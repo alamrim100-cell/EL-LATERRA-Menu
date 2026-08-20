@@ -144,6 +144,9 @@ async function sendOrder(){
 
   const items = Object.values(cart).map(i => ({name: i.name, nameEn: i.nameEn || '', qty: i.qty, price: i.price}));
 
+  const typeVal = (typeof orderType !== 'undefined') ? orderType : 'dine';
+  const typeLabel = typeVal === 'take' ? 'Takeaway · تيك أواي' : 'Dine In · داخل المقهى';
+
   try{
     const res = await fetch(`${SUPABASE_URL}/rest/v1/orders`, {
       method:'POST',
@@ -158,6 +161,7 @@ async function sendOrder(){
         items: JSON.stringify(items),
         status: 'new',
         note: note,
+        order_type: typeLabel,
         created_at: new Date().toISOString()
       })
     });

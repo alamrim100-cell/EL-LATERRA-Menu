@@ -221,6 +221,7 @@ function render(orders){
           </div>
           <div style="display:flex;align-items:center;gap:0.6rem;">
             ${newOrder ? `<div class="badge-new">جديد<span>New</span></div>` : ''}
+            ${order.order_type ? `<div style="background:${order.order_type.includes('Take') ? '#2980b9' : '#5C3A22'};color:#fff;font-size:0.65rem;font-weight:900;padding:0.2rem 0.6rem;border-radius:999px;text-align:center;line-height:1.5;">${order.order_type.includes('Take') ? '🥤 Takeaway' : '🪑 Dine In'}</div>` : ''}
             <div class="time-info">
               <span class="time-ar">${time.ar}</span>
               <span class="time-en">${time.en}</span>

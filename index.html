@@ -214,6 +214,13 @@
   .success-box h2{font-size:1.5rem;font-weight:900;color:#4caf50;margin-bottom:0.5rem;}
   .success-box p{color:var(--cream-dim);}
 
+  /* ===== نوع الطلب ===== */
+  .order-type-btn{flex:1;background:var(--roast);border:2px solid var(--line);border-radius:14px;padding:0.8rem 0.5rem;font-family:var(--ff-arabic);cursor:pointer;transition:all 0.2s;display:flex;flex-direction:column;align-items:center;gap:0.25rem;color:var(--cream-dim);}
+  .order-type-btn.active{border-color:var(--caramel);background:rgba(193,127,62,0.15);color:var(--cream);}
+  .order-type-btn:hover{border-color:var(--caramel-bright);}
+  .type-ar{font-weight:700;font-size:0.9rem;}
+  .type-en{font-family:var(--ff-display);font-style:italic;font-size:0.72rem;opacity:0.7;}
+
   /* ===== نافذة بارد/ساخن ===== */
   .temp-modal{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:65;display:none;align-items:center;justify-content:center;padding:1rem;}
   .temp-modal.open{display:flex;}
@@ -735,7 +742,24 @@
       <h2>🛒 طلبك</h2>
       <button class="close-btn" onclick="closeCart()">✕</button>
     </div>
-    <input type="number" id="tableNumber" class="table-input" placeholder="رقم الطاولة *" min="1" max="99">
+    <input type="number" id="tableNumber" class="table-input" placeholder="رقم الطاولة * · Table Number" min="1" max="99">
+
+    <!-- خيار Dine In / Takeaway -->
+    <div style="margin-bottom:1.2rem;">
+      <div style="font-size:0.85rem;color:var(--cream-dim);margin-bottom:0.7rem;text-align:center;">نوع الطلب · Order Type</div>
+      <div style="display:flex;gap:0.8rem;">
+        <button class="order-type-btn active" id="btnDineIn" onclick="selectOrderType('dine')">
+          <span style="font-size:1.3rem;">🪑</span>
+          <span class="type-ar">داخل المقهى</span>
+          <span class="type-en">Dine In</span>
+        </button>
+        <button class="order-type-btn" id="btnTakeaway" onclick="selectOrderType('take')">
+          <span style="font-size:1.3rem;">🥤</span>
+          <span class="type-ar">تيك أواي</span>
+          <span class="type-en">Takeaway</span>
+        </button>
+      </div>
+    </div>
     <div id="cartItems"></div>
     <div class="cart-total-row">
       <span>الإجمالي</span>
@@ -779,6 +803,23 @@
 
 <script src="cart.js"></script>
 <script>
+  // نوع الطلب
+  let orderType = 'dine';
+  function selectOrderType(type){
+    orderType = type;
+    document.getElementById('btnDineIn').classList.toggle('active', type === 'dine');
+    document.getElementById('btnTakeaway').classList.toggle('active', type === 'take');
+    const tableInput = document.getElementById('tableNumber');
+    if(type === 'take'){
+      tableInput.placeholder = 'اسمك للطلب · Your Name';
+      tableInput.type = 'text';
+    } else {
+      tableInput.placeholder = 'رقم الطاولة * · Table Number';
+      tableInput.type = 'number';
+    }
+  }
+
+  // مزامنة الإجمالي
   // Hero background
   const heroImg = document.getElementById('heroImg');
   const heroSection = document.getElementById('heroSection');
