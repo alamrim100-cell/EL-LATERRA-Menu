@@ -47,7 +47,7 @@ function updateCartUI(){
       <div class="cart-row">
         <div class="cart-item-name">
           <div>${item.name}</div>
-          .item-name-en{font-style:italic;font-size:1.05rem;color:var(--cream);margin-top:0.2rem;letter-spacing:0.03em;}
+          .item-name-en{font-style:italic;font-size:1.25rem;color:var(--cream);margin-top:0.2rem;letter-spacing:0.03em;}
         </div>
         <div class="cart-qty-ctrl">
           <button onclick="removeFromCart('${item.name}')">−</button>
