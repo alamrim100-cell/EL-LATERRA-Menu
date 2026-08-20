@@ -1,8 +1,6 @@
-// ===== إعدادات Supabase =====
 const SUPABASE_URL = 'https://fyyxuvqwoykavqhoaowu.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_CKq5sKxZvi5k43cmEJ1cjw_Cg7jWk_e';
 
-// ===== السلة =====
 let cart = {};
 
 function addToCart(nameAr, price, nameEn=''){
@@ -88,7 +86,6 @@ function animateBtn(name){
   });
 }
 
-// ===== إرسال الطلب =====
 async function sendOrder(){
   const tableInput = document.getElementById('tableNumber');
   const tableNum = tableInput ? tableInput.value.trim() : '';
@@ -108,7 +105,12 @@ async function sendOrder(){
   btn.disabled = true;
   btn.textContent = '⏳ جاري الإرسال...';
 
-  const items = Object.values(cart).map(i => ({name: i.name, nameEn: i.nameEn || '', qty: i.qty, price: i.price}));
+  const items = Object.values(cart).map(i => ({
+    name: i.name,
+    nameEn: i.nameEn || '',
+    qty: i.qty,
+    price: i.price
+  }));
 
   try{
     const res = await fetch(`${SUPABASE_URL}/rest/v1/orders`, {
@@ -129,12 +131,13 @@ async function sendOrder(){
     });
 
     if(res.ok || res.status === 201){
-      // نجح الإرسال
       showSuccess();
       cart = {};
       updateCartUI();
       hideCartBar();
       closeCart();
+      const sendBtn = document.getElementById('sendOrderBtn');
+      if(sendBtn){ sendBtn.disabled = false; sendBtn.textContent = '✅ أرسل الطلب للكاونتر'; }
     } else {
       throw new Error('فشل الإرسال');
     }
