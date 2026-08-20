@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة المدير — إيل لاتيرا</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&family=Cormorant+Garamond:ital,wght@1,500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#1a0f0a;--card:#2d1a10;--border:#4a2e1a;
+    --gold:#D99B53;--gold-dim:rgba(217,155,83,0.12);
+    --cream:#F3E8D8;--dim:#9a7a5a;
+    --green:#4caf50;--red:#e53935;--blue:#2980b9;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--cream);font-family:'Tajawal',sans-serif;min-height:100vh;padding-bottom:3rem;}
+
+  header{
+    background:var(--card);border-bottom:2px solid var(--gold);
+    padding:1rem 1.5rem;position:sticky;top:0;z-index:10;
+    display:flex;align-items:center;justify-content:space-between;
+  }
+  .h-title{font-size:1.1rem;font-weight:900;color:var(--gold);}
+  .h-sub{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.82rem;color:var(--dim);}
+  .h-link{background:var(--border);color:var(--cream);border:none;border-radius:8px;padding:0.45rem 0.9rem;font-family:'Tajawal',sans-serif;font-size:0.8rem;cursor:pointer;text-decoration:none;display:inline-block;}
+  .h-link:hover{background:var(--gold);color:var(--bg);}
+
+  .section{padding:1.2rem 1rem;max-width:1100px;margin:0 auto;}
+
+  /* FILTERS */
+  .filters{display:flex;gap:0.6rem;flex-wrap:wrap;margin-bottom:1.2rem;align-items:center;}
+  .filter-btn{background:var(--card);border:1px solid var(--border);color:var(--dim);border-radius:8px;padding:0.4rem 0.8rem;font-family:'Tajawal',sans-serif;font-size:0.8rem;cursor:pointer;transition:all 0.2s;}
+  .filter-btn.active{background:var(--gold);color:var(--bg);border-color:var(--gold);font-weight:700;}
+  .filter-input{background:var(--card);border:1px solid var(--border);color:var(--cream);border-radius:8px;padding:0.4rem 0.7rem;font-family:'Tajawal',sans-serif;font-size:0.8rem;outline:none;}
+  .filter-input:focus{border-color:var(--gold);}
+  .filter-input::placeholder{color:var(--dim);}
+
+  /* STATS CARDS */
+  .stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:0.7rem;margin-bottom:1.5rem;}
+  .stat-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:0.9rem;text-align:center;}
+  .stat-num{font-size:1.6rem;font-weight:900;color:var(--gold);}
+  .stat-ar{font-size:0.72rem;color:var(--dim);}
+  .stat-en{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.65rem;color:var(--border);}
+
+  /* PAY BREAKDOWN */
+  .pay-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0.6rem;margin-bottom:1.5rem;}
+  .pay-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.7rem;text-align:center;}
+  .pay-icon{font-size:1.4rem;margin-bottom:0.2rem;}
+  .pay-ar{font-size:0.78rem;font-weight:700;color:var(--cream);}
+  .pay-en{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.7rem;color:var(--dim);}
+  .pay-amt{font-size:0.9rem;font-weight:900;color:var(--gold);margin-top:0.2rem;direction:ltr;}
+  .pay-count{font-size:0.68rem;color:var(--dim);}
+
+  /* SECTION TITLE */
+  .sec-title{font-size:0.9rem;font-weight:900;color:var(--gold);margin-bottom:0.8rem;padding-bottom:0.4rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+  .sec-en{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.78rem;color:var(--dim);font-weight:400;}
+
+  /* INVOICES TABLE */
+  .inv-table{width:100%;border-collapse:collapse;font-size:0.82rem;}
+  .inv-table th{background:var(--card);color:var(--gold);font-weight:700;padding:0.6rem 0.7rem;text-align:right;border-bottom:2px solid var(--border);white-space:nowrap;}
+  .inv-table td{padding:0.6rem 0.7rem;border-bottom:1px solid var(--border);color:var(--cream);vertical-align:top;}
+  .inv-table tr:hover td{background:var(--gold-dim);}
+  .inv-num-cell{font-family:'Cormorant Garamond',serif;font-size:0.75rem;color:var(--dim);}
+  .inv-items-cell{max-width:180px;}
+  .inv-item-line{font-size:0.78rem;color:var(--cream);}
+  .inv-item-line-en{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.7rem;color:var(--dim);}
+  .inv-total-cell{font-weight:900;color:var(--gold);direction:ltr;white-space:nowrap;}
+  .badge-pay{font-size:0.68rem;font-weight:700;padding:2px 7px;border-radius:999px;white-space:nowrap;}
+  .pay-cash{background:#5C3A22;color:var(--gold);}
+  .pay-visa{background:#2980b9;color:#fff;}
+  .pay-transfer{background:#1a6b3a;color:#4caf50;}
+  .badge-wa{background:#25D366;color:#fff;font-size:0.65rem;padding:1px 5px;border-radius:999px;}
+  .badge-type-cell{font-size:0.72rem;}
+  .badge-dine2{background:#5C3A22;color:var(--gold);font-size:0.68rem;padding:2px 6px;border-radius:999px;}
+  .badge-take2{background:var(--blue);color:#fff;font-size:0.68rem;padding:2px 6px;border-radius:999px;}
+
+  .empty-inv{text-align:center;padding:3rem;color:var(--dim);}
+  .empty-inv-en{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.85rem;color:var(--border);}
+
+  .loading{text-align:center;padding:2rem;color:var(--dim);}
+
+  /* scroll table */
+  .table-wrap{overflow-x:auto;border-radius:10px;border:1px solid var(--border);}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="h-title">📊 لوحة المدير — إيل لاتيرا</div>
+    <div class="h-sub">Manager Dashboard — El Laterra</div>
+  </div>
+  <a href="staff.html" class="h-link">⬅ لوحة الموظف · Staff</a>
+</header>
+
+<div class="section">
+
+  <!-- FILTERS -->
+  <div class="filters">
+    <button class="filter-btn active" onclick="setFilter('today')">اليوم · Today</button>
+    <button class="filter-btn" onclick="setFilter('week')">الأسبوع · Week</button>
+    <button class="filter-btn" onclick="setFilter('month')">الشهر · Month</button>
+    <button class="filter-btn" onclick="setFilter('all')">الكل · All</button>
+    <input type="date" class="filter-input" id="dateFilter" onchange="setFilter('custom')">
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-num" id="sTotal">0</div><div class="stat-ar">إجمالي المبيعات</div><div class="stat-en">Total Sales (OMR)</div></div>
+    <div class="stat-card"><div class="stat-num" id="sCount">0</div><div class="stat-ar">عدد الفواتير</div><div class="stat-en">Invoices</div></div>
+    <div class="stat-card"><div class="stat-num" id="sAvg">0</div><div class="stat-ar">متوسط الفاتورة</div><div class="stat-en">Avg Invoice</div></div>
+    <div class="stat-card"><div class="stat-num" id="sWA">0</div><div class="stat-ar">أُرسلت واتساب</div><div class="stat-en">WhatsApp Sent</div></div>
+  </div>
+
+  <!-- PAY BREAKDOWN -->
+  <div class="pay-grid">
+    <div class="pay-card">
+      <div class="pay-icon">💵</div>
+      <div class="pay-ar">كاش</div>
+      <div class="pay-en">Cash</div>
+      <div class="pay-amt" id="pCashAmt">ر.ع 0.000</div>
+      <div class="pay-count" id="pCashCount">0 فاتورة · invoices</div>
+    </div>
+    <div class="pay-card">
+      <div class="pay-icon">💳</div>
+      <div class="pay-ar">فيزا</div>
+      <div class="pay-en">Visa</div>
+      <div class="pay-amt" id="pVisaAmt">ر.ع 0.000</div>
+      <div class="pay-count" id="pVisaCount">0 فاتورة · invoices</div>
+    </div>
+    <div class="pay-card">
+      <div class="pay-icon">📱</div>
+      <div class="pay-ar">تحويل</div>
+      <div class="pay-en">Transfer</div>
+      <div class="pay-amt" id="pTransAmt">ر.ع 0.000</div>
+      <div class="pay-count" id="pTransCount">0 فاتورة · invoices</div>
+    </div>
+  </div>
+
+  <!-- INVOICES LIST -->
+  <div class="sec-title">
+    📄 الفواتير <span class="sec-en">· Invoices</span>
+  </div>
+  <div class="table-wrap">
+    <table class="inv-table">
+      <thead>
+        <tr>
+          <th>رقم الفاتورة · Invoice #</th>
+          <th>الطاولة · Table</th>
+          <th>المنتجات · Items</th>
+          <th>الإجمالي · Total</th>
+          <th>الدفع · Payment</th>
+          <th>النوع · Type</th>
+          <th>الوقت · Time</th>
+          <th>واتساب</th>
+        </tr>
+      </thead>
+      <tbody id="invTableBody">
+        <tr><td colspan="8" class="loading">⏳ جاري التحميل...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<script>
+const SUPA = 'https://fyyxuvqwoykavqhoaowu.supabase.co';
+const KEY  = 'sb_publishable_CKq5sKxZvi5k43cmEJ1cjw_Cg7jWk_e';
+
+let allInvoices = [];
+let currentFilter = 'today';
+
+function setFilter(f){
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach((b,i)=>{
+    b.classList.toggle('active', ['today','week','month','all'][i]===f);
+  });
+  applyFilter();
+}
+
+function filterInvoices(invoices){
+  const now = new Date();
+  if(currentFilter==='today'){
+    return invoices.filter(i=>new Date(i.created_at).toDateString()===now.toDateString());
+  }
+  if(currentFilter==='week'){
+    const week = new Date(now); week.setDate(now.getDate()-7);
+    return invoices.filter(i=>new Date(i.created_at)>=week);
+  }
+  if(currentFilter==='month'){
+    const month = new Date(now); month.setDate(now.getDate()-30);
+    return invoices.filter(i=>new Date(i.created_at)>=month);
+  }
+  if(currentFilter==='custom'){
+    const d = document.getElementById('dateFilter').value;
+    if(!d) return invoices;
+    return invoices.filter(i=>i.created_at.startsWith(d));
+  }
+  return invoices;
+}
+
+function applyFilter(){
+  const filtered = filterInvoices(allInvoices);
+  updateStats(filtered);
+  renderTable(filtered);
+}
+
+function payType(pm){
+  if(!pm) return 'cash';
+  if(pm.includes('Visa')||pm.includes('فيزا')) return 'visa';
+  if(pm.includes('Transfer')||pm.includes('تحويل')) return 'transfer';
+  return 'cash';
+}
+
+function updateStats(invoices){
+  const total = invoices.reduce((s,i)=>s+(+i.total||0),0);
+  const count = invoices.length;
+  const avg = count>0?(total/count):0;
+  const waCount = invoices.filter(i=>i.whatsapp_sent).length;
+
+  document.getElementById('sTotal').textContent = total.toFixed(3);
+  document.getElementById('sCount').textContent = count;
+  document.getElementById('sAvg').textContent = avg.toFixed(3);
+  document.getElementById('sWA').textContent = waCount;
+
+  const cash = invoices.filter(i=>payType(i.payment_method)==='cash');
+  const visa = invoices.filter(i=>payType(i.payment_method)==='visa');
+  const trans = invoices.filter(i=>payType(i.payment_method)==='transfer');
+
+  const sumOf = arr => arr.reduce((s,i)=>s+(+i.total||0),0);
+
+  document.getElementById('pCashAmt').textContent = `ر.ع ${sumOf(cash).toFixed(3)}`;
+  document.getElementById('pCashCount').textContent = `${cash.length} فاتورة · invoices`;
+  document.getElementById('pVisaAmt').textContent = `ر.ع ${sumOf(visa).toFixed(3)}`;
+  document.getElementById('pVisaCount').textContent = `${visa.length} فاتورة · invoices`;
+  document.getElementById('pTransAmt').textContent = `ر.ع ${sumOf(trans).toFixed(3)}`;
+  document.getElementById('pTransCount').textContent = `${trans.length} فاتورة · invoices`;
+}
+
+function parseItems(s){ try{return JSON.parse(s);}catch{return[];} }
+
+function renderTable(invoices){
+  const tbody = document.getElementById('invTableBody');
+  if(invoices.length===0){
+    tbody.innerHTML=`<tr><td colspan="8">
+      <div class="empty-inv">
+        لا توجد فواتير في هذه الفترة
+        <div class="empty-inv-en">No invoices found for this period</div>
+      </div>
+    </td></tr>`;
+    return;
+  }
+  const sorted = [...invoices].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
+  tbody.innerHTML = sorted.map(inv=>{
+    const items = parseItems(inv.items);
+    const pt = payType(inv.payment_method);
+    const isT = inv.order_type && inv.order_type.includes('Take');
+    const t = new Date(inv.created_at);
+    const timeStr = t.toLocaleString('ar-OM',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'});
+    return `<tr>
+      <td class="inv-num-cell">${inv.invoice_number||'-'}</td>
+      <td>${inv.table_number||'-'}</td>
+      <td class="inv-items-cell">
+        ${items.slice(0,3).map(i=>`
+          <div class="inv-item-line">${i.name} ×${i.qty}</div>
+          ${i.nameEn?`<div class="inv-item-line-en">${i.nameEn}</div>`:''}
+        `).join('')}
+        ${items.length>3?`<div style="font-size:0.7rem;color:var(--dim);">+${items.length-3} أخرى · more</div>`:''}
+      </td>
+      <td class="inv-total-cell">ر.ع ${(+inv.total||0).toFixed(3)}</td>
+      <td><span class="badge-pay pay-${pt}">${pt==='cash'?'💵 كاش':pt==='visa'?'💳 فيزا':'📱 تحويل'}</span></td>
+      <td class="badge-type-cell"><span class="${isT?'badge-take2':'badge-dine2'}">${isT?'🥤 Takeaway':'🪑 Dine In'}</span></td>
+      <td style="font-size:0.75rem;color:var(--dim);white-space:nowrap;">${timeStr}</td>
+      <td>${inv.whatsapp_sent?`<span class="badge-wa">✓ أُرسل</span>`:'-'}</td>
+    </tr>`;
+  }).join('');
+}
+
+async function loadInvoices(){
+  try{
+    const r = await fetch(`${SUPA}/rest/v1/invoices?select=*&order=created_at.desc&limit=500`,{
+      headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`}
+    });
+    const data = await r.json();
+    if(Array.isArray(data)){
+      allInvoices = data;
+      applyFilter();
+    }
+  }catch(e){ console.error(e); }
+}
+
+loadInvoices();
+setInterval(loadInvoices, 30000);
+</script>
+</body>
+</html>
