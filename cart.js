@@ -5,15 +5,16 @@ const SUPABASE_KEY = 'sb_publishable_CKq5sKxZvi5k43cmEJ1cjw_Cg7jWk_e';
 // ===== السلة =====
 let cart = {};
 
-function addToCart(name, price){
-  if(cart[name]){
-    cart[name].qty++;
+function addToCart(nameAr, price, nameEn=''){
+  const key = nameAr;
+  if(cart[key]){
+    cart[key].qty++;
   } else {
-    cart[name] = {name, price, qty:1};
+    cart[key] = {name: nameAr, nameEn: nameEn, price, qty:1};
   }
   updateCartUI();
   showCartBar();
-  animateBtn(name);
+  animateBtn(nameAr);
 }
 
 function removeFromCart(name){
@@ -46,11 +47,14 @@ function updateCartUI(){
   if(itemsEl){
     itemsEl.innerHTML = Object.values(cart).map(item => `
       <div class="cart-row">
-        <span class="cart-item-name">${item.name}</span>
+        <div class="cart-item-name">
+          <div>${item.name}</div>
+          ${item.nameEn ? `<div style="font-size:0.75rem;opacity:0.6;font-style:italic;">${item.nameEn}</div>` : ''}
+        </div>
         <div class="cart-qty-ctrl">
           <button onclick="removeFromCart('${item.name}')">−</button>
           <span>${item.qty}</span>
-          <button onclick="addToCart('${item.name}', ${item.price})">+</button>
+          <button onclick="addToCart('${item.name}', ${item.price}, '${item.nameEn}')">+</button>
         </div>
         <span class="cart-item-price">${(item.price * item.qty).toFixed(3)}</span>
       </div>
@@ -104,7 +108,7 @@ async function sendOrder(){
   btn.disabled = true;
   btn.textContent = '⏳ جاري الإرسال...';
 
-  const items = Object.values(cart).map(i => ({name: i.name, qty: i.qty, price: i.price}));
+  const items = Object.values(cart).map(i => ({name: i.name, nameEn: i.nameEn || '', qty: i.qty, price: i.price}));
 
   try{
     const res = await fetch(`${SUPABASE_URL}/rest/v1/orders`, {
