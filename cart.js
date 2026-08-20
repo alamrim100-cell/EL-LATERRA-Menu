@@ -38,9 +38,11 @@ function updateCartUI(){
   const total = getTotal();
   const countEl = document.getElementById('cartCount');
   const totalEl = document.getElementById('cartTotal');
+  const total2El = document.getElementById('cartTotal2');
   const itemsEl = document.getElementById('cartItems');
   if(countEl) countEl.textContent = count;
   if(totalEl) totalEl.textContent = total.toFixed(3);
+  if(total2El) total2El.textContent = total.toFixed(3);
   if(itemsEl){
     itemsEl.innerHTML = Object.values(cart).map(item => `
       <div class="cart-row">
@@ -55,7 +57,6 @@ function updateCartUI(){
     `).join('');
   }
 }
-
 function showCartBar(){
   const bar = document.getElementById('cartBar');
   if(bar) bar.classList.add('show');
