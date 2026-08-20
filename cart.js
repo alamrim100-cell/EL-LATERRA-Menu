@@ -57,6 +57,7 @@ function updateCartUI(){
     `).join('');
   }
 }
+
 function showCartBar(){
   const bar = document.getElementById('cartBar');
   if(bar) bar.classList.add('show');
