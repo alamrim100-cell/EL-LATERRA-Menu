@@ -214,6 +214,11 @@
   .success-box h2{font-size:1.5rem;font-weight:900;color:#4caf50;margin-bottom:0.5rem;}
   .success-box p{color:var(--cream-dim);}
 
+  /* ===== غير متوفر ===== */
+  .item.unavailable{opacity:0.45;}
+  .item.unavailable .add-btn{background:var(--roast);color:var(--cream-dim);cursor:not-allowed;pointer-events:none;}
+  .unavail-badge{background:#e53935;color:#fff;font-size:0.65rem;font-weight:900;padding:0.15rem 0.5rem;border-radius:999px;white-space:nowrap;}
+
   /* ===== نوع الطلب ===== */
   .order-type-btn{flex:1;background:var(--roast);border:2px solid var(--line);border-radius:14px;padding:0.8rem 0.5rem;font-family:var(--ff-arabic);cursor:pointer;transition:all 0.2s;display:flex;flex-direction:column;align-items:center;gap:0.25rem;color:var(--cream-dim);}
   .order-type-btn.active{border-color:var(--caramel);background:rgba(193,127,62,0.15);color:var(--cream);}
@@ -820,6 +825,50 @@
   }
 
   // مزامنة الإجمالي
+  // ===== تحقق من المنتجات غير المتوفرة =====
+  const SUPA_URL = 'https://fyyxuvqwoykavqhoaowu.supabase.co';
+  const SUPA_KEY = 'sb_publishable_CKq5sKxZvi5k43cmEJ1cjw_Cg7jWk_e';
+
+  async function loadAvailability(){
+    try{
+      const res = await fetch(`${SUPA_URL}/rest/v1/availability?select=*`, {
+        headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${SUPA_KEY}`}
+      });
+      const data = await res.json();
+      if(!Array.isArray(data)) return;
+
+      const unavailable = new Set(data.filter(d => !d.available).map(d => d.item_id));
+
+      // لكل عنصر في المينيو تحقق من حالته
+      document.querySelectorAll('.item').forEach(itemEl => {
+        const btn = itemEl.querySelector('.add-btn');
+        if(!btn) return;
+        // استخرج اسم المنتج من onclick
+        const onclick = btn.getAttribute('onclick') || '';
+        const match = onclick.match(/addToCart\('([^']+)'/);
+        if(!match) return;
+        const itemName = match[1];
+
+        if(unavailable.has(itemName)){
+          itemEl.classList.add('unavailable');
+          // أضف badge غير متوفر
+          const nameEl = itemEl.querySelector('.item-name');
+          if(nameEl && !nameEl.querySelector('.unavail-badge')){
+            const badge = document.createElement('span');
+            badge.className = 'unavail-badge';
+            badge.textContent = '🚫 غير متوفر · Unavailable';
+            nameEl.appendChild(badge);
+          }
+          btn.textContent = 'غير متوفر';
+        }
+      });
+    }catch(e){ console.error(e); }
+  }
+
+  loadAvailability();
+  // تحديث كل دقيقة
+  setInterval(loadAvailability, 60000);
+
   // Hero background
   const heroImg = document.getElementById('heroImg');
   const heroSection = document.getElementById('heroSection');
