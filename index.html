@@ -214,6 +214,24 @@
   .success-box h2{font-size:1.5rem;font-weight:900;color:#4caf50;margin-bottom:0.5rem;}
   .success-box p{color:var(--cream-dim);}
 
+  /* ===== نافذة بارد/ساخن ===== */
+  .temp-modal{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:65;display:none;align-items:center;justify-content:center;padding:1rem;}
+  .temp-modal.open{display:flex;}
+  .temp-box{background:var(--espresso);border-radius:20px;padding:2rem 1.5rem;width:100%;max-width:340px;text-align:center;border:1px solid var(--line);}
+  .temp-item-name{font-weight:900;font-size:1.3rem;color:var(--cream);margin-bottom:0.3rem;}
+  .temp-item-en{font-family:var(--ff-display);font-style:italic;font-size:0.9rem;color:var(--caramel);margin-bottom:1.5rem;}
+  .temp-question{font-size:0.9rem;color:var(--cream-dim);margin-bottom:1.2rem;}
+  .temp-btns{display:flex;gap:1rem;justify-content:center;}
+  .temp-btn{flex:1;padding:1rem 0.5rem;border:none;border-radius:14px;font-family:var(--ff-arabic);font-weight:900;font-size:1rem;cursor:pointer;transition:all 0.2s;display:flex;flex-direction:column;align-items:center;gap:0.3rem;}
+  .temp-btn .temp-icon{font-size:1.8rem;}
+  .temp-btn .temp-ar{font-size:0.95rem;}
+  .temp-btn .temp-en{font-size:0.7rem;font-style:italic;opacity:0.8;}
+  .temp-btn-hot{background:#c0392b;color:#fff;}
+  .temp-btn-hot:hover{background:#e74c3c;transform:scale(1.04);}
+  .temp-btn-cold{background:#2980b9;color:#fff;}
+  .temp-btn-cold:hover{background:#3498db;transform:scale(1.04);}
+  .temp-cancel{margin-top:1rem;background:none;border:none;color:var(--cream-dim);font-family:var(--ff-arabic);font-size:0.85rem;cursor:pointer;text-decoration:underline;}
+
   @media (prefers-reduced-motion: reduce){*{animation:none !important; transition:none !important;}}
 </style>
 </head>
@@ -734,6 +752,28 @@
     <div class="success-icon">✅</div>
     <h2>تم إرسال طلبك!</h2>
     <p>سيصلك طلبك قريباً ☕</p>
+  </div>
+</div>
+
+<!-- نافذة بارد/ساخن -->
+<div class="temp-modal" id="tempModal">
+  <div class="temp-box">
+    <div class="temp-item-name" id="tempItemName"></div>
+    <div class="temp-item-en" id="tempItemNameEn"></div>
+    <div class="temp-question">كيف تحب مشروبك؟ · How would you like it?</div>
+    <div class="temp-btns">
+      <button class="temp-btn temp-btn-hot" onclick="selectTemp('ساخن','Hot')">
+        <span class="temp-icon">☕</span>
+        <span class="temp-ar">ساخن</span>
+        <span class="temp-en">Hot</span>
+      </button>
+      <button class="temp-btn temp-btn-cold" onclick="selectTemp('بارد','Cold')">
+        <span class="temp-icon">🧊</span>
+        <span class="temp-ar">بارد</span>
+        <span class="temp-en">Cold</span>
+      </button>
+    </div>
+    <button class="temp-cancel" onclick="closeTempModal()">إلغاء · Cancel</button>
   </div>
 </div>
 

@@ -1,18 +1,54 @@
+// ===== إعدادات Supabase =====
 const SUPABASE_URL = 'https://fyyxuvqwoykavqhoaowu.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_CKq5sKxZvi5k43cmEJ1cjw_Cg7jWk_e';
 
+// ===== السلة =====
 let cart = {};
 
+let pendingItem = null;
+
 function addToCart(nameAr, price, nameEn=''){
-  const key = nameAr;
+  // المشروبات اللي ما تحتاج خيار (طلبات جاهزة)
+  const noTempItems = ['كرواسون','مرتديلا','حلومي','كريب','تيراميسو','تشيزكيك','لندن كيك','سان سباستيان','قهوة عربية'];
+  if(noTempItems.includes(nameAr)){
+    addItemToCart(nameAr, price, nameEn, '');
+    return;
+  }
+  // أظهر نافذة الاختيار
+  pendingItem = {nameAr, price, nameEn};
+  const modal = document.getElementById('tempModal');
+  const itemName = document.getElementById('tempItemName');
+  const itemNameEn = document.getElementById('tempItemNameEn');
+  if(itemName) itemName.textContent = nameAr;
+  if(itemNameEn) itemNameEn.textContent = nameEn;
+  if(modal) modal.classList.add('open');
+}
+
+function selectTemp(temp, tempEn){
+  if(!pendingItem) return;
+  addItemToCart(pendingItem.nameAr, pendingItem.price, pendingItem.nameEn, temp, tempEn);
+  pendingItem = null;
+  const modal = document.getElementById('tempModal');
+  if(modal) modal.classList.remove('open');
+}
+
+function closeTempModal(){
+  pendingItem = null;
+  const modal = document.getElementById('tempModal');
+  if(modal) modal.classList.remove('open');
+}
+
+function addItemToCart(nameAr, price, nameEn='', temp='', tempEn=''){
+  const key = nameAr + (temp ? '_' + temp : '');
+  const displayName = nameAr + (temp ? ` — ${temp}` : '');
+  const displayNameEn = nameEn + (tempEn ? ` — ${tempEn}` : '');
   if(cart[key]){
     cart[key].qty++;
   } else {
-    cart[key] = {name: nameAr, nameEn: nameEn, price, qty:1};
+    cart[key] = {name: displayName, nameEn: displayNameEn, price, qty:1};
   }
   updateCartUI();
   showCartBar();
-  animateBtn(nameAr);
 }
 
 function removeFromCart(name){
@@ -47,7 +83,7 @@ function updateCartUI(){
       <div class="cart-row">
         <div class="cart-item-name">
           <div>${item.name}</div>
-          .item-name-en{font-style:italic;font-size:1.25rem;color:var(--cream);margin-top:0.2rem;letter-spacing:0.03em;}
+          ${item.nameEn ? `<div style="font-size:0.75rem;opacity:0.6;font-style:italic;">${item.nameEn}</div>` : ''}
         </div>
         <div class="cart-qty-ctrl">
           <button onclick="removeFromCart('${item.name}')">−</button>
@@ -86,6 +122,7 @@ function animateBtn(name){
   });
 }
 
+// ===== إرسال الطلب =====
 async function sendOrder(){
   const tableInput = document.getElementById('tableNumber');
   const tableNum = tableInput ? tableInput.value.trim() : '';
@@ -105,12 +142,7 @@ async function sendOrder(){
   btn.disabled = true;
   btn.textContent = '⏳ جاري الإرسال...';
 
-  const items = Object.values(cart).map(i => ({
-    name: i.name,
-    nameEn: i.nameEn || '',
-    qty: i.qty,
-    price: i.price
-  }));
+  const items = Object.values(cart).map(i => ({name: i.name, nameEn: i.nameEn || '', qty: i.qty, price: i.price}));
 
   try{
     const res = await fetch(`${SUPABASE_URL}/rest/v1/orders`, {
@@ -131,13 +163,12 @@ async function sendOrder(){
     });
 
     if(res.ok || res.status === 201){
+      // نجح الإرسال
       showSuccess();
       cart = {};
       updateCartUI();
       hideCartBar();
       closeCart();
-      const sendBtn = document.getElementById('sendOrderBtn');
-      if(sendBtn){ sendBtn.disabled = false; sendBtn.textContent = '✅ أرسل الطلب للكاونتر'; }
     } else {
       throw new Error('فشل الإرسال');
     }
