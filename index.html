@@ -739,13 +739,7 @@
 
 <script src="cart.js"></script>
 <script>
-  // مزامنة الإجمالي
-  const _origUpdate = updateCartUI;
-  function updateCartUI(){
-    _origUpdate();
-    const t2 = document.getElementById('cartTotal2');
-    if(t2) t2.textContent = getTotal().toFixed(3);
-  }
+ 
 
   // Hero background
   const heroImg = document.getElementById('heroImg');
