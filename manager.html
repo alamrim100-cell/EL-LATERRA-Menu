@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>لوحة المدير — إيل لاتيرا</title>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&family=Cormorant+Garamond:ital,wght@1,500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
   :root{
     --bg:#1a0f0a;--card:#2d1a10;--border:#4a2e1a;
@@ -15,17 +16,22 @@
   *{margin:0;padding:0;box-sizing:border-box;}
   body{background:var(--bg);color:var(--cream);font-family:'Tajawal',sans-serif;min-height:100vh;padding-bottom:3rem;}
 
-  header{
-    background:var(--card);border-bottom:2px solid var(--gold);
-    padding:1rem 1.5rem;position:sticky;top:0;z-index:10;
-    display:flex;align-items:center;justify-content:space-between;
-  }
+  header{background:var(--card);border-bottom:2px solid var(--gold);padding:1rem 1.5rem;position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;}
   .h-title{font-size:1.1rem;font-weight:900;color:var(--gold);}
   .h-sub{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.82rem;color:var(--dim);}
   .h-link{background:var(--border);color:var(--cream);border:none;border-radius:8px;padding:0.45rem 0.9rem;font-family:'Tajawal',sans-serif;font-size:0.8rem;cursor:pointer;text-decoration:none;display:inline-block;}
   .h-link:hover{background:var(--gold);color:var(--bg);}
 
-  .section{padding:1.2rem 1rem;max-width:1100px;margin:0 auto;}
+  /* TABS */
+  .tabs{display:flex;background:var(--card);border-bottom:1px solid var(--border);position:sticky;top:58px;z-index:19;overflow-x:auto;scrollbar-width:none;}
+  .tabs::-webkit-scrollbar{display:none;}
+  .tab{flex:0 0 auto;padding:0.7rem 1rem;border:none;font-family:'Tajawal',sans-serif;font-size:0.82rem;font-weight:700;cursor:pointer;transition:all 0.2s;color:var(--dim);background:transparent;border-left:1px solid var(--border);}
+  .tab:first-child{border-left:none;}
+  .tab.active{color:var(--bg);background:var(--gold);}
+  .tab .tab-en{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.72rem;font-weight:400;display:block;opacity:0.8;}
+
+  .panel{display:none;padding:1rem;max-width:1100px;margin:0 auto;}
+  .panel.active{display:block;}
 
   /* FILTERS */
   .filters{display:flex;gap:0.6rem;flex-wrap:wrap;margin-bottom:1.2rem;align-items:center;}
@@ -33,54 +39,73 @@
   .filter-btn.active{background:var(--gold);color:var(--bg);border-color:var(--gold);font-weight:700;}
   .filter-input{background:var(--card);border:1px solid var(--border);color:var(--cream);border-radius:8px;padding:0.4rem 0.7rem;font-family:'Tajawal',sans-serif;font-size:0.8rem;outline:none;}
   .filter-input:focus{border-color:var(--gold);}
-  .filter-input::placeholder{color:var(--dim);}
 
-  /* STATS CARDS */
-  .stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:0.7rem;margin-bottom:1.5rem;}
-  .stat-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:0.9rem;text-align:center;}
-  .stat-num{font-size:1.6rem;font-weight:900;color:var(--gold);}
-  .stat-ar{font-size:0.72rem;color:var(--dim);}
-  .stat-en{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.65rem;color:var(--border);}
+  /* STATS */
+  .stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:0.7rem;margin-bottom:1.2rem;}
+  .stat-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:0.8rem;text-align:center;}
+  .stat-num{font-size:1.5rem;font-weight:900;color:var(--gold);}
+  .stat-ar{font-size:0.7rem;color:var(--dim);}
+  .stat-en{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.62rem;color:var(--border);}
 
   /* PAY BREAKDOWN */
-  .pay-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0.6rem;margin-bottom:1.5rem;}
+  .pay-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0.6rem;margin-bottom:1.2rem;}
   .pay-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.7rem;text-align:center;}
-  .pay-icon{font-size:1.4rem;margin-bottom:0.2rem;}
-  .pay-ar{font-size:0.78rem;font-weight:700;color:var(--cream);}
-  .pay-en{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.7rem;color:var(--dim);}
-  .pay-amt{font-size:0.9rem;font-weight:900;color:var(--gold);margin-top:0.2rem;direction:ltr;}
-  .pay-count{font-size:0.68rem;color:var(--dim);}
+  .pay-icon{font-size:1.3rem;margin-bottom:0.2rem;}
+  .pay-ar{font-size:0.75rem;font-weight:700;color:var(--cream);}
+  .pay-en{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.68rem;color:var(--dim);}
+  .pay-amt{font-size:0.88rem;font-weight:900;color:var(--gold);margin-top:0.2rem;direction:ltr;}
+  .pay-count{font-size:0.65rem;color:var(--dim);}
 
-  /* SECTION TITLE */
+  /* NET PROFIT */
+  .net-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1rem 1.2rem;margin-bottom:1.2rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;}
+  .net-lbl{font-size:0.85rem;font-weight:900;color:var(--gold);}
+  .net-en{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.75rem;color:var(--dim);}
+  .net-amt{font-size:1.4rem;font-weight:900;}
+
+  /* CHARTS */
+  .chart-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1rem;margin-bottom:1.2rem;}
+  .chart-title{font-size:0.88rem;font-weight:900;color:var(--gold);margin-bottom:0.8rem;display:flex;justify-content:space-between;align-items:center;}
+  .chart-en{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.75rem;color:var(--dim);font-weight:400;}
+  .chart-wrap{position:relative;height:220px;}
+
+  /* TABLES */
   .sec-title{font-size:0.9rem;font-weight:900;color:var(--gold);margin-bottom:0.8rem;padding-bottom:0.4rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
   .sec-en{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.78rem;color:var(--dim);font-weight:400;}
-
-  /* INVOICES TABLE */
-  .inv-table{width:100%;border-collapse:collapse;font-size:0.82rem;}
+  .table-wrap{overflow-x:auto;border-radius:10px;border:1px solid var(--border);margin-bottom:1.5rem;}
+  .inv-table{width:100%;border-collapse:collapse;font-size:0.8rem;}
   .inv-table th{background:var(--card);color:var(--gold);font-weight:700;padding:0.6rem 0.7rem;text-align:right;border-bottom:2px solid var(--border);white-space:nowrap;}
-  .inv-table td{padding:0.6rem 0.7rem;border-bottom:1px solid var(--border);color:var(--cream);vertical-align:top;}
+  .inv-table td{padding:0.55rem 0.7rem;border-bottom:1px solid var(--border);color:var(--cream);vertical-align:top;}
   .inv-table tr:hover td{background:var(--gold-dim);}
-  .inv-num-cell{font-family:'Cormorant Garamond',serif;font-size:0.75rem;color:var(--dim);}
-  .inv-items-cell{max-width:180px;}
-  .inv-item-line{font-size:0.78rem;color:var(--cream);}
-  .inv-item-line-en{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.7rem;color:var(--dim);}
-  .inv-total-cell{font-weight:900;color:var(--gold);direction:ltr;white-space:nowrap;}
   .badge-pay{font-size:0.68rem;font-weight:700;padding:2px 7px;border-radius:999px;white-space:nowrap;}
   .pay-cash{background:#5C3A22;color:var(--gold);}
   .pay-visa{background:#2980b9;color:#fff;}
   .pay-transfer{background:#1a6b3a;color:#4caf50;}
   .badge-wa{background:#25D366;color:#fff;font-size:0.65rem;padding:1px 5px;border-radius:999px;}
-  .badge-type-cell{font-size:0.72rem;}
   .badge-dine2{background:#5C3A22;color:var(--gold);font-size:0.68rem;padding:2px 6px;border-radius:999px;}
   .badge-take2{background:var(--blue);color:#fff;font-size:0.68rem;padding:2px 6px;border-radius:999px;}
+  .empty-row{text-align:center;padding:1.5rem;color:var(--dim);}
 
-  .empty-inv{text-align:center;padding:3rem;color:var(--dim);}
-  .empty-inv-en{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.85rem;color:var(--border);}
+  /* FIXED EXPENSES */
+  .fx-layout{display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;}
+  @media(max-width:600px){.fx-layout{grid-template-columns:1fr;}}
+  .fx-form{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.2rem;display:flex;flex-direction:column;gap:0.7rem;align-self:start;}
+  .fx-form-title{font-weight:900;color:var(--gold);font-size:0.95rem;}
+  .fx-form-en{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.78rem;color:var(--dim);}
+  .fx-input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:0.55rem 0.8rem;color:var(--cream);font-family:'Tajawal',sans-serif;font-size:0.85rem;outline:none;transition:border-color 0.2s;}
+  .fx-input:focus{border-color:var(--gold);}
+  .fx-input::placeholder{color:var(--dim);}
+  .fx-submit{background:var(--gold);color:var(--bg);border:none;border-radius:10px;padding:0.65rem;font-family:'Tajawal',sans-serif;font-weight:900;font-size:0.88rem;cursor:pointer;transition:all 0.2s;}
+  .fx-submit:hover{opacity:0.85;}
+  .fx-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.7rem 0.9rem;display:flex;justify-content:space-between;align-items:center;gap:0.5rem;margin-bottom:0.5rem;}
+  .fx-name{font-size:0.88rem;font-weight:700;color:var(--cream);}
+  .fx-meta{font-size:0.72rem;color:var(--dim);font-family:'Cormorant Garamond',serif;font-style:italic;}
+  .fx-amt{font-weight:900;color:var(--red);direction:ltr;font-size:0.9rem;white-space:nowrap;}
+  .fx-del{background:none;border:1px solid var(--border);color:var(--dim);border-radius:6px;padding:3px 7px;cursor:pointer;font-size:0.75rem;transition:all 0.2s;}
+  .fx-del:hover{background:var(--red);color:#fff;border-color:var(--red);}
+  .fx-total{font-size:0.82rem;font-weight:700;color:var(--red);margin-bottom:0.5rem;}
 
-  .loading{text-align:center;padding:2rem;color:var(--dim);}
-
-  /* scroll table */
-  .table-wrap{overflow-x:auto;border-radius:10px;border:1px solid var(--border);}
+  .toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);background:var(--green);color:#fff;padding:0.6rem 1.2rem;border-radius:10px;font-weight:700;font-size:0.85rem;opacity:0;transition:opacity 0.3s;pointer-events:none;z-index:99;white-space:nowrap;}
+  .toast.show{opacity:1;}
 </style>
 </head>
 <body>
@@ -93,288 +118,467 @@
   <a href="staff.html" class="h-link">⬅ لوحة الموظف · Staff</a>
 </header>
 
-<div class="section">
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('overview')">📈 نظرة عامة<span class="tab-en">Overview</span></button>
+  <button class="tab" onclick="switchTab('charts')">📊 رسوم بيانية<span class="tab-en">Charts</span></button>
+  <button class="tab" onclick="switchTab('invoices')">📄 الفواتير<span class="tab-en">Invoices</span></button>
+  <button class="tab" onclick="switchTab('expenses')">💸 المصروفات<span class="tab-en">Expenses</span></button>
+  <button class="tab" onclick="switchTab('fixed')">🏢 مصاريف ثابتة<span class="tab-en">Fixed Costs</span></button>
+</div>
 
-  <!-- FILTERS -->
-  <div class="filters">
+<!-- ===== OVERVIEW ===== -->
+<div class="panel active" id="panel-overview">
+  <div class="filters" style="margin-top:1rem;">
     <button class="filter-btn active" onclick="setFilter('today')">اليوم · Today</button>
     <button class="filter-btn" onclick="setFilter('week')">الأسبوع · Week</button>
     <button class="filter-btn" onclick="setFilter('month')">الشهر · Month</button>
+    <button class="filter-btn" onclick="setFilter('year')">السنة · Year</button>
     <button class="filter-btn" onclick="setFilter('all')">الكل · All</button>
     <input type="date" class="filter-input" id="dateFilter" onchange="setFilter('custom')">
   </div>
 
-  <!-- STATS -->
   <div class="stats-grid">
     <div class="stat-card"><div class="stat-num" id="sTotal">0</div><div class="stat-ar">إجمالي المبيعات</div><div class="stat-en">Total Sales (OMR)</div></div>
     <div class="stat-card"><div class="stat-num" id="sCount">0</div><div class="stat-ar">عدد الفواتير</div><div class="stat-en">Invoices</div></div>
     <div class="stat-card"><div class="stat-num" id="sAvg">0</div><div class="stat-ar">متوسط الفاتورة</div><div class="stat-en">Avg Invoice</div></div>
+    <div class="stat-card"><div class="stat-num" id="sExpenses">0</div><div class="stat-ar">المصروفات</div><div class="stat-en">Expenses (OMR)</div></div>
+    <div class="stat-card"><div class="stat-num" id="sFixed">0</div><div class="stat-ar">مصاريف ثابتة</div><div class="stat-en">Fixed Costs</div></div>
     <div class="stat-card"><div class="stat-num" id="sWA">0</div><div class="stat-ar">أُرسلت واتساب</div><div class="stat-en">WhatsApp Sent</div></div>
   </div>
 
-  <!-- PAY BREAKDOWN -->
   <div class="pay-grid">
-    <div class="pay-card">
-      <div class="pay-icon">💵</div>
-      <div class="pay-ar">كاش</div>
-      <div class="pay-en">Cash</div>
-      <div class="pay-amt" id="pCashAmt">ر.ع 0.000</div>
-      <div class="pay-count" id="pCashCount">0 فاتورة · invoices</div>
-    </div>
-    <div class="pay-card">
-      <div class="pay-icon">💳</div>
-      <div class="pay-ar">فيزا</div>
-      <div class="pay-en">Visa</div>
-      <div class="pay-amt" id="pVisaAmt">ر.ع 0.000</div>
-      <div class="pay-count" id="pVisaCount">0 فاتورة · invoices</div>
-    </div>
-    <div class="pay-card">
-      <div class="pay-icon">📱</div>
-      <div class="pay-ar">تحويل</div>
-      <div class="pay-en">Transfer</div>
-      <div class="pay-amt" id="pTransAmt">ر.ع 0.000</div>
-      <div class="pay-count" id="pTransCount">0 فاتورة · invoices</div>
-    </div>
+    <div class="pay-card"><div class="pay-icon">💵</div><div class="pay-ar">كاش</div><div class="pay-en">Cash</div><div class="pay-amt" id="pCashAmt">0.000</div><div class="pay-count" id="pCashCount">0</div></div>
+    <div class="pay-card"><div class="pay-icon">💳</div><div class="pay-ar">فيزا</div><div class="pay-en">Visa</div><div class="pay-amt" id="pVisaAmt">0.000</div><div class="pay-count" id="pVisaCount">0</div></div>
+    <div class="pay-card"><div class="pay-icon">📱</div><div class="pay-ar">تحويل</div><div class="pay-en">Transfer</div><div class="pay-amt" id="pTransAmt">0.000</div><div class="pay-count" id="pTransCount">0</div></div>
   </div>
 
-  <!-- INVOICES LIST -->
-  <div class="sec-title">
-    📄 الفواتير <span class="sec-en">· Invoices</span>
+  <div class="net-card">
+    <div><div class="net-lbl">💰 صافي الربح · Net Profit</div><div class="net-en">Sales - Expenses - Fixed Costs</div></div>
+    <div class="net-amt" id="netProfit">ر.ع 0.000</div>
   </div>
-  <div class="table-wrap">
-    <table class="inv-table">
-      <thead>
-        <tr>
-          <th>رقم الفاتورة · Invoice #</th>
-          <th>الطاولة · Table</th>
-          <th>المنتجات · Items</th>
-          <th>الإجمالي · Total</th>
-          <th>الدفع · Payment</th>
-          <th>النوع · Type</th>
-          <th>الوقت · Time</th>
-          <th>واتساب</th>
-        </tr>
-      </thead>
-      <tbody id="invTableBody">
-        <tr><td colspan="8" class="loading">⏳ جاري التحميل...</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <!-- EXPENSES REPORT -->
-  <div class="sec-title" style="margin-top:2rem;">
-    💸 المصروفات <span class="sec-en">· Expenses</span>
-    <span id="expTotalLbl" style="font-size:0.85rem;color:var(--red);font-weight:900;">ر.ع 0.000</span>
-  </div>
-  <div class="table-wrap">
-    <table class="inv-table">
-      <thead>
-        <tr>
-          <th>المصروف · Expense</th>
-          <th>المبلغ · Amount</th>
-          <th>التاريخ · Date</th>
-          <th>الوقت · Time</th>
-        </tr>
-      </thead>
-      <tbody id="expTableBody">
-        <tr><td colspan="4" class="loading">⏳ جاري التحميل...</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <!-- NET PROFIT -->
-  <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1rem 1.2rem;margin-top:1rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;">
-    <div>
-      <div style="font-size:0.85rem;font-weight:900;color:var(--gold);">صافي الربح · Net Profit</div>
-      <div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.75rem;color:var(--dim);">المبيعات - المصروفات</div>
-    </div>
-    <div style="font-size:1.3rem;font-weight:900;" id="netProfit">ر.ع 0.000</div>
-  </div>
-
 </div>
+
+<!-- ===== CHARTS ===== -->
+<div class="panel" id="panel-charts">
+  <div style="margin-top:1rem;">
+
+    <!-- اليومي - أعمدة -->
+    <div class="chart-card">
+      <div class="chart-title">
+        📊 المبيعات اليومية — آخر 30 يوم
+        <span class="chart-en">Daily Sales — Last 30 Days</span>
+      </div>
+      <div class="chart-wrap"><canvas id="chartDaily"></canvas></div>
+    </div>
+
+    <!-- الشهري - خط -->
+    <div class="chart-card">
+      <div class="chart-title">
+        📈 المبيعات الشهرية — آخر 12 شهر
+        <span class="chart-en">Monthly Sales — Last 12 Months</span>
+      </div>
+      <div class="chart-wrap"><canvas id="chartMonthly"></canvas></div>
+    </div>
+
+    <!-- السنوي - خط -->
+    <div class="chart-card">
+      <div class="chart-title">
+        📈 المبيعات السنوية
+        <span class="chart-en">Yearly Sales</span>
+      </div>
+      <div class="chart-wrap"><canvas id="chartYearly"></canvas></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== INVOICES ===== -->
+<div class="panel" id="panel-invoices">
+  <div class="filters" style="margin-top:1rem;">
+    <button class="filter-btn active" onclick="setInvFilter('today')">اليوم</button>
+    <button class="filter-btn" onclick="setInvFilter('week')">الأسبوع</button>
+    <button class="filter-btn" onclick="setInvFilter('month')">الشهر</button>
+    <button class="filter-btn" onclick="setInvFilter('all')">الكل</button>
+    <input type="date" class="filter-input" id="invDateFilter" onchange="setInvFilter('custom')">
+  </div>
+  <div class="table-wrap">
+    <table class="inv-table">
+      <thead><tr>
+        <th>رقم الفاتورة</th><th>الطاولة</th><th>المنتجات</th>
+        <th>الإجمالي</th><th>الدفع</th><th>النوع</th><th>الوقت</th><th>واتساب</th>
+      </tr></thead>
+      <tbody id="invTableBody"><tr><td colspan="8" class="empty-row">⏳ جاري التحميل...</td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ===== EXPENSES ===== -->
+<div class="panel" id="panel-expenses">
+  <div class="filters" style="margin-top:1rem;">
+    <button class="filter-btn active" onclick="setExpFilter('today')">اليوم</button>
+    <button class="filter-btn" onclick="setExpFilter('week')">الأسبوع</button>
+    <button class="filter-btn" onclick="setExpFilter('month')">الشهر</button>
+    <button class="filter-btn" onclick="setExpFilter('all')">الكل</button>
+  </div>
+  <div class="sec-title">💸 المصروفات اليومية <span class="sec-en">· Daily Expenses</span> <span id="expTotalLbl" style="color:var(--red);font-size:0.85rem;">ر.ع 0.000</span></div>
+  <div class="table-wrap">
+    <table class="inv-table">
+      <thead><tr><th>المصروف</th><th>المبلغ</th><th>التاريخ</th><th>الوقت</th></tr></thead>
+      <tbody id="expTableBody"><tr><td colspan="4" class="empty-row">⏳ جاري التحميل...</td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ===== FIXED COSTS ===== -->
+<div class="panel" id="panel-fixed">
+  <div style="margin-top:1rem;" class="fx-layout">
+
+    <div class="fx-form">
+      <div><div class="fx-form-title">🏢 إضافة مصروف ثابت</div><div class="fx-form-en">Add Fixed Cost</div></div>
+      <div>
+        <div style="font-size:0.78rem;color:var(--dim);margin-bottom:0.3rem;">اسم المصروف · Name</div>
+        <input type="text" id="fxName" class="fx-input" placeholder="مثال: إيجار، رواتب، كهرباء...">
+      </div>
+      <div>
+        <div style="font-size:0.78rem;color:var(--dim);margin-bottom:0.3rem;">المبلغ الشهري · Monthly Amount (ر.ع)</div>
+        <input type="number" id="fxAmount" class="fx-input" placeholder="0.000" step="0.001" min="0">
+      </div>
+      <div>
+        <div style="font-size:0.78rem;color:var(--dim);margin-bottom:0.3rem;">الفئة · Category</div>
+        <select id="fxCategory" class="fx-input">
+          <option value="إيجار">🏠 إيجار · Rent</option>
+          <option value="رواتب">👥 رواتب · Salaries</option>
+          <option value="كهرباء">⚡ كهرباء · Electricity</option>
+          <option value="ماء">💧 ماء · Water</option>
+          <option value="إنترنت">📡 إنترنت · Internet</option>
+          <option value="صيانة">🔧 صيانة · Maintenance</option>
+          <option value="تأمين">🛡️ تأمين · Insurance</option>
+          <option value="أخرى">📦 أخرى · Other</option>
+        </select>
+      </div>
+      <button class="fx-submit" onclick="addFixedCost()">✅ حفظ · Save</button>
+    </div>
+
+    <div>
+      <div class="sec-title">
+        قائمة المصاريف الثابتة <span class="sec-en">· Fixed Costs List</span>
+        <span id="fxTotalLbl" class="fx-total">ر.ع 0.000 / شهر</span>
+      </div>
+      <div id="fxList"><div class="empty-row">لا توجد مصاريف ثابتة بعد<br><span style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.82rem;">No fixed costs yet</span></div></div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
 
 <script>
 const SUPA = 'https://fyyxuvqwoykavqhoaowu.supabase.co';
 const KEY  = 'sb_publishable_CKq5sKxZvi5k43cmEJ1cjw_Cg7jWk_e';
 
-let allInvoices = [];
-let allExpenses = [];
-let currentFilter = 'today';
+let allInvoices=[], allExpenses=[], allFixed=[];
+let currentFilter='today', invFilter='today', expFilter='today';
+let chartDaily=null, chartMonthly=null, chartYearly=null;
 
-function setFilter(f){
-  currentFilter = f;
-  document.querySelectorAll('.filter-btn').forEach((b,i)=>{
-    b.classList.toggle('active', ['today','week','month','all'][i]===f);
+/* ===== TABS ===== */
+function switchTab(tab){
+  document.querySelectorAll('.tab').forEach((t,i)=>{
+    t.classList.toggle('active',['overview','charts','invoices','expenses','fixed'][i]===tab);
   });
-  applyFilter();
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById(`panel-${tab}`).classList.add('active');
+  if(tab==='charts') renderCharts();
+  if(tab==='invoices') renderInvoices(filterData(allInvoices,invFilter,'inv'));
+  if(tab==='expenses') renderExpenses(filterData(allExpenses,expFilter,'exp'));
+  if(tab==='fixed') renderFixed();
 }
 
-function filterInvoices(invoices){
-  const now = new Date();
-  if(currentFilter==='today'){
-    return invoices.filter(i=>new Date(i.created_at).toDateString()===now.toDateString());
-  }
-  if(currentFilter==='week'){
-    const week = new Date(now); week.setDate(now.getDate()-7);
-    return invoices.filter(i=>new Date(i.created_at)>=week);
-  }
-  if(currentFilter==='month'){
-    const month = new Date(now); month.setDate(now.getDate()-30);
-    return invoices.filter(i=>new Date(i.created_at)>=month);
-  }
-  if(currentFilter==='custom'){
-    const d = document.getElementById('dateFilter').value;
-    if(!d) return invoices;
-    return invoices.filter(i=>i.created_at.startsWith(d));
-  }
-  return invoices;
+/* ===== FILTERS ===== */
+function setFilter(f){
+  currentFilter=f;
+  document.querySelectorAll('#panel-overview .filter-btn').forEach((b,i)=>{
+    b.classList.toggle('active',['today','week','month','year','all'][i]===f);
+  });
+  applyOverview();
+}
+function setInvFilter(f){
+  invFilter=f;
+  document.querySelectorAll('#panel-invoices .filter-btn').forEach((b,i)=>{
+    b.classList.toggle('active',['today','week','month','all'][i]===f);
+  });
+  renderInvoices(filterData(allInvoices,f,'inv'));
+}
+function setExpFilter(f){
+  expFilter=f;
+  document.querySelectorAll('#panel-expenses .filter-btn').forEach((b,i)=>{
+    b.classList.toggle('active',['today','week','month','all'][i]===f);
+  });
+  renderExpenses(filterData(allExpenses,f,'exp'));
 }
 
-function applyFilter(){
-  const filtered = filterInvoices(allInvoices);
-  const filteredExp = filterExpenses(allExpenses);
-  updateStats(filtered, filteredExp);
-  renderTable(filtered);
-  renderExpenses(filteredExp);
+function filterData(data,f,type){
+  const now=new Date();
+  const field='created_at';
+  if(f==='today') return data.filter(d=>new Date(d[field]).toDateString()===now.toDateString());
+  if(f==='week'){const w=new Date(now);w.setDate(now.getDate()-7);return data.filter(d=>new Date(d[field])>=w);}
+  if(f==='month'){const m=new Date(now);m.setDate(now.getDate()-30);return data.filter(d=>new Date(d[field])>=m);}
+  if(f==='year'){const y=new Date(now);y.setFullYear(now.getFullYear()-1);return data.filter(d=>new Date(d[field])>=y);}
+  if(f==='custom'){
+    const id=type==='inv'?'invDateFilter':'dateFilter';
+    const v=document.getElementById(id)?.value;
+    if(v) return data.filter(d=>d[field].startsWith(v));
+  }
+  return data;
 }
 
-function filterExpenses(expenses){
-  const now = new Date();
-  if(currentFilter==='today'){
-    return expenses.filter(e=>new Date(e.created_at).toDateString()===now.toDateString());
-  }
-  if(currentFilter==='week'){
-    const week = new Date(now); week.setDate(now.getDate()-7);
-    return expenses.filter(e=>new Date(e.created_at)>=week);
-  }
-  if(currentFilter==='month'){
-    const month = new Date(now); month.setDate(now.getDate()-30);
-    return expenses.filter(e=>new Date(e.created_at)>=month);
-  }
-  if(currentFilter==='custom'){
-    const d = document.getElementById('dateFilter').value;
-    if(!d) return expenses;
-    return expenses.filter(e=>e.expense_date===d);
-  }
-  return expenses;
+/* ===== OVERVIEW ===== */
+function applyOverview(){
+  const inv=filterData(allInvoices,currentFilter,'inv');
+  const exp=filterData(allExpenses,currentFilter,'exp');
+  const sales=inv.reduce((s,i)=>s+(+i.total||0),0);
+  const expenses=exp.reduce((s,e)=>s+(+e.amount||0),0);
+  const fixedTotal=allFixed.reduce((s,f)=>s+(+f.amount||0),0);
+  const net=sales-expenses-fixedTotal;
+
+  document.getElementById('sTotal').textContent=sales.toFixed(3);
+  document.getElementById('sCount').textContent=inv.length;
+  document.getElementById('sAvg').textContent=(inv.length?sales/inv.length:0).toFixed(3);
+  document.getElementById('sExpenses').textContent=expenses.toFixed(3);
+  document.getElementById('sFixed').textContent=fixedTotal.toFixed(3);
+  document.getElementById('sWA').textContent=inv.filter(i=>i.whatsapp_sent).length;
+
+  const netEl=document.getElementById('netProfit');
+  netEl.textContent=`ر.ع ${net.toFixed(3)}`;
+  netEl.style.color=net>=0?'#4caf50':'#e53935';
+
+  const payType=pm=>{if(!pm)return'cash';if(pm.includes('Visa')||pm.includes('فيزا'))return'visa';if(pm.includes('Transfer')||pm.includes('تحويل'))return'transfer';return'cash';};
+  const sumOf=arr=>arr.reduce((s,i)=>s+(+i.total||0),0);
+  const cash=inv.filter(i=>payType(i.payment_method)==='cash');
+  const visa=inv.filter(i=>payType(i.payment_method)==='visa');
+  const trans=inv.filter(i=>payType(i.payment_method)==='transfer');
+  document.getElementById('pCashAmt').textContent=`ر.ع ${sumOf(cash).toFixed(3)}`;
+  document.getElementById('pCashCount').textContent=`${cash.length} فاتورة`;
+  document.getElementById('pVisaAmt').textContent=`ر.ع ${sumOf(visa).toFixed(3)}`;
+  document.getElementById('pVisaCount').textContent=`${visa.length} فاتورة`;
+  document.getElementById('pTransAmt').textContent=`ر.ع ${sumOf(trans).toFixed(3)}`;
+  document.getElementById('pTransCount').textContent=`${trans.length} فاتورة`;
 }
 
+/* ===== CHARTS ===== */
+const CHART_OPTS={
+  responsive:true,maintainAspectRatio:false,
+  plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`ر.ع ${ctx.parsed.y.toFixed(3)}`}}},
+  scales:{
+    x:{ticks:{color:'#9a7a5a',font:{size:10}},grid:{color:'rgba(74,46,26,0.5)'}},
+    y:{ticks:{color:'#9a7a5a',font:{size:10},callback:v=>`${v.toFixed(1)}`},grid:{color:'rgba(74,46,26,0.5)'}}
+  }
+};
+
+function groupByDay(invoices,days=30){
+  const result={};
+  for(let i=days-1;i>=0;i--){
+    const d=new Date();d.setDate(d.getDate()-i);
+    const key=d.toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit'});
+    result[key]=0;
+  }
+  invoices.forEach(inv=>{
+    const d=new Date(inv.created_at);
+    const key=d.toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit'});
+    if(key in result) result[key]+=(+inv.total||0);
+  });
+  return result;
+}
+
+function groupByMonth(invoices,months=12){
+  const result={};
+  for(let i=months-1;i>=0;i--){
+    const d=new Date();d.setMonth(d.getMonth()-i);
+    const key=d.toLocaleDateString('ar-SA',{month:'short',year:'2-digit'});
+    result[key]=0;
+  }
+  invoices.forEach(inv=>{
+    const d=new Date(inv.created_at);
+    const key=d.toLocaleDateString('ar-SA',{month:'short',year:'2-digit'});
+    if(key in result) result[key]+=(+inv.total||0);
+  });
+  return result;
+}
+
+function groupByYear(invoices){
+  const result={};
+  invoices.forEach(inv=>{
+    const y=new Date(inv.created_at).getFullYear().toString();
+    result[y]=(result[y]||0)+(+inv.total||0);
+  });
+  return result;
+}
+
+function renderCharts(){
+  // اليومي - Bar
+  const daily=groupByDay(allInvoices,30);
+  if(chartDaily) chartDaily.destroy();
+  chartDaily=new Chart(document.getElementById('chartDaily'),{
+    type:'bar',
+    data:{
+      labels:Object.keys(daily),
+      datasets:[{label:'المبيعات',data:Object.values(daily),backgroundColor:'rgba(217,155,83,0.7)',borderColor:'#D99B53',borderWidth:1,borderRadius:4}]
+    },
+    options:{...CHART_OPTS}
+  });
+
+  // الشهري - Line
+  const monthly=groupByMonth(allInvoices,12);
+  if(chartMonthly) chartMonthly.destroy();
+  chartMonthly=new Chart(document.getElementById('chartMonthly'),{
+    type:'line',
+    data:{
+      labels:Object.keys(monthly),
+      datasets:[{label:'المبيعات',data:Object.values(monthly),borderColor:'#D99B53',backgroundColor:'rgba(217,155,83,0.1)',borderWidth:2,pointBackgroundColor:'#D99B53',pointRadius:4,tension:0.4,fill:true}]
+    },
+    options:{...CHART_OPTS}
+  });
+
+  // السنوي - Line
+  const yearly=groupByYear(allInvoices);
+  const yKeys=Object.keys(yearly).sort();
+  if(chartYearly) chartYearly.destroy();
+  chartYearly=new Chart(document.getElementById('chartYearly'),{
+    type:'line',
+    data:{
+      labels:yKeys,
+      datasets:[{label:'المبيعات',data:yKeys.map(k=>yearly[k]),borderColor:'#4caf50',backgroundColor:'rgba(76,175,80,0.1)',borderWidth:2,pointBackgroundColor:'#4caf50',pointRadius:5,tension:0.4,fill:true}]
+    },
+    options:{...CHART_OPTS}
+  });
+}
+
+/* ===== INVOICES TABLE ===== */
+function parseItems(s){try{return JSON.parse(s);}catch{return[];}}
+function payType(pm){if(!pm)return'cash';if(pm.includes('Visa')||pm.includes('فيزا'))return'visa';if(pm.includes('Transfer')||pm.includes('تحويل'))return'transfer';return'cash';}
+
+function renderInvoices(invoices){
+  const tbody=document.getElementById('invTableBody');
+  if(invoices.length===0){tbody.innerHTML=`<tr><td colspan="8" class="empty-row">لا توجد فواتير · No invoices</td></tr>`;return;}
+  const sorted=[...invoices].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
+  tbody.innerHTML=sorted.map(inv=>{
+    const items=parseItems(inv.items);
+    const pt=payType(inv.payment_method);
+    const isT=inv.order_type&&inv.order_type.includes('Take');
+    const t=new Date(inv.created_at);
+    return `<tr>
+      <td style="font-size:0.72rem;color:var(--dim);">${inv.invoice_number||'-'}</td>
+      <td>${inv.table_number||'-'}</td>
+      <td style="max-width:160px;">${items.slice(0,2).map(i=>`<div style="font-size:0.78rem;">${i.name} ×${i.qty}</div>`).join('')}${items.length>2?`<div style="font-size:0.7rem;color:var(--dim);">+${items.length-2} أخرى</div>`:''}</td>
+      <td style="font-weight:900;color:var(--gold);direction:ltr;">ر.ع ${(+inv.total||0).toFixed(3)}</td>
+      <td><span class="badge-pay pay-${pt}">${pt==='cash'?'💵 كاش':pt==='visa'?'💳 فيزا':'📱 تحويل'}</span></td>
+      <td><span class="${isT?'badge-take2':'badge-dine2'}">${isT?'🥤 Take':'🪑 Dine'}</span></td>
+      <td style="font-size:0.72rem;color:var(--dim);">${t.toLocaleString('ar-OM',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'})}</td>
+      <td>${inv.whatsapp_sent?'<span class="badge-wa">✓</span>':'-'}</td>
+    </tr>`;
+  }).join('');
+}
+
+/* ===== EXPENSES TABLE ===== */
 function renderExpenses(expenses){
-  const tbody = document.getElementById('expTableBody');
-  const total = expenses.reduce((s,e)=>s+(+e.amount||0),0);
-  document.getElementById('expTotalLbl').textContent = `ر.ع ${total.toFixed(3)}`;
-
-  if(expenses.length===0){
-    tbody.innerHTML=`<tr><td colspan="4" style="text-align:center;padding:1.5rem;color:var(--dim);">لا توجد مصروفات · No expenses</td></tr>`;
-    return;
-  }
-  tbody.innerHTML = [...expenses].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).map(e=>`
+  const tbody=document.getElementById('expTableBody');
+  const total=expenses.reduce((s,e)=>s+(+e.amount||0),0);
+  document.getElementById('expTotalLbl').textContent=`ر.ع ${total.toFixed(3)}`;
+  if(expenses.length===0){tbody.innerHTML=`<tr><td colspan="4" class="empty-row">لا توجد مصروفات · No expenses</td></tr>`;return;}
+  tbody.innerHTML=[...expenses].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).map(e=>`
     <tr>
       <td style="font-weight:700;">${e.name}</td>
       <td style="color:var(--red);font-weight:900;direction:ltr;">- ر.ع ${(+e.amount).toFixed(3)}</td>
-      <td style="font-size:0.78rem;color:var(--dim);">${e.expense_date}</td>
+      <td style="font-size:0.78rem;color:var(--dim);">${e.expense_date||'-'}</td>
       <td style="font-size:0.78rem;color:var(--dim);">${new Date(e.created_at).toLocaleTimeString('ar-OM',{hour:'2-digit',minute:'2-digit'})}</td>
     </tr>
   `).join('');
 }
 
-function payType(pm){
-  if(!pm) return 'cash';
-  if(pm.includes('Visa')||pm.includes('فيزا')) return 'visa';
-  if(pm.includes('Transfer')||pm.includes('تحويل')) return 'transfer';
-  return 'cash';
-}
-
-function updateStats(invoices, expenses=[]){
-  const total = invoices.reduce((s,i)=>s+(+i.total||0),0);
-  const expTotal = expenses.reduce((s,e)=>s+(+e.amount||0),0);
-  const count = invoices.length;
-  const avg = count>0?(total/count):0;
-  const waCount = invoices.filter(i=>i.whatsapp_sent).length;
-  const net = total - expTotal;
-
-  document.getElementById('sTotal').textContent = total.toFixed(3);
-  document.getElementById('sCount').textContent = count;
-  document.getElementById('sAvg').textContent = avg.toFixed(3);
-  document.getElementById('sWA').textContent = waCount;
-
-  const netEl = document.getElementById('netProfit');
-  netEl.textContent = `ر.ع ${net.toFixed(3)}`;
-  netEl.style.color = net >= 0 ? '#4caf50' : '#e53935';
-
-  const cash = invoices.filter(i=>payType(i.payment_method)==='cash');
-  const visa = invoices.filter(i=>payType(i.payment_method)==='visa');
-  const trans = invoices.filter(i=>payType(i.payment_method)==='transfer');
-
-  const sumOf = arr => arr.reduce((s,i)=>s+(+i.total||0),0);
-
-  document.getElementById('pCashAmt').textContent = `ر.ع ${sumOf(cash).toFixed(3)}`;
-  document.getElementById('pCashCount').textContent = `${cash.length} فاتورة · invoices`;
-  document.getElementById('pVisaAmt').textContent = `ر.ع ${sumOf(visa).toFixed(3)}`;
-  document.getElementById('pVisaCount').textContent = `${visa.length} فاتورة · invoices`;
-  document.getElementById('pTransAmt').textContent = `ر.ع ${sumOf(trans).toFixed(3)}`;
-  document.getElementById('pTransCount').textContent = `${trans.length} فاتورة · invoices`;
-}
-
-function parseItems(s){ try{return JSON.parse(s);}catch{return[];} }
-
-function renderTable(invoices){
-  const tbody = document.getElementById('invTableBody');
-  if(invoices.length===0){
-    tbody.innerHTML=`<tr><td colspan="8">
-      <div class="empty-inv">
-        لا توجد فواتير في هذه الفترة
-        <div class="empty-inv-en">No invoices found for this period</div>
-      </div>
-    </td></tr>`;
-    return;
-  }
-  const sorted = [...invoices].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
-  tbody.innerHTML = sorted.map(inv=>{
-    const items = parseItems(inv.items);
-    const pt = payType(inv.payment_method);
-    const isT = inv.order_type && inv.order_type.includes('Take');
-    const t = new Date(inv.created_at);
-    const timeStr = t.toLocaleString('ar-OM',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'});
-    return `<tr>
-      <td class="inv-num-cell">${inv.invoice_number||'-'}</td>
-      <td>${inv.table_number||'-'}</td>
-      <td class="inv-items-cell">
-        ${items.slice(0,3).map(i=>`
-          <div class="inv-item-line">${i.name} ×${i.qty}</div>
-          ${i.nameEn?`<div class="inv-item-line-en">${i.nameEn}</div>`:''}
-        `).join('')}
-        ${items.length>3?`<div style="font-size:0.7rem;color:var(--dim);">+${items.length-3} أخرى · more</div>`:''}
-      </td>
-      <td class="inv-total-cell">ر.ع ${(+inv.total||0).toFixed(3)}</td>
-      <td><span class="badge-pay pay-${pt}">${pt==='cash'?'💵 كاش':pt==='visa'?'💳 فيزا':'📱 تحويل'}</span></td>
-      <td class="badge-type-cell"><span class="${isT?'badge-take2':'badge-dine2'}">${isT?'🥤 Takeaway':'🪑 Dine In'}</span></td>
-      <td style="font-size:0.75rem;color:var(--dim);white-space:nowrap;">${timeStr}</td>
-      <td>${inv.whatsapp_sent?`<span class="badge-wa">✓ أُرسل</span>`:'-'}</td>
-    </tr>`;
-  }).join('');
-}
-
-async function loadInvoices(){
+/* ===== FIXED COSTS ===== */
+async function addFixedCost(){
+  const name=document.getElementById('fxName').value.trim();
+  const amount=+document.getElementById('fxAmount').value;
+  const category=document.getElementById('fxCategory').value;
+  if(!name){document.getElementById('fxName').style.borderColor='#e53935';setTimeout(()=>document.getElementById('fxName').style.borderColor='',2000);return;}
+  if(!amount||amount<=0){document.getElementById('fxAmount').style.borderColor='#e53935';setTimeout(()=>document.getElementById('fxAmount').style.borderColor='',2000);return;}
   try{
-    const [invRes, expRes] = await Promise.all([
-      fetch(`${SUPA}/rest/v1/invoices?select=*&order=created_at.desc&limit=500`,{
-        headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`}
-      }),
-      fetch(`${SUPA}/rest/v1/expenses?select=*&order=created_at.desc&limit=500`,{
-        headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`}
-      })
-    ]);
-    const invData = await invRes.json();
-    const expData = await expRes.json();
-    if(Array.isArray(invData)) allInvoices = invData;
-    if(Array.isArray(expData)) allExpenses = expData;
-    applyFilter();
-  }catch(e){ console.error(e); }
+    const r=await fetch(`${SUPA}/rest/v1/fixed_costs`,{
+      method:'POST',
+      headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify({name,amount,category})
+    });
+    if(r.ok||r.status===201){
+      document.getElementById('fxName').value='';
+      document.getElementById('fxAmount').value='';
+      toast('✅ تم الحفظ · Saved');
+      await loadFixed();
+      renderFixed();
+      applyOverview();
+    }
+  }catch(e){toast('❌ خطأ · Error');}
 }
 
-loadInvoices();
-setInterval(loadInvoices, 30000);
+async function deleteFixed(id){
+  if(!confirm('حذف هذا المصروف الثابت؟')) return;
+  try{
+    await fetch(`${SUPA}/rest/v1/fixed_costs?id=eq.${id}`,{
+      method:'DELETE',
+      headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Prefer':'return=minimal'}
+    });
+    toast('🗑️ تم الحذف · Deleted');
+    await loadFixed();
+    renderFixed();
+    applyOverview();
+  }catch(e){toast('❌ خطأ · Error');}
+}
+
+function renderFixed(){
+  const el=document.getElementById('fxList');
+  const total=allFixed.reduce((s,f)=>s+(+f.amount||0),0);
+  document.getElementById('fxTotalLbl').textContent=`ر.ع ${total.toFixed(3)} / شهر`;
+  if(allFixed.length===0){el.innerHTML=`<div class="empty-row">لا توجد مصاريف ثابتة بعد<br><span style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.82rem;">No fixed costs yet</span></div>`;return;}
+  el.innerHTML=allFixed.map(f=>`
+    <div class="fx-card">
+      <div>
+        <div class="fx-name">${f.category||''} ${f.name}</div>
+        <div class="fx-meta">شهري · Monthly</div>
+      </div>
+      <span class="fx-amt">- ر.ع ${(+f.amount).toFixed(3)}</span>
+      <button class="fx-del" onclick="deleteFixed(${f.id})">🗑️</button>
+    </div>
+  `).join('');
+}
+
+/* ===== LOAD ===== */
+async function loadFixed(){
+  try{
+    const r=await fetch(`${SUPA}/rest/v1/fixed_costs?select=*&order=created_at.desc`,{
+      headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`}
+    });
+    const d=await r.json();
+    if(Array.isArray(d)) allFixed=d;
+  }catch(e){console.error(e);}
+}
+
+async function loadAll(){
+  try{
+    const [invR,expR]=await Promise.all([
+      fetch(`${SUPA}/rest/v1/invoices?select=*&order=created_at.desc&limit=1000`,{headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`}}),
+      fetch(`${SUPA}/rest/v1/expenses?select=*&order=created_at.desc&limit=1000`,{headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`}})
+    ]);
+    const invD=await invR.json();
+    const expD=await expR.json();
+    if(Array.isArray(invD)) allInvoices=invD;
+    if(Array.isArray(expD)) allExpenses=expD;
+    await loadFixed();
+    applyOverview();
+  }catch(e){console.error(e);}
+}
+
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+
+loadAll();
+setInterval(loadAll,30000);
 </script>
 </body>
 </html>
