@@ -234,37 +234,79 @@
   <div style="margin-top:1rem;" class="fx-layout">
 
     <div class="fx-form">
-      <div><div class="fx-form-title">🏢 إضافة مصروف ثابت</div><div class="fx-form-en">Add Fixed Cost</div></div>
+      <div><div class="fx-form-title">🏢 إضافة مصاريف الشهر</div><div class="fx-form-en">Add This Month's Fixed Costs</div></div>
+
+      <!-- اختيار الشهر والسنة -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;">
+        <div>
+          <div style="font-size:0.78rem;color:var(--dim);margin-bottom:0.3rem;">الشهر · Month</div>
+          <select id="fxMonth" class="fx-input">
+            <option value="1">يناير · Jan</option>
+            <option value="2">فبراير · Feb</option>
+            <option value="3">مارس · Mar</option>
+            <option value="4">أبريل · Apr</option>
+            <option value="5">مايو · May</option>
+            <option value="6">يونيو · Jun</option>
+            <option value="7">يوليو · Jul</option>
+            <option value="8">أغسطس · Aug</option>
+            <option value="9">سبتمبر · Sep</option>
+            <option value="10">أكتوبر · Oct</option>
+            <option value="11">نوفمبر · Nov</option>
+            <option value="12">ديسمبر · Dec</option>
+          </select>
+        </div>
+        <div>
+          <div style="font-size:0.78rem;color:var(--dim);margin-bottom:0.3rem;">السنة · Year</div>
+          <input type="number" id="fxYear" class="fx-input" placeholder="2026" min="2024" max="2099">
+        </div>
+      </div>
+
       <div>
         <div style="font-size:0.78rem;color:var(--dim);margin-bottom:0.3rem;">اسم المصروف · Name</div>
         <input type="text" id="fxName" class="fx-input" placeholder="مثال: إيجار، رواتب، كهرباء...">
       </div>
       <div>
-        <div style="font-size:0.78rem;color:var(--dim);margin-bottom:0.3rem;">المبلغ الشهري · Monthly Amount (ر.ع)</div>
+        <div style="font-size:0.78rem;color:var(--dim);margin-bottom:0.3rem;">المبلغ · Amount (ر.ع)</div>
         <input type="number" id="fxAmount" class="fx-input" placeholder="0.000" step="0.001" min="0">
       </div>
       <div>
         <div style="font-size:0.78rem;color:var(--dim);margin-bottom:0.3rem;">الفئة · Category</div>
         <select id="fxCategory" class="fx-input">
-          <option value="إيجار">🏠 إيجار · Rent</option>
-          <option value="رواتب">👥 رواتب · Salaries</option>
-          <option value="كهرباء">⚡ كهرباء · Electricity</option>
-          <option value="ماء">💧 ماء · Water</option>
-          <option value="إنترنت">📡 إنترنت · Internet</option>
-          <option value="صيانة">🔧 صيانة · Maintenance</option>
-          <option value="تأمين">🛡️ تأمين · Insurance</option>
-          <option value="أخرى">📦 أخرى · Other</option>
+          <option value="🏠 إيجار">🏠 إيجار · Rent</option>
+          <option value="👥 رواتب">👥 رواتب · Salaries</option>
+          <option value="⚡ كهرباء">⚡ كهرباء · Electricity</option>
+          <option value="💧 ماء">💧 ماء · Water</option>
+          <option value="📡 إنترنت">📡 إنترنت · Internet</option>
+          <option value="🔧 صيانة">🔧 صيانة · Maintenance</option>
+          <option value="🛡️ تأمين">🛡️ تأمين · Insurance</option>
+          <option value="📦 أخرى">📦 أخرى · Other</option>
         </select>
       </div>
-      <button class="fx-submit" onclick="addFixedCost()">✅ حفظ · Save</button>
+      <button class="fx-submit" onclick="addFixedCost()">✅ إضافة · Add</button>
     </div>
 
     <div>
-      <div class="sec-title">
-        قائمة المصاريف الثابتة <span class="sec-en">· Fixed Costs List</span>
-        <span id="fxTotalLbl" class="fx-total">ر.ع 0.000 / شهر</span>
+      <!-- فلتر الشهر لعرض المصاريف -->
+      <div style="display:flex;gap:0.5rem;margin-bottom:0.8rem;flex-wrap:wrap;align-items:center;">
+        <select id="fxViewMonth" class="fx-input" style="flex:1;" onchange="renderFixed()">
+          <option value="1">يناير</option><option value="2">فبراير</option>
+          <option value="3">مارس</option><option value="4">أبريل</option>
+          <option value="5">مايو</option><option value="6">يونيو</option>
+          <option value="7">يوليو</option><option value="8">أغسطس</option>
+          <option value="9">سبتمبر</option><option value="10">أكتوبر</option>
+          <option value="11">نوفمبر</option><option value="12">ديسمبر</option>
+        </select>
+        <input type="number" id="fxViewYear" class="fx-input" style="width:80px;" onchange="renderFixed()" placeholder="2026">
       </div>
-      <div id="fxList"><div class="empty-row">لا توجد مصاريف ثابتة بعد<br><span style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.82rem;">No fixed costs yet</span></div></div>
+
+      <div class="sec-title">
+        مصاريف الشهر <span class="sec-en">· Month's Fixed Costs</span>
+        <span id="fxTotalLbl" class="fx-total">ر.ع 0.000</span>
+      </div>
+      <div id="fxList">
+        <div class="empty-row">لا توجد مصاريف لهذا الشهر<br>
+        <span style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.82rem;">No fixed costs for this month</span></div>
+      </div>
     </div>
 
   </div>
@@ -290,7 +332,16 @@ function switchTab(tab){
   if(tab==='charts') renderCharts();
   if(tab==='invoices') renderInvoices(filterData(allInvoices,invFilter,'inv'));
   if(tab==='expenses') renderExpenses(filterData(allExpenses,expFilter,'exp'));
-  if(tab==='fixed') renderFixed();
+  if(tab==='fixed'){
+    const now = new Date();
+    // تعيين الشهر والسنة الحالية في الفورم
+    document.getElementById('fxMonth').value = now.getMonth()+1;
+    document.getElementById('fxYear').value = now.getFullYear();
+    // تعيين الشهر والسنة الحالية في الفلتر
+    document.getElementById('fxViewMonth').value = now.getMonth()+1;
+    document.getElementById('fxViewYear').value = now.getFullYear();
+    renderFixed();
+  }
 }
 
 /* ===== FILTERS ===== */
@@ -337,7 +388,12 @@ function applyOverview(){
   const exp=filterData(allExpenses,currentFilter,'exp');
   const sales=inv.reduce((s,i)=>s+(+i.total||0),0);
   const expenses=exp.reduce((s,e)=>s+(+e.amount||0),0);
-  const fixedTotal=allFixed.reduce((s,f)=>s+(+f.amount||0),0);
+
+  // المصاريف الثابتة للشهر الحالي فقط
+  const now = new Date();
+  const fixedThisMonth = allFixed.filter(f=>+f.month===now.getMonth()+1 && +f.year===now.getFullYear());
+  const fixedTotal = fixedThisMonth.reduce((s,f)=>s+(+f.amount||0),0);
+
   const net=sales-expenses-fixedTotal;
 
   document.getElementById('sTotal').textContent=sales.toFixed(3);
@@ -496,16 +552,33 @@ function renderExpenses(expenses){
 
 /* ===== FIXED COSTS ===== */
 async function addFixedCost(){
-  const name=document.getElementById('fxName').value.trim();
-  const amount=+document.getElementById('fxAmount').value;
-  const category=document.getElementById('fxCategory').value;
-  if(!name){document.getElementById('fxName').style.borderColor='#e53935';setTimeout(()=>document.getElementById('fxName').style.borderColor='',2000);return;}
-  if(!amount||amount<=0){document.getElementById('fxAmount').style.borderColor='#e53935';setTimeout(()=>document.getElementById('fxAmount').style.borderColor='',2000);return;}
+  const name = document.getElementById('fxName').value.trim();
+  const amount = +document.getElementById('fxAmount').value;
+  const category = document.getElementById('fxCategory').value;
+  const month = +document.getElementById('fxMonth').value;
+  const year = +document.getElementById('fxYear').value;
+
+  if(!name){
+    document.getElementById('fxName').style.borderColor='#e53935';
+    setTimeout(()=>document.getElementById('fxName').style.borderColor='',2000);
+    return;
+  }
+  if(!amount||amount<=0){
+    document.getElementById('fxAmount').style.borderColor='#e53935';
+    setTimeout(()=>document.getElementById('fxAmount').style.borderColor='',2000);
+    return;
+  }
+  if(!year||year<2024){
+    document.getElementById('fxYear').style.borderColor='#e53935';
+    setTimeout(()=>document.getElementById('fxYear').style.borderColor='',2000);
+    return;
+  }
+
   try{
     const r=await fetch(`${SUPA}/rest/v1/fixed_costs`,{
       method:'POST',
       headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},
-      body:JSON.stringify({name,amount,category})
+      body:JSON.stringify({name, amount, category, month, year})
     });
     if(r.ok||r.status===201){
       document.getElementById('fxName').value='';
@@ -515,11 +588,11 @@ async function addFixedCost(){
       renderFixed();
       applyOverview();
     }
-  }catch(e){toast('❌ خطأ · Error');}
+  }catch(e){ toast('❌ خطأ · Error'); }
 }
 
 async function deleteFixed(id){
-  if(!confirm('حذف هذا المصروف الثابت؟')) return;
+  if(!confirm('حذف هذا المصروف؟\nDelete this expense?')) return;
   try{
     await fetch(`${SUPA}/rest/v1/fixed_costs?id=eq.${id}`,{
       method:'DELETE',
@@ -529,19 +602,28 @@ async function deleteFixed(id){
     await loadFixed();
     renderFixed();
     applyOverview();
-  }catch(e){toast('❌ خطأ · Error');}
+  }catch(e){ toast('❌ خطأ · Error'); }
 }
 
 function renderFixed(){
-  const el=document.getElementById('fxList');
-  const total=allFixed.reduce((s,f)=>s+(+f.amount||0),0);
-  document.getElementById('fxTotalLbl').textContent=`ر.ع ${total.toFixed(3)} / شهر`;
-  if(allFixed.length===0){el.innerHTML=`<div class="empty-row">لا توجد مصاريف ثابتة بعد<br><span style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.82rem;">No fixed costs yet</span></div>`;return;}
-  el.innerHTML=allFixed.map(f=>`
+  const el = document.getElementById('fxList');
+  const viewMonth = +document.getElementById('fxViewMonth').value;
+  const viewYear = +document.getElementById('fxViewYear').value || new Date().getFullYear();
+
+  // فلتر حسب الشهر والسنة المختارة
+  const filtered = allFixed.filter(f => +f.month === viewMonth && +f.year === viewYear);
+  const total = filtered.reduce((s,f)=>s+(+f.amount||0),0);
+  document.getElementById('fxTotalLbl').textContent = `ر.ع ${total.toFixed(3)}`;
+
+  if(filtered.length===0){
+    el.innerHTML=`<div class="empty-row">لا توجد مصاريف لهذا الشهر<br><span style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.82rem;">No fixed costs for this month</span></div>`;
+    return;
+  }
+  el.innerHTML = filtered.map(f=>`
     <div class="fx-card">
       <div>
-        <div class="fx-name">${f.category||''} ${f.name}</div>
-        <div class="fx-meta">شهري · Monthly</div>
+        <div class="fx-name">${f.category} ${f.name}</div>
+        <div class="fx-meta">${f.month}/${f.year}</div>
       </div>
       <span class="fx-amt">- ر.ع ${(+f.amount).toFixed(3)}</span>
       <button class="fx-del" onclick="deleteFixed(${f.id})">🗑️</button>
