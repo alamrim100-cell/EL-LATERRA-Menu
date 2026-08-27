@@ -345,6 +345,32 @@
   }
   .no-pay-btn.active{border-color:var(--gold);background:var(--gold-dim);color:var(--cream);}
   .no-pay-btn:hover{border-color:var(--gold);}
+
+  /* ===== المصروفات ===== */
+  .exp-layout{display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;}
+  @media(max-width:600px){.exp-layout{grid-template-columns:1fr;}}
+
+  .exp-form{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.2rem;display:flex;flex-direction:column;gap:0.8rem;align-self:start;}
+  .exp-form-title{font-weight:900;color:var(--gold);font-size:0.95rem;}
+  .exp-form-en{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.78rem;color:var(--dim);}
+  .exp-input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:0.6rem 0.8rem;color:var(--cream);font-family:'Tajawal',sans-serif;font-size:0.88rem;outline:none;transition:border-color 0.2s;}
+  .exp-input:focus{border-color:var(--gold);}
+  .exp-input::placeholder{color:var(--dim);}
+  .exp-submit{background:var(--gold);color:var(--bg);border:none;border-radius:10px;padding:0.7rem;font-family:'Tajawal',sans-serif;font-weight:900;font-size:0.9rem;cursor:pointer;transition:all 0.2s;}
+  .exp-submit:hover{background:var(--caramel-bright,#e8b060);}
+
+  .exp-list{display:flex;flex-direction:column;gap:0.5rem;}
+  .exp-list-title{font-weight:900;color:var(--gold);font-size:0.9rem;margin-bottom:0.3rem;display:flex;justify-content:space-between;align-items:center;}
+  .exp-total-today{font-size:0.82rem;color:var(--red);font-weight:700;}
+  .exp-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.7rem 0.9rem;display:flex;justify-content:space-between;align-items:center;gap:0.5rem;animation:slideIn 0.3s ease;}
+  .exp-card-info{flex:1;}
+  .exp-card-name{font-size:0.88rem;font-weight:700;color:var(--cream);}
+  .exp-card-date{font-size:0.72rem;color:var(--dim);font-family:'Cormorant Garamond',serif;font-style:italic;}
+  .exp-card-amt{font-weight:900;color:var(--red);direction:ltr;font-size:0.9rem;white-space:nowrap;}
+  .exp-del-btn{background:none;border:1px solid var(--border);color:var(--dim);border-radius:6px;padding:3px 7px;cursor:pointer;font-size:0.75rem;transition:all 0.2s;}
+  .exp-del-btn:hover{background:var(--red);color:#fff;border-color:var(--red);}
+  .exp-empty{text-align:center;padding:2rem;color:var(--dim);}
+  .exp-empty-en{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.82rem;color:var(--border);}
 </style>
 </head>
 <body>
@@ -384,6 +410,12 @@
     <div>
       <div>➕ طلب جديد</div>
       <div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.85rem;opacity:0.8;">New Order</div>
+    </div>
+  </button>
+  <button class="tab" onclick="switchTab('expenses')">
+    <div>
+      <div>💸 مصروفات</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.85rem;opacity:0.8;">Expenses</div>
     </div>
   </button>
 </div>
@@ -542,6 +574,50 @@
   </div>
 </div>
 
+<!-- EXPENSES PANEL -->
+<div class="panel" id="panel-expenses">
+  <div class="exp-layout">
+
+    <!-- فورم إضافة مصروف -->
+    <div class="exp-form">
+      <div>
+        <div class="exp-form-title">💸 إضافة مصروف</div>
+        <div class="exp-form-en">Add Expense</div>
+      </div>
+      <div>
+        <div style="font-size:0.78rem;color:var(--dim);margin-bottom:0.3rem;">اسم المصروف · Expense Name</div>
+        <input type="text" id="expName" class="exp-input" placeholder="مثال: مواد خام، صيانة...">
+      </div>
+      <div>
+        <div style="font-size:0.78rem;color:var(--dim);margin-bottom:0.3rem;">المبلغ · Amount (ر.ع)</div>
+        <input type="number" id="expAmount" class="exp-input" placeholder="0.000" step="0.001" min="0">
+      </div>
+      <div>
+        <div style="font-size:0.78rem;color:var(--dim);margin-bottom:0.3rem;">التاريخ · Date</div>
+        <input type="date" id="expDate" class="exp-input">
+      </div>
+      <button class="exp-submit" onclick="addExpense()">
+        ✅ حفظ المصروف · Save Expense
+      </button>
+    </div>
+
+    <!-- قائمة المصروفات -->
+    <div>
+      <div class="exp-list-title">
+        <span>📋 مصروفات اليوم · Today's Expenses</span>
+        <span class="exp-total-today" id="expTotalToday">ر.ع 0.000</span>
+      </div>
+      <div class="exp-list" id="expList">
+        <div class="exp-empty">
+          <div>لا توجد مصروفات اليوم</div>
+          <div class="exp-empty-en">No expenses today</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
 <!-- TEMP MODAL للطلب الجديد -->
 <div class="no-temp-modal" id="noTempModal">
   <div class="no-temp-box">
@@ -641,13 +717,14 @@ let activeTab = 'orders';
 function switchTab(tab){
   activeTab = tab;
   document.querySelectorAll('.tab').forEach((t,i) => {
-    t.classList.toggle('active', ['orders','products','stats','neworder'][i] === tab);
+    t.classList.toggle('active', ['orders','products','stats','neworder','expenses'][i] === tab);
   });
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.getElementById(`panel-${tab}`).classList.add('active');
   if(tab === 'products') renderProducts();
   if(tab === 'stats') renderStats();
   if(tab === 'neworder') renderNoMenu();
+  if(tab === 'expenses'){ setExpenseDate(); loadExpenses(); }
 }
 
 /* ===== HELPERS ===== */
@@ -1362,6 +1439,99 @@ async function noSendOrder(){
     btn.textContent='❌ فشل الإرسال · Failed';
     btn.disabled=false;
   }
+}
+
+/* ===== EXPENSES ===== */
+let allExpenses = [];
+
+function setExpenseDate(){
+  const d = document.getElementById('expDate');
+  if(d && !d.value){
+    d.value = new Date().toISOString().split('T')[0];
+  }
+}
+
+async function loadExpenses(){
+  try{
+    const today = new Date().toISOString().split('T')[0];
+    const r = await fetch(`${SUPA}/rest/v1/expenses?select=*&expense_date=eq.${today}&order=created_at.desc`,{
+      headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`}
+    });
+    const data = await r.json();
+    if(Array.isArray(data)){
+      allExpenses = data;
+      renderExpenses(data);
+    }
+  }catch(e){ console.error(e); }
+}
+
+async function addExpense(){
+  const name = document.getElementById('expName').value.trim();
+  const amount = +document.getElementById('expAmount').value;
+  const date = document.getElementById('expDate').value;
+
+  if(!name){
+    document.getElementById('expName').style.borderColor='#e53935';
+    setTimeout(()=>document.getElementById('expName').style.borderColor='',2000);
+    return;
+  }
+  if(!amount || amount<=0){
+    document.getElementById('expAmount').style.borderColor='#e53935';
+    setTimeout(()=>document.getElementById('expAmount').style.borderColor='',2000);
+    return;
+  }
+
+  try{
+    const r = await fetch(`${SUPA}/rest/v1/expenses`,{
+      method:'POST',
+      headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body: JSON.stringify({name, amount, expense_date: date||new Date().toISOString().split('T')[0]})
+    });
+    if(r.ok || r.status===201){
+      document.getElementById('expName').value='';
+      document.getElementById('expAmount').value='';
+      toast('✅ تم حفظ المصروف · Expense Saved');
+      loadExpenses();
+    }
+  }catch(e){ toast('❌ خطأ في الحفظ · Save Error'); }
+}
+
+async function deleteExpense(id){
+  if(!confirm('حذف هذا المصروف؟\nDelete this expense?')) return;
+  try{
+    await fetch(`${SUPA}/rest/v1/expenses?id=eq.${id}`,{
+      method:'DELETE',
+      headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Prefer':'return=minimal'}
+    });
+    toast('🗑️ تم الحذف · Deleted');
+    loadExpenses();
+  }catch(e){ toast('❌ خطأ · Error'); }
+}
+
+function renderExpenses(expenses){
+  const list = document.getElementById('expList');
+  const totalEl = document.getElementById('expTotalToday');
+  const total = expenses.reduce((s,e)=>s+(+e.amount||0),0);
+  totalEl.textContent = `ر.ع ${total.toFixed(3)}`;
+
+  if(expenses.length===0){
+    list.innerHTML=`<div class="exp-empty">
+      <div>لا توجد مصروفات اليوم</div>
+      <div class="exp-empty-en">No expenses today</div>
+    </div>`;
+    return;
+  }
+
+  list.innerHTML = expenses.map(e=>`
+    <div class="exp-card">
+      <div class="exp-card-info">
+        <div class="exp-card-name">${e.name}</div>
+        <div class="exp-card-date">${new Date(e.created_at).toLocaleTimeString('ar-OM',{hour:'2-digit',minute:'2-digit'})} · ${e.expense_date}</div>
+      </div>
+      <span class="exp-card-amt">- ر.ع ${(+e.amount).toFixed(3)}</span>
+      <button class="exp-del-btn" onclick="deleteExpense(${e.id})">🗑️</button>
+    </div>
+  `).join('');
 }
 
 /* ===== INIT ===== */
