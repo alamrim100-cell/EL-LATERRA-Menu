@@ -907,7 +907,16 @@ function sendInvoiceWA(){
     `شكراً لزيارتكم! 🙏\nlaterra.cafe`;
 
   const encoded = encodeURIComponent(msg);
-  window.open(`https://wa.me/?text=${encoded}`, '_blank');
+
+  // جرب فتح تطبيق واتساب مباشرة
+  const waUrl = `https://api.whatsapp.com/send?text=${encoded}`;
+  const a = document.createElement('a');
+  a.href = waUrl;
+  a.target = '_blank';
+  a.rel = 'noopener';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
   saveInvoice(true);
 }
 
@@ -1057,6 +1066,8 @@ function noGetFinal(){
   const subtotal = noGetTotal();
   return Math.max(0, subtotal - noCalcDiscount(subtotal));
 }
+
+function noAddItem(item){
   if(noTempItems.includes(item.id)){
     noAddToCart(item, '','');
     return;
