@@ -282,7 +282,7 @@
   <div class="sec-title">💸 المصروفات اليومية <span class="sec-en">· Daily Expenses</span> <span id="expTotalLbl" style="color:var(--red);font-size:0.85rem;">ر.ع 0.000</span></div>
   <div class="table-wrap">
     <table class="inv-table">
-      <thead><tr><th>المصروف</th><th>المبلغ</th><th>التاريخ</th><th>الوقت</th></tr></thead>
+      <thead><tr><th>المصروف</th><th>المبلغ</th><th>التاريخ</th><th>الوقت</th><th>إجراءات</th></tr></thead>
       <tbody id="expTableBody"><tr><td colspan="4" class="empty-row">⏳ جاري التحميل...</td></tr></tbody>
     </table>
   </div>
@@ -413,6 +413,35 @@
     <div>
       <div class="sec-title">السجل التاريخي <span class="sec-en">· Historical Records</span></div>
       <div id="histList"><div class="empty-row">لا توجد بيانات سابقة<br><span style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.82rem;">No historical data yet</span></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- نافذة تعديل مصروف -->
+<div class="modal-overlay" id="expModal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <span class="modal-title">💸 تعديل المصروف · Edit Expense</span>
+      <button class="modal-close" onclick="closeExpModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="editExpId">
+      <div>
+        <div class="modal-lbl">اسم المصروف · Expense Name</div>
+        <input type="text" id="editExpName" class="modal-input">
+      </div>
+      <div>
+        <div class="modal-lbl">المبلغ · Amount (ر.ع)</div>
+        <input type="number" id="editExpAmount" class="modal-input" step="0.001" min="0">
+      </div>
+      <div>
+        <div class="modal-lbl">التاريخ · Date</div>
+        <input type="date" id="editExpDate" class="modal-input">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn modal-btn-save" onclick="saveExpEdit()">💾 حفظ · Save</button>
+      <button class="modal-btn modal-btn-del" onclick="deleteExpense(document.getElementById('editExpId').value)">🗑️ حذف · Delete</button>
     </div>
   </div>
 </div>
@@ -708,17 +737,70 @@ function renderInvoices(invoices){
 }
 
 /* ===== EXPENSES TABLE ===== */
+let currentEditExp = null;
+
+function openExpModal(exp){
+  currentEditExp = exp;
+  document.getElementById('editExpId').value = exp.id;
+  document.getElementById('editExpName').value = exp.name||'';
+  document.getElementById('editExpAmount').value = exp.amount||'';
+  document.getElementById('editExpDate').value = exp.expense_date||'';
+  document.getElementById('expModal').classList.add('open');
+}
+
+function closeExpModal(){
+  document.getElementById('expModal').classList.remove('open');
+  currentEditExp = null;
+}
+
+async function saveExpEdit(){
+  const id = document.getElementById('editExpId').value;
+  const name = document.getElementById('editExpName').value.trim();
+  const amount = +document.getElementById('editExpAmount').value;
+  const date = document.getElementById('editExpDate').value;
+  if(!name||!amount) return;
+  try{
+    await fetch(`${SUPA}/rest/v1/expenses?id=eq.${id}`,{
+      method:'PATCH',
+      headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify({name, amount, expense_date: date})
+    });
+    toast('✅ تم التعديل · Updated');
+    closeExpModal();
+    await loadAll();
+    renderExpenses(filterData(allExpenses,expFilter,'exp'));
+  }catch(e){ toast('❌ خطأ · Error'); }
+}
+
+async function deleteExpense(id){
+  if(!confirm('حذف هذا المصروف؟\nDelete this expense?')) return;
+  try{
+    await fetch(`${SUPA}/rest/v1/expenses?id=eq.${id}`,{
+      method:'DELETE',
+      headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Prefer':'return=minimal'}
+    });
+    toast('🗑️ تم الحذف · Deleted');
+    closeExpModal();
+    await loadAll();
+    renderExpenses(filterData(allExpenses,expFilter,'exp'));
+  }catch(e){ toast('❌ خطأ · Error'); }
+}
+
 function renderExpenses(expenses){
   const tbody=document.getElementById('expTableBody');
   const total=expenses.reduce((s,e)=>s+(+e.amount||0),0);
   document.getElementById('expTotalLbl').textContent=`ر.ع ${total.toFixed(3)}`;
-  if(expenses.length===0){tbody.innerHTML=`<tr><td colspan="4" class="empty-row">لا توجد مصروفات · No expenses</td></tr>`;return;}
+  if(expenses.length===0){tbody.innerHTML=`<tr><td colspan="5" class="empty-row">لا توجد مصروفات · No expenses</td></tr>`;return;}
   tbody.innerHTML=[...expenses].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).map(e=>`
     <tr>
       <td style="font-weight:700;">${e.name}</td>
       <td style="color:var(--red);font-weight:900;direction:ltr;">- ر.ع ${(+e.amount).toFixed(3)}</td>
       <td style="font-size:0.78rem;color:var(--dim);">${e.expense_date||'-'}</td>
       <td style="font-size:0.78rem;color:var(--dim);">${new Date(e.created_at).toLocaleTimeString('ar-OM',{hour:'2-digit',minute:'2-digit'})}</td>
+      <td>
+        <button style="background:var(--gold);color:var(--bg);border:none;border-radius:6px;padding:3px 7px;cursor:pointer;font-size:0.72rem;font-weight:700;margin-left:4px;" onclick='openExpModal(${JSON.stringify(e).replace(/'/g,"&#39;")})'>✏️</button>
+        <button style="background:var(--red);color:#fff;border:none;border-radius:6px;padding:3px 7px;cursor:pointer;font-size:0.72rem;" onclick="deleteExpense(${e.id})">🗑️</button>
+      </td>
     </tr>
   `).join('');
 }
