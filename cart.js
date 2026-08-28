@@ -167,12 +167,30 @@ async function sendOrder(){
     });
 
     if(res.ok || res.status === 201){
-      // نجح الإرسال
-      showSuccess();
+      // نجح الإرسال — إعادة تعيين كل شي
       cart = {};
       updateCartUI();
       hideCartBar();
       closeCart();
+
+      // إعادة تعيين الخانات
+      if(tableInput) tableInput.value = '';
+      if(noteInput) noteInput.value = '';
+
+      // إعادة تفعيل الزر
+      btn.disabled = false;
+      btn.textContent = '✅ أرسل الطلب للكاونتر';
+
+      // إعادة تعيين نوع الطلب
+      if(typeof orderType !== 'undefined'){
+        orderType = 'dine';
+        const btnDine = document.getElementById('btnDineIn');
+        const btnTake = document.getElementById('btnTakeaway');
+        if(btnDine) btnDine.classList.add('active');
+        if(btnTake) btnTake.classList.remove('active');
+      }
+
+      showSuccess();
     } else {
       throw new Error('فشل الإرسال');
     }
