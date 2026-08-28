@@ -371,18 +371,49 @@
   .exp-del-btn:hover{background:var(--red);color:#fff;border-color:var(--red);}
   .exp-empty{text-align:center;padding:2rem;color:var(--dim);}
   .exp-empty-en{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.82rem;color:var(--border);}
+
+  /* ===== شاشة تسجيل الدخول ===== */
+  .login-screen{position:fixed;inset:0;background:var(--bg);z-index:200;display:flex;align-items:center;justify-content:center;padding:1rem;}
+  .login-box{background:var(--card);border:2px solid var(--gold);border-radius:20px;padding:2rem 1.5rem;width:100%;max-width:320px;text-align:center;}
+  .login-logo{font-size:1.5rem;font-weight:900;color:var(--gold);margin-bottom:0.3rem;}
+  .login-sub{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.88rem;color:var(--dim);margin-bottom:1.5rem;}
+  .login-input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:0.65rem 0.8rem;color:var(--cream);font-family:'Tajawal',sans-serif;font-size:0.9rem;outline:none;margin-bottom:0.7rem;text-align:center;letter-spacing:0.05em;}
+  .login-input:focus{border-color:var(--gold);}
+  .login-btn{width:100%;background:var(--gold);color:var(--bg);border:none;border-radius:10px;padding:0.75rem;font-family:'Tajawal',sans-serif;font-weight:900;font-size:0.95rem;cursor:pointer;}
+  .login-btn:hover{opacity:0.85;}
+  .login-err{color:var(--red);font-size:0.82rem;margin-top:0.5rem;display:none;}
+
+  /* ===== زر الصوت ===== */
+  .sound-btn{background:none;border:1px solid var(--border);color:var(--dim);border-radius:8px;padding:0.3rem 0.6rem;cursor:pointer;font-size:0.82rem;transition:all 0.2s;}
+  .sound-btn.active{border-color:var(--gold);color:var(--gold);}
 </style>
 </head>
 <body>
+
+<!-- شاشة تسجيل الدخول -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">☕ إيل لاتيرا</div>
+    <div class="login-sub">Staff Dashboard · لوحة الموظف</div>
+    <input type="text" id="loginUser" class="login-input" placeholder="اسم المستخدم · Username" autocomplete="username">
+    <input type="password" id="loginPass" class="login-input" placeholder="كلمة المرور · Password" autocomplete="current-password" onkeydown="if(event.key==='Enter') doLogin()">
+    <button class="login-btn" onclick="doLogin()">🔐 دخول · Login</button>
+    <div class="login-err" id="loginErr">❌ بيانات خاطئة · Wrong credentials</div>
+  </div>
+</div>
 
 <header>
   <div>
     <div class="h-title">☕ لوحة تحكم الموظف</div>
     <div class="h-sub">Staff Dashboard — El Laterra</div>
   </div>
-  <div class="live-dot">
-    <div class="dot"></div>
-    <span>مباشر</span>
+  <div style="display:flex;align-items:center;gap:0.6rem;">
+    <button class="sound-btn active" id="soundBtn" onclick="toggleSound()" title="تفعيل/إيقاف الصوت">🔔</button>
+    <div class="live-dot">
+      <div class="dot"></div>
+      <span>مباشر</span>
+    </div>
+    <button class="sound-btn" onclick="doLogout()" style="border-color:var(--red);color:var(--red);">🚪</button>
   </div>
 </header>
 
@@ -750,7 +781,10 @@ async function fetchOrders(){
     if(!Array.isArray(data)) return;
 
     const newOnes = data.filter(o=>!knownIds.has(o.id));
-    if(knownIds.size>0 && newOnes.length>0) toast(`🔔 ${newOnes.length} طلب جديد · New Order!`);
+    if(knownIds.size>0 && newOnes.length>0){
+      toast(`🔔 ${newOnes.length} طلب جديد · New Order!`);
+      playCoffeeBell();
+    }
     data.forEach(o=>knownIds.add(o.id));
 
     allOrders = data;
@@ -1534,14 +1568,92 @@ function renderExpenses(expenses){
   `).join('');
 }
 
+/* ===== AUTH ===== */
+const STAFF_USER = 'AKSHAY';
+const STAFF_PASS = 'A1234567';
+
+function checkAuth(){
+  if(sessionStorage.getItem('staff_auth')==='true'){
+    document.getElementById('loginScreen').style.display='none';
+  }
+}
+
+function doLogin(){
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value;
+  if(u===STAFF_USER && p===STAFF_PASS){
+    sessionStorage.setItem('staff_auth','true');
+    document.getElementById('loginScreen').style.display='none';
+    init();
+  } else {
+    const err = document.getElementById('loginErr');
+    err.style.display='block';
+    setTimeout(()=>err.style.display='none',3000);
+  }
+}
+
+function doLogout(){
+  sessionStorage.removeItem('staff_auth');
+  location.reload();
+}
+
+/* ===== SOUND ===== */
+let soundEnabled = true;
+let audioCtx = null;
+
+function toggleSound(){
+  soundEnabled = !soundEnabled;
+  const btn = document.getElementById('soundBtn');
+  btn.textContent = soundEnabled ? '🔔' : '🔕';
+  btn.classList.toggle('active', soundEnabled);
+}
+
+function getAudioCtx(){
+  if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+  return audioCtx;
+}
+
+function playCoffeeBell(){
+  if(!soundEnabled) return;
+  try{
+    const ctx = getAudioCtx();
+    const t = ctx.currentTime;
+
+    // نغمة جرس قهوة — ثلاث نبضات متصاعدة
+    const notes = [
+      {freq:880, start:0,   dur:0.3, gain:0.4},
+      {freq:1046,start:0.2, dur:0.3, gain:0.5},
+      {freq:1318,start:0.4, dur:0.5, gain:0.6},
+      {freq:1046,start:0.7, dur:0.3, gain:0.4},
+      {freq:880, start:0.9, dur:0.4, gain:0.35},
+    ];
+
+    notes.forEach(n=>{
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(n.freq, t+n.start);
+      osc.frequency.exponentialRampToValueAtTime(n.freq*0.95, t+n.start+n.dur);
+      gain.gain.setValueAtTime(0, t+n.start);
+      gain.gain.linearRampToValueAtTime(n.gain, t+n.start+0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, t+n.start+n.dur);
+      osc.start(t+n.start);
+      osc.stop(t+n.start+n.dur+0.05);
+    });
+  }catch(e){ console.log('Audio error:', e); }
+}
+
 /* ===== INIT ===== */
 async function init(){
   await loadAvailability();
   await fetchOrders();
 }
 
-init();
-setInterval(fetchOrders, 5000);
+checkAuth();
+if(sessionStorage.getItem('staff_auth')==='true') init();
+setInterval(()=>{ if(sessionStorage.getItem('staff_auth')==='true') fetchOrders(); }, 5000);
 </script>
 </body>
 </html>

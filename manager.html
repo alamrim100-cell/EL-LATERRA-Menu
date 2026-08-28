@@ -148,6 +148,44 @@
   .hist-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.7rem 0.9rem;display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;}
   .hist-del{background:none;border:1px solid var(--border);color:var(--dim);border-radius:6px;padding:3px 7px;cursor:pointer;font-size:0.75rem;}
   .hist-del:hover{background:var(--red);color:#fff;border-color:var(--red);}
+
+  /* ===== إدارة المينيو ===== */
+  .menu-section{margin-bottom:1.5rem;}
+  .menu-section-title{font-size:0.88rem;font-weight:900;color:var(--gold);margin-bottom:0.6rem;padding-bottom:0.4rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+  .menu-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:0.6rem;}
+  .menu-item-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.7rem;display:flex;flex-direction:column;gap:0.4rem;position:relative;}
+  .menu-item-card.unavailable{opacity:0.5;border-color:var(--red);}
+  .menu-item-img{width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid var(--border);background:var(--border);}
+  .menu-item-ar{font-weight:700;font-size:0.82rem;color:var(--cream);}
+  .menu-item-en{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.72rem;color:var(--dim);}
+  .menu-item-price{font-size:0.78rem;color:var(--gold);font-weight:700;}
+  .menu-item-actions{display:flex;gap:0.3rem;margin-top:0.2rem;}
+  .menu-action-btn{flex:1;padding:0.3rem;border:none;border-radius:6px;font-family:'Tajawal',sans-serif;font-size:0.7rem;font-weight:700;cursor:pointer;transition:all 0.2s;}
+  .menu-btn-edit{background:var(--gold);color:var(--bg);}
+  .menu-btn-toggle-off{background:var(--red);color:#fff;}
+  .menu-btn-toggle-on{background:var(--green);color:#fff;}
+  .menu-add-form{background:var(--card);border:1px solid var(--gold);border-radius:14px;padding:1.2rem;margin-bottom:1.5rem;}
+  .menu-add-title{font-weight:900;color:var(--gold);font-size:0.95rem;margin-bottom:1rem;}
+  .menu-add-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;}
+  @media(max-width:500px){.menu-add-grid{grid-template-columns:1fr;}}
+  .menu-form-input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:0.5rem 0.7rem;color:var(--cream);font-family:'Tajawal',sans-serif;font-size:0.85rem;outline:none;}
+  .menu-form-input:focus{border-color:var(--gold);}
+  .menu-form-input::placeholder{color:var(--dim);}
+  .menu-form-lbl{font-size:0.72rem;color:var(--dim);margin-bottom:0.3rem;}
+  .menu-add-btn{background:var(--gold);color:var(--bg);border:none;border-radius:10px;padding:0.65rem 1.2rem;font-family:'Tajawal',sans-serif;font-weight:900;font-size:0.88rem;cursor:pointer;margin-top:0.6rem;width:100%;}
+
+  /* نافذة تعديل المنتج */
+  .menu-modal{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:90;display:none;align-items:center;justify-content:center;padding:1rem;}
+  .menu-modal.open{display:flex;}
+  .menu-modal-box{background:var(--card);border:1px solid var(--border);border-radius:16px;width:100%;max-width:400px;overflow:hidden;}
+  .menu-modal-head{background:var(--gold-dim);border-bottom:1px solid var(--border);padding:0.9rem 1.2rem;display:flex;justify-content:space-between;align-items:center;}
+  .menu-modal-title{font-weight:900;color:var(--gold);font-size:0.95rem;}
+  .menu-modal-close{background:none;border:none;color:var(--dim);font-size:1.2rem;cursor:pointer;}
+  .menu-modal-body{padding:1.2rem;display:flex;flex-direction:column;gap:0.7rem;}
+  .menu-modal-actions{display:flex;gap:0.6rem;padding:0.9rem 1.2rem;border-top:1px solid var(--border);}
+  .menu-modal-btn{flex:1;padding:0.65rem;border:none;border-radius:10px;font-family:'Tajawal',sans-serif;font-weight:900;font-size:0.82rem;cursor:pointer;}
+  .menu-modal-save{background:var(--gold);color:var(--bg);}
+  .menu-modal-del{background:var(--red);color:#fff;}
 </style>
 </head>
 <body>
@@ -183,6 +221,7 @@
   <button class="tab" onclick="switchTab('expenses')">💸 المصروفات<span class="tab-en">Expenses</span></button>
   <button class="tab" onclick="switchTab('fixed')">🏢 مصاريف ثابتة<span class="tab-en">Fixed Costs</span></button>
   <button class="tab" onclick="switchTab('history')">📅 مبيعات سابقة<span class="tab-en">History</span></button>
+  <button class="tab" onclick="switchTab('menu')">🍽️ إدارة المينيو<span class="tab-en">Menu Mgmt</span></button>
 </div>
 
 <!-- ===== OVERVIEW ===== -->
@@ -417,6 +456,93 @@
   </div>
 </div>
 
+<!-- ===== MENU MANAGEMENT ===== -->
+<div class="panel" id="panel-menu">
+  <div style="margin-top:1rem;">
+
+    <!-- فورم إضافة منتج جديد -->
+    <div class="menu-add-form">
+      <div class="menu-add-title">➕ إضافة منتج جديد · Add New Item</div>
+      <div class="menu-add-grid">
+        <div>
+          <div class="menu-form-lbl">الاسم بالعربي · Arabic Name</div>
+          <input type="text" id="newItemAr" class="menu-form-input" placeholder="مثال: كابتشينو">
+        </div>
+        <div>
+          <div class="menu-form-lbl">الاسم بالإنجليزي · English Name</div>
+          <input type="text" id="newItemEn" class="menu-form-input" placeholder="Example: Cappuccino">
+        </div>
+        <div>
+          <div class="menu-form-lbl">السعر · Price (ر.ع)</div>
+          <input type="number" id="newItemPrice" class="menu-form-input" placeholder="0.000" step="0.001" min="0">
+        </div>
+        <div>
+          <div class="menu-form-lbl">القسم · Section</div>
+          <select id="newItemSection" class="menu-form-input">
+            <option value="قهوة الاسبريسو">☕ قهوة الاسبريسو · Espresso</option>
+            <option value="القهوة المقطرة">🫗 القهوة المقطرة · Drip Coffee</option>
+            <option value="مشروبات لاتيرا">🥤 مشروبات لاتيرا · Drinks</option>
+            <option value="ساندويتش">🥪 ساندويتش · Sandwich</option>
+            <option value="الكيك">🍰 الكيك · Cake</option>
+          </select>
+        </div>
+        <div>
+          <div class="menu-form-lbl">اسم الصورة · Image filename</div>
+          <input type="text" id="newItemImg" class="menu-form-input" placeholder="مثال: cappuccino.jpeg">
+        </div>
+      </div>
+      <button class="menu-add-btn" onclick="addMenuItem()">✅ إضافة المنتج · Add Item</button>
+    </div>
+
+    <!-- قائمة المنتجات حسب القسم -->
+    <div id="menuContent"><div style="text-align:center;padding:2rem;color:var(--dim);">⏳ جاري التحميل...</div></div>
+
+  </div>
+</div>
+
+<!-- نافذة تعديل منتج -->
+<div class="menu-modal" id="menuModal">
+  <div class="menu-modal-box">
+    <div class="menu-modal-head">
+      <span class="menu-modal-title">✏️ تعديل المنتج · Edit Item</span>
+      <button class="menu-modal-close" onclick="closeMenuModal()">✕</button>
+    </div>
+    <div class="menu-modal-body">
+      <input type="hidden" id="editMenuId">
+      <div>
+        <div class="menu-form-lbl">الاسم بالعربي · Arabic Name</div>
+        <input type="text" id="editMenuAr" class="menu-form-input">
+      </div>
+      <div>
+        <div class="menu-form-lbl">الاسم بالإنجليزي · English Name</div>
+        <input type="text" id="editMenuEn" class="menu-form-input">
+      </div>
+      <div>
+        <div class="menu-form-lbl">السعر · Price (ر.ع)</div>
+        <input type="number" id="editMenuPrice" class="menu-form-input" step="0.001">
+      </div>
+      <div>
+        <div class="menu-form-lbl">القسم · Section</div>
+        <select id="editMenuSection" class="menu-form-input">
+          <option value="قهوة الاسبريسو">☕ قهوة الاسبريسو · Espresso</option>
+          <option value="القهوة المقطرة">🫗 القهوة المقطرة · Drip Coffee</option>
+          <option value="مشروبات لاتيرا">🥤 مشروبات لاتيرا · Drinks</option>
+          <option value="ساندويتش">🥪 ساندويتش · Sandwich</option>
+          <option value="الكيك">🍰 الكيك · Cake</option>
+        </select>
+      </div>
+      <div>
+        <div class="menu-form-lbl">اسم الصورة · Image filename</div>
+        <input type="text" id="editMenuImg" class="menu-form-input">
+      </div>
+    </div>
+    <div class="menu-modal-actions">
+      <button class="menu-modal-btn menu-modal-save" onclick="saveMenuEdit()">💾 حفظ · Save</button>
+      <button class="menu-modal-btn menu-modal-del" onclick="deleteMenuItem()">🗑️ حذف · Delete</button>
+    </div>
+  </div>
+</div>
+
 <!-- نافذة تعديل مصروف -->
 <div class="modal-overlay" id="expModal">
   <div class="modal-box">
@@ -544,6 +670,7 @@ function switchTab(tab){
     renderFixed();
   }
   if(tab==='history') renderHistory();
+  if(tab==='menu'){ loadMenuItems(); }
 }
 
 /* ===== FILTERS ===== */
@@ -1032,6 +1159,135 @@ async function deleteHistEntry(id){
     toast('🗑️ تم الحذف · Deleted');
     await loadAll();
     renderHistory();
+  }catch(e){ toast('❌ خطأ · Error'); }
+}
+
+/* ===== MENU MANAGEMENT ===== */
+let allMenuItems = [];
+let currentEditMenu = null;
+const SECTIONS_ORDER = ['قهوة الاسبريسو','القهوة المقطرة','مشروبات لاتيرا','ساندويتش','الكيك'];
+
+async function loadMenuItems(){
+  try{
+    const r = await fetch(`${SUPA}/rest/v1/menu_items?select=*&order=section,created_at`,{
+      headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`}
+    });
+    const d = await r.json();
+    if(Array.isArray(d)){ allMenuItems=d; renderMenuItems(); }
+  }catch(e){ console.error(e); }
+}
+
+function renderMenuItems(){
+  const c = document.getElementById('menuContent');
+  if(allMenuItems.length===0){
+    c.innerHTML=`<div style="text-align:center;padding:2rem;color:var(--dim);">لا توجد منتجات بعد · No items yet</div>`;
+    return;
+  }
+  // جلب حالة التوفر
+  const unavail = new Set();
+  // نعرض حسب الأقسام
+  const grouped = {};
+  SECTIONS_ORDER.forEach(s=>grouped[s]=[]);
+  allMenuItems.forEach(i=>{ if(grouped[i.section]) grouped[i.section].push(i); else{ grouped[i.section]=grouped[i.section]||[]; grouped[i.section].push(i); } });
+
+  c.innerHTML = SECTIONS_ORDER.filter(s=>grouped[s]&&grouped[s].length>0).map(sec=>`
+    <div class="menu-section">
+      <div class="menu-section-title">
+        ${sec}
+        <span style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.75rem;color:var(--dim);font-weight:400;">${grouped[sec].length} منتج</span>
+      </div>
+      <div class="menu-grid">
+        ${grouped[sec].map(item=>`
+          <div class="menu-item-card">
+            <div style="display:flex;align-items:center;gap:0.5rem;">
+              ${item.img?`<img class="menu-item-img" src="${item.img}" onerror="this.style.display='none'" alt="">`:''}
+              <div>
+                <div class="menu-item-ar">${item.name_ar}</div>
+                <div class="menu-item-en">${item.name_en||''}</div>
+                <div class="menu-item-price">ر.ع ${(+item.price).toFixed(3)}</div>
+              </div>
+            </div>
+            <div class="menu-item-actions">
+              <button class="menu-action-btn menu-btn-edit" onclick='openMenuModal(${JSON.stringify(item).replace(/'/g,"&#39;")})'>✏️ تعديل</button>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+function openMenuModal(item){
+  currentEditMenu = item;
+  document.getElementById('editMenuId').value = item.id;
+  document.getElementById('editMenuAr').value = item.name_ar||'';
+  document.getElementById('editMenuEn').value = item.name_en||'';
+  document.getElementById('editMenuPrice').value = item.price||'';
+  document.getElementById('editMenuSection').value = item.section||'قهوة الاسبريسو';
+  document.getElementById('editMenuImg').value = item.img||'';
+  document.getElementById('menuModal').classList.add('open');
+}
+
+function closeMenuModal(){
+  document.getElementById('menuModal').classList.remove('open');
+  currentEditMenu=null;
+}
+
+async function saveMenuEdit(){
+  const id = document.getElementById('editMenuId').value;
+  const name_ar = document.getElementById('editMenuAr').value.trim();
+  const name_en = document.getElementById('editMenuEn').value.trim();
+  const price = +document.getElementById('editMenuPrice').value;
+  const section = document.getElementById('editMenuSection').value;
+  const img = document.getElementById('editMenuImg').value.trim();
+  if(!name_ar||!price){ toast('❌ أدخل الاسم والسعر'); return; }
+  try{
+    await fetch(`${SUPA}/rest/v1/menu_items?id=eq.${id}`,{
+      method:'PATCH',
+      headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify({name_ar,name_en,price,section,img})
+    });
+    toast('✅ تم التعديل · Updated');
+    closeMenuModal();
+    loadMenuItems();
+  }catch(e){ toast('❌ خطأ · Error'); }
+}
+
+async function deleteMenuItem(){
+  if(!confirm('حذف هذا المنتج نهائياً؟\nDelete this item permanently?')) return;
+  const id = document.getElementById('editMenuId').value;
+  try{
+    await fetch(`${SUPA}/rest/v1/menu_items?id=eq.${id}`,{
+      method:'DELETE',
+      headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Prefer':'return=minimal'}
+    });
+    toast('🗑️ تم الحذف · Deleted');
+    closeMenuModal();
+    loadMenuItems();
+  }catch(e){ toast('❌ خطأ · Error'); }
+}
+
+async function addMenuItem(){
+  const name_ar = document.getElementById('newItemAr').value.trim();
+  const name_en = document.getElementById('newItemEn').value.trim();
+  const price = +document.getElementById('newItemPrice').value;
+  const section = document.getElementById('newItemSection').value;
+  const img = document.getElementById('newItemImg').value.trim();
+  if(!name_ar||!price){ toast('❌ أدخل الاسم والسعر · Enter name and price'); return; }
+  try{
+    const r = await fetch(`${SUPA}/rest/v1/menu_items`,{
+      method:'POST',
+      headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify({name_ar,name_en,price,section,img,available:true})
+    });
+    if(r.ok||r.status===201){
+      document.getElementById('newItemAr').value='';
+      document.getElementById('newItemEn').value='';
+      document.getElementById('newItemPrice').value='';
+      document.getElementById('newItemImg').value='';
+      toast('✅ تم إضافة المنتج · Item Added');
+      loadMenuItems();
+    }
   }catch(e){ toast('❌ خطأ · Error'); }
 }
 
