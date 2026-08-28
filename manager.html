@@ -106,16 +106,74 @@
 
   .toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);background:var(--green);color:#fff;padding:0.6rem 1.2rem;border-radius:10px;font-weight:700;font-size:0.85rem;opacity:0;transition:opacity 0.3s;pointer-events:none;z-index:99;white-space:nowrap;}
   .toast.show{opacity:1;}
+
+  /* ===== شاشة تسجيل الدخول ===== */
+  .login-screen{position:fixed;inset:0;background:var(--bg);z-index:200;display:flex;align-items:center;justify-content:center;padding:1rem;}
+  .login-box{background:var(--card);border:2px solid var(--gold);border-radius:20px;padding:2rem 1.5rem;width:100%;max-width:320px;text-align:center;}
+  .login-logo{font-size:1.5rem;font-weight:900;color:var(--gold);margin-bottom:0.3rem;}
+  .login-sub{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.88rem;color:var(--dim);margin-bottom:1.5rem;}
+  .login-input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:0.65rem 0.8rem;color:var(--cream);font-family:'Tajawal',sans-serif;font-size:0.9rem;outline:none;margin-bottom:0.7rem;text-align:center;}
+  .login-input:focus{border-color:var(--gold);}
+  .login-btn{width:100%;background:var(--gold);color:var(--bg);border:none;border-radius:10px;padding:0.75rem;font-family:'Tajawal',sans-serif;font-weight:900;font-size:0.95rem;cursor:pointer;transition:all 0.2s;}
+  .login-btn:hover{opacity:0.85;}
+  .login-err{color:var(--red);font-size:0.82rem;margin-top:0.5rem;display:none;}
+
+  /* ===== نافذة تعديل فاتورة ===== */
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:90;display:none;align-items:center;justify-content:center;padding:1rem;overflow-y:auto;}
+  .modal-overlay.open{display:flex;}
+  .modal-box{background:var(--card);border:1px solid var(--border);border-radius:16px;width:100%;max-width:480px;overflow:hidden;}
+  .modal-head{background:var(--gold-dim);border-bottom:1px solid var(--border);padding:0.9rem 1.2rem;display:flex;justify-content:space-between;align-items:center;}
+  .modal-title{font-weight:900;color:var(--gold);font-size:0.95rem;}
+  .modal-close{background:none;border:none;color:var(--dim);font-size:1.2rem;cursor:pointer;}
+  .modal-body{padding:1.2rem;display:flex;flex-direction:column;gap:0.8rem;}
+  .modal-lbl{font-size:0.78rem;color:var(--dim);margin-bottom:0.3rem;}
+  .modal-input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:0.55rem 0.8rem;color:var(--cream);font-family:'Tajawal',sans-serif;font-size:0.85rem;outline:none;}
+  .modal-input:focus{border-color:var(--gold);}
+  .modal-actions{display:flex;gap:0.6rem;padding:0.9rem 1.2rem;border-top:1px solid var(--border);background:rgba(0,0,0,0.1);}
+  .modal-btn{flex:1;padding:0.65rem;border:none;border-radius:10px;font-family:'Tajawal',sans-serif;font-weight:900;font-size:0.82rem;cursor:pointer;transition:all 0.2s;}
+  .modal-btn-save{background:var(--gold);color:var(--bg);}
+  .modal-btn-del{background:var(--red);color:#fff;}
+  .modal-btn-print{background:#2980b9;color:#fff;}
+  .modal-btn:hover{opacity:0.85;}
+
+  /* ===== تبويب المبيعات التاريخية ===== */
+  .hist-layout{display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;}
+  @media(max-width:600px){.hist-layout{grid-template-columns:1fr;}}
+  .hist-form{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.2rem;display:flex;flex-direction:column;gap:0.7rem;align-self:start;}
+  .hist-input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:0.55rem 0.8rem;color:var(--cream);font-family:'Tajawal',sans-serif;font-size:0.85rem;outline:none;}
+  .hist-input:focus{border-color:var(--gold);}
+  .hist-input::placeholder{color:var(--dim);}
+  .hist-submit{background:var(--gold);color:var(--bg);border:none;border-radius:10px;padding:0.65rem;font-family:'Tajawal',sans-serif;font-weight:900;font-size:0.88rem;cursor:pointer;}
+  .hist-submit:hover{opacity:0.85;}
+  .hist-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.7rem 0.9rem;display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;}
+  .hist-del{background:none;border:1px solid var(--border);color:var(--dim);border-radius:6px;padding:3px 7px;cursor:pointer;font-size:0.75rem;}
+  .hist-del:hover{background:var(--red);color:#fff;border-color:var(--red);}
 </style>
 </head>
 <body>
+
+<!-- شاشة تسجيل الدخول -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">☕ إيل لاتيرا</div>
+    <div class="login-sub">Manager Dashboard · لوحة المدير</div>
+    <input type="text" id="loginUser" class="login-input" placeholder="اسم المستخدم · Username" autocomplete="username">
+    <input type="password" id="loginPass" class="login-input" placeholder="كلمة المرور · Password" autocomplete="current-password" onkeydown="if(event.key==='Enter') doLogin()">
+    <button class="login-btn" onclick="doLogin()">🔐 دخول · Login</button>
+    <div class="login-err" id="loginErr">❌ بيانات خاطئة · Wrong credentials</div>
+  </div>
+</div>
 
 <header>
   <div>
     <div class="h-title">📊 لوحة المدير — إيل لاتيرا</div>
     <div class="h-sub">Manager Dashboard — El Laterra</div>
   </div>
-  <a href="staff.html" class="h-link">⬅ لوحة الموظف · Staff</a>
+  <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+    <a href="index.html" class="h-link">☕ المينيو · Menu</a>
+    <a href="staff.html" class="h-link">👨‍💼 الموظف · Staff</a>
+    <button class="h-link" onclick="doLogout()" style="background:#5C3A22;">🚪 خروج · Logout</button>
+  </div>
 </header>
 
 <div class="tabs">
@@ -124,6 +182,7 @@
   <button class="tab" onclick="switchTab('invoices')">📄 الفواتير<span class="tab-en">Invoices</span></button>
   <button class="tab" onclick="switchTab('expenses')">💸 المصروفات<span class="tab-en">Expenses</span></button>
   <button class="tab" onclick="switchTab('fixed')">🏢 مصاريف ثابتة<span class="tab-en">Fixed Costs</span></button>
+  <button class="tab" onclick="switchTab('history')">📅 مبيعات سابقة<span class="tab-en">History</span></button>
 </div>
 
 <!-- ===== OVERVIEW ===== -->
@@ -205,7 +264,7 @@
     <table class="inv-table">
       <thead><tr>
         <th>رقم الفاتورة</th><th>الطاولة</th><th>المنتجات</th>
-        <th>الإجمالي</th><th>الدفع</th><th>النوع</th><th>الوقت</th><th>واتساب</th>
+        <th>الإجمالي</th><th>الدفع</th><th>النوع</th><th>الوقت</th><th>واتساب</th><th>تعديل</th>
       </tr></thead>
       <tbody id="invTableBody"><tr><td colspan="8" class="empty-row">⏳ جاري التحميل...</td></tr></tbody>
     </table>
@@ -312,20 +371,135 @@
   </div>
 </div>
 
+<!-- ===== HISTORY ===== -->
+<div class="panel" id="panel-history">
+  <div style="margin-top:1rem;" class="hist-layout">
+    <div class="hist-form">
+      <div>
+        <div style="font-weight:900;color:var(--gold);font-size:0.95rem;">📅 إدخال مبيعات سابقة</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.78rem;color:var(--dim);">Enter Historical Sales</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;">
+        <div>
+          <div style="font-size:0.78rem;color:var(--dim);margin-bottom:0.3rem;">الشهر · Month</div>
+          <select id="histMonth" class="hist-input">
+            <option value="1">يناير</option><option value="2">فبراير</option>
+            <option value="3">مارس</option><option value="4">أبريل</option>
+            <option value="5">مايو</option><option value="6">يونيو</option>
+            <option value="7">يوليو</option><option value="8">أغسطس</option>
+            <option value="9">سبتمبر</option><option value="10">أكتوبر</option>
+            <option value="11">نوفمبر</option><option value="12">ديسمبر</option>
+          </select>
+        </div>
+        <div>
+          <div style="font-size:0.78rem;color:var(--dim);margin-bottom:0.3rem;">السنة · Year</div>
+          <input type="number" id="histYear" class="hist-input" placeholder="2025" min="2020" max="2099">
+        </div>
+      </div>
+      <div>
+        <div style="font-size:0.78rem;color:var(--dim);margin-bottom:0.3rem;">إجمالي المبيعات · Total Sales (ر.ع)</div>
+        <input type="number" id="histSales" class="hist-input" placeholder="0.000" step="0.001" min="0">
+      </div>
+      <div>
+        <div style="font-size:0.78rem;color:var(--dim);margin-bottom:0.3rem;">عدد الفواتير · Invoice Count</div>
+        <input type="number" id="histCount" class="hist-input" placeholder="0" min="0">
+      </div>
+      <div>
+        <div style="font-size:0.78rem;color:var(--dim);margin-bottom:0.3rem;">ملاحظة · Note</div>
+        <input type="text" id="histNote" class="hist-input" placeholder="اختياري · Optional">
+      </div>
+      <button class="hist-submit" onclick="addHistorySale()">✅ حفظ · Save</button>
+    </div>
+    <div>
+      <div class="sec-title">السجل التاريخي <span class="sec-en">· Historical Records</span></div>
+      <div id="histList"><div class="empty-row">لا توجد بيانات سابقة<br><span style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.82rem;">No historical data yet</span></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- نافذة تعديل فاتورة -->
+<div class="modal-overlay" id="invModal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <span class="modal-title">📄 تعديل الفاتورة · Edit Invoice</span>
+      <button class="modal-close" onclick="closeInvModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="editInvId">
+      <div>
+        <div class="modal-lbl">رقم الطاولة / اسم الزبون · Table / Customer</div>
+        <input type="text" id="editTable" class="modal-input">
+      </div>
+      <div>
+        <div class="modal-lbl">الإجمالي · Total (ر.ع)</div>
+        <input type="number" id="editTotal" class="modal-input" step="0.001">
+      </div>
+      <div>
+        <div class="modal-lbl">طريقة الدفع · Payment</div>
+        <select id="editPayment" class="modal-input">
+          <option value="💵 كاش · Cash">💵 كاش · Cash</option>
+          <option value="💳 فيزا · Visa">💳 فيزا · Visa</option>
+          <option value="📱 تحويل · Transfer">📱 تحويل · Transfer</option>
+        </select>
+      </div>
+      <div>
+        <div class="modal-lbl">ملاحظة · Note</div>
+        <input type="text" id="editNote" class="modal-input">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn modal-btn-print" onclick="reprintInvoice()">🖨️ إعادة طباعة</button>
+      <button class="modal-btn modal-btn-save" onclick="saveInvEdit()">💾 حفظ</button>
+      <button class="modal-btn modal-btn-del" onclick="deleteInvoice()">🗑️ حذف</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
 const SUPA = 'https://fyyxuvqwoykavqhoaowu.supabase.co';
 const KEY  = 'sb_publishable_CKq5sKxZvi5k43cmEJ1cjw_Cg7jWk_e';
 
-let allInvoices=[], allExpenses=[], allFixed=[];
+let allInvoices=[], allExpenses=[], allFixed=[], allHistory=[];
 let currentFilter='today', invFilter='today', expFilter='today';
 let chartDaily=null, chartMonthly=null, chartYearly=null;
+let currentEditInv=null;
+
+/* ===== AUTH ===== */
+const MANAGER_USER = 'MANAGER';
+const MANAGER_PASS = '675676402';
+
+function checkAuth(){
+  const logged = sessionStorage.getItem('mgr_auth');
+  if(logged === 'true'){
+    document.getElementById('loginScreen').style.display = 'none';
+  }
+}
+
+function doLogin(){
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value;
+  if(u === MANAGER_USER && p === MANAGER_PASS){
+    sessionStorage.setItem('mgr_auth','true');
+    document.getElementById('loginScreen').style.display='none';
+    loadAll();
+  } else {
+    const err = document.getElementById('loginErr');
+    err.style.display='block';
+    setTimeout(()=>err.style.display='none', 3000);
+  }
+}
+
+function doLogout(){
+  sessionStorage.removeItem('mgr_auth');
+  location.reload();
+}
 
 /* ===== TABS ===== */
 function switchTab(tab){
   document.querySelectorAll('.tab').forEach((t,i)=>{
-    t.classList.toggle('active',['overview','charts','invoices','expenses','fixed'][i]===tab);
+    t.classList.toggle('active',['overview','charts','invoices','expenses','fixed','history'][i]===tab);
   });
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.getElementById(`panel-${tab}`).classList.add('active');
@@ -334,14 +508,13 @@ function switchTab(tab){
   if(tab==='expenses') renderExpenses(filterData(allExpenses,expFilter,'exp'));
   if(tab==='fixed'){
     const now = new Date();
-    // تعيين الشهر والسنة الحالية في الفورم
     document.getElementById('fxMonth').value = now.getMonth()+1;
     document.getElementById('fxYear').value = now.getFullYear();
-    // تعيين الشهر والسنة الحالية في الفلتر
     document.getElementById('fxViewMonth').value = now.getMonth()+1;
     document.getElementById('fxViewYear').value = now.getFullYear();
     renderFixed();
   }
+  if(tab==='history') renderHistory();
 }
 
 /* ===== FILTERS ===== */
@@ -631,6 +804,155 @@ function renderFixed(){
   `).join('');
 }
 
+/* ===== INVOICE EDIT ===== */
+function openInvModal(inv){
+  currentEditInv = inv;
+  document.getElementById('editInvId').value = inv.id;
+  document.getElementById('editTable').value = inv.table_number||'';
+  document.getElementById('editTotal').value = inv.total||'';
+  document.getElementById('editNote').value = inv.note||'';
+  // اختيار طريقة الدفع
+  const sel = document.getElementById('editPayment');
+  const pm = inv.payment_method||'';
+  if(pm.includes('Visa')||pm.includes('فيزا')) sel.value='💳 فيزا · Visa';
+  else if(pm.includes('Transfer')||pm.includes('تحويل')) sel.value='📱 تحويل · Transfer';
+  else sel.value='💵 كاش · Cash';
+  document.getElementById('invModal').classList.add('open');
+}
+
+function closeInvModal(){
+  document.getElementById('invModal').classList.remove('open');
+  currentEditInv=null;
+}
+
+async function saveInvEdit(){
+  const id = document.getElementById('editInvId').value;
+  const table = document.getElementById('editTable').value.trim();
+  const total = +document.getElementById('editTotal').value;
+  const payment = document.getElementById('editPayment').value;
+  const note = document.getElementById('editNote').value.trim();
+  try{
+    await fetch(`${SUPA}/rest/v1/invoices?id=eq.${id}`,{
+      method:'PATCH',
+      headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify({table_number:table, total, payment_method:payment, note})
+    });
+    toast('✅ تم التعديل · Updated');
+    closeInvModal();
+    await loadAll();
+    renderInvoices(filterData(allInvoices,invFilter,'inv'));
+  }catch(e){ toast('❌ خطأ · Error'); }
+}
+
+async function deleteInvoice(){
+  if(!confirm('حذف هذه الفاتورة نهائياً؟\nDelete this invoice permanently?')) return;
+  const id = document.getElementById('editInvId').value;
+  try{
+    await fetch(`${SUPA}/rest/v1/invoices?id=eq.${id}`,{
+      method:'DELETE',
+      headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Prefer':'return=minimal'}
+    });
+    toast('🗑️ تم الحذف · Deleted');
+    closeInvModal();
+    await loadAll();
+    renderInvoices(filterData(allInvoices,invFilter,'inv'));
+  }catch(e){ toast('❌ خطأ · Error'); }
+}
+
+function reprintInvoice(){
+  if(!currentEditInv) return;
+  const inv = currentEditInv;
+  const items = parseItems(inv.items);
+  const total = +inv.total||0;
+  const now = new Date();
+  const msg = `*☕ إيل لاتيرا — إعادة طباعة فاتورة*\n`+
+    `CR: 1540794\n\n`+
+    `📋 ${inv.invoice_number||'—'}\n`+
+    `🪑 ${inv.table_number||'—'}\n`+
+    `💳 ${inv.payment_method||'—'}\n\n`+
+    items.map(i=>`• ${i.name} ×${i.qty} — ر.ع ${(+i.price * +i.qty).toFixed(3)}`).join('\n')+
+    `\n\n*الإجمالي: ر.ع ${total.toFixed(3)}*\n`+
+    `شكراً لزيارتكم! 🙏\nlaterra.cafe`;
+  window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`,'_blank');
+}
+
+/* ===== HISTORICAL SALES ===== */
+async function addHistorySale(){
+  const month = +document.getElementById('histMonth').value;
+  const year = +document.getElementById('histYear').value;
+  const sales = +document.getElementById('histSales').value;
+  const count = +document.getElementById('histCount').value;
+  const note = document.getElementById('histNote').value.trim();
+
+  if(!year||year<2020){ toast('❌ أدخل السنة · Enter year'); return; }
+  if(!sales||sales<0){ toast('❌ أدخل المبيعات · Enter sales'); return; }
+
+  try{
+    // نحفظ كفاتورة واحدة بتاريخ أول يوم من الشهر
+    const dateStr = `${year}-${String(month).padStart(2,'0')}-01T00:00:00.000Z`;
+    const r = await fetch(`${SUPA}/rest/v1/invoices`,{
+      method:'POST',
+      headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify({
+        invoice_number: `HIST-${year}-${String(month).padStart(2,'0')}`,
+        table_number: `تاريخي · Historical`,
+        items: JSON.stringify([{name:`مبيعات ${month}/${year}`,nameEn:`Sales ${month}/${year}`,qty:count||1,price:sales/(count||1)}]),
+        total: sales,
+        payment_method: '📊 تاريخي · Historical',
+        order_type: 'Historical',
+        note: note||`بيانات تاريخية ${month}/${year}`,
+        order_time: dateStr,
+        delivery_time: dateStr,
+        created_at: dateStr
+      })
+    });
+    if(r.ok||r.status===201){
+      document.getElementById('histSales').value='';
+      document.getElementById('histCount').value='';
+      document.getElementById('histNote').value='';
+      toast('✅ تم الحفظ · Saved');
+      await loadAll();
+      renderHistory();
+    }
+  }catch(e){ toast('❌ خطأ · Error'); }
+}
+
+function renderHistory(){
+  const el = document.getElementById('histList');
+  const hist = allInvoices.filter(i=>i.order_type==='Historical').sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
+  if(hist.length===0){
+    el.innerHTML=`<div class="empty-row">لا توجد بيانات سابقة<br><span style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.82rem;">No historical data yet</span></div>`;
+    return;
+  }
+  el.innerHTML = hist.map(h=>{
+    const d = new Date(h.created_at);
+    return `<div class="hist-card">
+      <div>
+        <div style="font-weight:700;color:var(--cream);">${d.toLocaleDateString('ar-SA',{month:'long',year:'numeric'})}</div>
+        <div style="font-size:0.75rem;color:var(--dim);">${h.note||''}</div>
+      </div>
+      <div style="text-align:center;">
+        <div style="font-weight:900;color:var(--gold);direction:ltr;">ر.ع ${(+h.total).toFixed(3)}</div>
+        <div style="font-size:0.72rem;color:var(--dim);">${h.invoice_number}</div>
+      </div>
+      <button class="hist-del" onclick="deleteHistEntry(${h.id})">🗑️</button>
+    </div>`;
+  }).join('');
+}
+
+async function deleteHistEntry(id){
+  if(!confirm('حذف هذا السجل؟')) return;
+  try{
+    await fetch(`${SUPA}/rest/v1/invoices?id=eq.${id}`,{
+      method:'DELETE',
+      headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Prefer':'return=minimal'}
+    });
+    toast('🗑️ تم الحذف · Deleted');
+    await loadAll();
+    renderHistory();
+  }catch(e){ toast('❌ خطأ · Error'); }
+}
+
 /* ===== LOAD ===== */
 async function loadFixed(){
   try{
@@ -659,8 +981,34 @@ async function loadAll(){
 
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
 
-loadAll();
-setInterval(loadAll,30000);
+// تعديل renderInvoices لإضافة زر التعديل
+function renderInvoices(invoices){
+  const tbody=document.getElementById('invTableBody');
+  if(invoices.length===0){tbody.innerHTML=`<tr><td colspan="9" class="empty-row">لا توجد فواتير · No invoices</td></tr>`;return;}
+  const sorted=[...invoices].filter(i=>i.order_type!=='Historical').sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
+  if(sorted.length===0){tbody.innerHTML=`<tr><td colspan="9" class="empty-row">لا توجد فواتير · No invoices</td></tr>`;return;}
+  tbody.innerHTML=sorted.map(inv=>{
+    const items=parseItems(inv.items);
+    const pt=payType(inv.payment_method);
+    const isT=inv.order_type&&inv.order_type.includes('Take');
+    const t=new Date(inv.created_at);
+    return `<tr>
+      <td style="font-size:0.72rem;color:var(--dim);">${inv.invoice_number||'-'}</td>
+      <td>${inv.table_number||'-'}</td>
+      <td style="max-width:140px;">${items.slice(0,2).map(i=>`<div style="font-size:0.75rem;">${i.name} ×${i.qty}</div>`).join('')}${items.length>2?`<div style="font-size:0.68rem;color:var(--dim);">+${items.length-2} أخرى</div>`:''}</td>
+      <td style="font-weight:900;color:var(--gold);direction:ltr;">ر.ع ${(+inv.total||0).toFixed(3)}</td>
+      <td><span class="badge-pay pay-${pt}">${pt==='cash'?'💵':pt==='visa'?'💳':'📱'}</span></td>
+      <td><span class="${isT?'badge-take2':'badge-dine2'}">${isT?'🥤':'🪑'}</span></td>
+      <td style="font-size:0.7rem;color:var(--dim);">${t.toLocaleString('ar-OM',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'})}</td>
+      <td>${inv.whatsapp_sent?'<span class="badge-wa">✓</span>':'-'}</td>
+      <td><button style="background:var(--gold);color:var(--bg);border:none;border-radius:6px;padding:3px 8px;cursor:pointer;font-size:0.72rem;font-weight:700;" onclick='openInvModal(${JSON.stringify(inv).replace(/'/g,"&#39;")})'>✏️</button></td>
+    </tr>`;
+  }).join('');
+}
+
+checkAuth();
+if(sessionStorage.getItem('mgr_auth')==='true') loadAll();
+setInterval(()=>{ if(sessionStorage.getItem('mgr_auth')==='true') loadAll(); },30000);
 </script>
 </body>
 </html>
