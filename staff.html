@@ -507,70 +507,72 @@
     <!-- السلة -->
     <div class="no-cart">
       <div>
-        <div class="no-cart-title">🛒 الطلب الحالي</div>
-        <div class="no-cart-en">Current Order</div>
+        <div class="no-cart-title">🛒 Current Order</div>
+        <div class="no-cart-en">الطلب الحالي</div>
       </div>
       <div class="no-type-row">
         <button class="no-type-btn active" id="noBtnDine" onclick="noSelectType('dine')">
-          🪑 داخل<span class="no-type-en">Dine In</span>
+          🪑 Dine In<span class="no-type-en">داخل</span>
         </button>
         <button class="no-type-btn" id="noBtnTake" onclick="noSelectType('take')">
-          🥤 تيك أواي<span class="no-type-en">Takeaway</span>
+          🥤 Takeaway<span class="no-type-en">تيك أواي</span>
         </button>
       </div>
-      <input type="text" id="noTableInput" class="no-table-input" placeholder="رقم الطاولة · Table Number">
+      <div id="noTableInputWrap">
+        <input type="number" id="noTableInput" class="no-table-input" placeholder="Table No. (Optional) · رقم الطاولة (اختياري)">
+      </div>
 
       <!-- طريقة الدفع -->
       <div>
-        <div style="font-size:0.78rem;color:var(--dim);margin-bottom:0.4rem;text-align:center;">طريقة الدفع · Payment Method</div>
+        <div style="font-size:0.78rem;color:var(--dim);margin-bottom:0.4rem;text-align:center;">Payment Method · طريقة الدفع</div>
         <div style="display:flex;gap:0.4rem;">
           <button class="no-type-btn active" id="payBtnCash" onclick="noSelectPayment('cash')" style="flex:1;font-size:0.75rem;">
-            💵 كاش<span class="no-type-en">Cash</span>
+            💵 Cash<span class="no-type-en">كاش</span>
           </button>
           <button class="no-type-btn" id="payBtnVisa" onclick="noSelectPayment('visa')" style="flex:1;font-size:0.75rem;">
-            💳 فيزا<span class="no-type-en">Visa</span>
+            💳 Visa<span class="no-type-en">فيزا</span>
           </button>
           <button class="no-type-btn" id="payBtnTransfer" onclick="noSelectPayment('transfer')" style="flex:1;font-size:0.75rem;">
-            📲 تحويل<span class="no-type-en">Transfer</span>
+            📲 Transfer<span class="no-type-en">تحويل</span>
           </button>
         </div>
       </div>
       <div class="no-cart-items" id="noCartItems">
-        <div class="no-cart-empty">لا توجد منتجات بعد<br><span style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.78rem;">No items yet</span></div>
+        <div class="no-cart-empty">No items yet<br><span style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.78rem;">لا توجد منتجات بعد</span></div>
       </div>
       <div class="no-divider"></div>
 
       <!-- الخصم -->
       <div>
         <div style="font-size:0.78rem;font-weight:700;color:var(--cream);margin-bottom:0.5rem;">
-          🏷️ خصم · Discount
+          🏷️ Discount · خصم
         </div>
         <div style="display:flex;gap:0.4rem;margin-bottom:0.4rem;">
           <button class="no-disc-type active" id="discTypeAmt" onclick="noSetDiscType('amount')">
-            مبلغ ثابت · Amount
+            Amount · مبلغ ثابت
           </button>
           <button class="no-disc-type" id="discTypePct" onclick="noSetDiscType('percent')">
-            نسبة % · Percent
+            Percent % · نسبة
           </button>
         </div>
         <div style="display:flex;gap:0.4rem;align-items:center;">
           <input type="number" id="discInput" class="no-table-input" placeholder="0" min="0" oninput="noUpdateDiscount()" style="flex:1;">
-          <span id="discUnit" style="color:var(--gold);font-weight:900;font-size:0.88rem;min-width:30px;">ر.ع</span>
+          <span id="discUnit" style="color:var(--gold);font-weight:900;font-size:0.88rem;min-width:30px;">OMR</span>
         </div>
         <div style="display:flex;justify-content:space-between;margin-top:0.4rem;font-size:0.8rem;">
-          <span style="color:var(--dim);">قيمة الخصم · Discount</span>
-          <span style="color:var(--red);font-weight:700;" id="discAmt">- ر.ع 0.000</span>
+          <span style="color:var(--dim);">Discount · الخصم</span>
+          <span style="color:var(--red);font-weight:700;" id="discAmt">- OMR 0.000</span>
         </div>
       </div>
 
       <div class="no-divider"></div>
       <div class="no-total-row">
-        <span class="no-total-ar">الإجمالي · Total</span>
-        <span class="no-total-amt">ر.ع <span id="noTotal">0.000</span></span>
+        <span class="no-total-ar">Total · الإجمالي</span>
+        <span class="no-total-amt">OMR <span id="noTotal">0.000</span></span>
       </div>
       <div style="display:flex;justify-content:space-between;font-size:0.82rem;margin-top:-0.3rem;">
-        <span style="color:var(--dim);">بعد الخصم · After Disc.</span>
-        <span style="color:var(--green);font-weight:900;" id="noFinal">ر.ع 0.000</span>
+        <span style="color:var(--dim);">After Discount · بعد الخصم</span>
+        <span style="color:var(--green);font-weight:900;" id="noFinal">OMR 0.000</span>
       </div>
 
       <!-- نوع الدفع -->
@@ -599,7 +601,7 @@
       </div>
 
       <button class="no-send-btn" id="noSendBtn" onclick="noSendOrder()">
-        ✅ إرسال الطلب · Send Order
+        ✅ Send Order · إرسال الطلب
       </button>
     </div>
   </div>
@@ -1294,8 +1296,13 @@ function noSelectType(type){
   document.getElementById('noBtnDine').classList.toggle('active', type==='dine');
   document.getElementById('noBtnTake').classList.toggle('active', type==='take');
   const inp = document.getElementById('noTableInput');
-  inp.placeholder = type==='take' ? 'اسم الزبون · Customer Name' : 'رقم الطاولة · Table Number';
-  inp.type = type==='take' ? 'text' : 'number';
+  if(type==='take'){
+    document.getElementById('noTableInputWrap').style.display = 'none';
+    inp.value = 'Takeaway';
+  } else {
+    document.getElementById('noTableInputWrap').style.display = 'block';
+    inp.value = '';
+  }
 }
 
 function noSelectPayment(method){
@@ -1309,7 +1316,7 @@ function noSetDiscType(type){
   noDiscType = type;
   document.getElementById('discTypeAmt').classList.toggle('active', type==='amount');
   document.getElementById('discTypePct').classList.toggle('active', type==='percent');
-  document.getElementById('discUnit').textContent = type==='percent' ? '%' : 'ر.ع';
+  document.getElementById('discUnit').textContent = type==='percent' ? '%' : 'OMR';
   noUpdateDiscount();
 }
 
@@ -1380,8 +1387,8 @@ function noRenderCart(){
   const final = Math.max(0, subtotal - disc);
 
   document.getElementById('noTotal').textContent = subtotal.toFixed(3);
-  document.getElementById('discAmt').textContent = `- ر.ع ${disc.toFixed(3)}`;
-  document.getElementById('noFinal').textContent = `ر.ع ${final.toFixed(3)}`;
+  document.getElementById('discAmt').textContent = `- OMR ${disc.toFixed(3)}`;
+  document.getElementById('noFinal').textContent = `OMR ${final.toFixed(3)}`;
 
   if(items.length===0){
     el.innerHTML=`<div class="no-cart-empty">لا توجد منتجات بعد<br><span style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.78rem;">No items yet</span></div>`;
@@ -1398,7 +1405,7 @@ function noRenderCart(){
         <span>${item.qty}</span>
         <button onclick="noCart['${key}'].qty++; noRenderCart()">+</button>
       </div>
-      <span class="no-item-total">ر.ع ${(item.price*item.qty).toFixed(3)}</span>
+      <span class="no-item-total">OMR ${(item.price*item.qty).toFixed(3)}</span>
     </div>
   `).join('');
 }
@@ -1423,13 +1430,10 @@ function renderNoMenu(){
 }
 
 async function noSendOrder(){
-  const tableVal = document.getElementById('noTableInput').value.trim();
-  if(!tableVal){
-    document.getElementById('noTableInput').style.borderColor = '#e53935';
-    setTimeout(()=>document.getElementById('noTableInput').style.borderColor='',2000);
-    return;
-  }
-  if(Object.keys(noCart).length===0){ toast('🛒 السلة فاضية · Cart is empty'); return; }
+  const tableInput = document.getElementById('noTableInput');
+  const tableVal = noOrderType === 'take' ? 'Takeaway' : (tableInput.value.trim() || 'Counter · كاونتر');
+
+  if(Object.keys(noCart).length===0){ toast('🛒 Cart is empty · السلة فاضية'); return; }
 
   const btn = document.getElementById('noSendBtn');
   btn.disabled = true;
@@ -1457,16 +1461,20 @@ async function noSendOrder(){
       })
     });
     if(res.ok || res.status===201){
-      toast('✅ تم إرسال الطلب · Order Sent');
+      toast('✅ Order Sent · تم إرسال الطلب');
       noCart = {};
       noRenderCart();
       document.getElementById('noTableInput').value = '';
+      document.getElementById('noTableInputWrap').style.display = 'block';
       document.getElementById('discInput').value = '';
       noDiscValue = 0;
       noPayment = 'cash';
+      noOrderType = 'dine';
       noSelectPayment('cash');
+      document.getElementById('noBtnDine').classList.add('active');
+      document.getElementById('noBtnTake').classList.remove('active');
       btn.disabled = false;
-      btn.textContent = '✅ إرسال الطلب · Send Order';
+      btn.textContent = '✅ Send Order · إرسال الطلب';
       switchTab('orders');
     } else { throw new Error(); }
   }catch(e){
