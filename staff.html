@@ -22,8 +22,8 @@
     padding:0.9rem 1.2rem;position:sticky;top:0;z-index:20;
     display:flex;align-items:center;justify-content:space-between;
   }
-  .h-title{font-size:1.1rem;font-weight:900;color:var(--gold);}
-  .h-sub{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.92rem;color:var(--dim);}
+  .h-title{font-size:1.1rem;font-weight:900;color:var(--gold);font-family:'Cormorant Garamond',serif;}
+  .h-sub{font-size:0.75rem;color:var(--dim);}
   .live-dot{display:flex;align-items:center;gap:5px;font-size:0.78rem;color:var(--green);}
   .dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:blink 1.5s ease-in-out infinite;}
   @keyframes blink{0%,100%{opacity:1;}50%{opacity:0.3;}}
@@ -32,7 +32,7 @@
   .tabs{display:flex;background:var(--card);border-bottom:1px solid var(--border);position:sticky;top:58px;z-index:19;}
   .tab{
     flex:1;padding:0.75rem 0.5rem;border:none;
-    font-family:'Tajawal',sans-serif;font-size:0.82rem;font-weight:700;
+    font-family:'Cormorant Garamond',serif;font-size:0.88rem;font-weight:600;
     cursor:pointer;transition:all 0.2s;color:var(--dim);
     background:transparent;border-left:1px solid var(--border);
     display:flex;align-items:center;justify-content:center;gap:0.4rem;
@@ -54,8 +54,8 @@
     border-radius:10px;padding:0.6rem 0.5rem;text-align:center;
   }
   .stat-num{font-size:1.5rem;font-weight:900;color:var(--gold);}
-  .stat-ar{font-size:0.7rem;color:var(--dim);}
-  .stat-en{font-size:0.82rem;color:var(--border);font-family:'Cormorant Garamond',serif;font-style:italic;}
+  .stat-ar{font-size:0.62rem;color:var(--border);}
+  .stat-en{font-size:0.78rem;color:var(--dim);font-family:'Cormorant Garamond',serif;}
 
   /* ===== SECTION PANELS ===== */
   .panel{display:none;padding:1rem;}
@@ -77,49 +77,49 @@
     display:flex;justify-content:space-between;align-items:center;
     border-bottom:1px solid var(--border);flex-wrap:wrap;gap:0.3rem;
   }
-  .table-ar{font-weight:900;font-size:0.95rem;color:var(--gold);}
-  .table-en{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.88rem;color:var(--dim);}
+  .table-ar{font-size:0.72rem;color:var(--dim);}
+  .table-en{font-family:'Cormorant Garamond',serif;font-size:1.05rem;font-weight:700;color:var(--gold);}
   .card-badges{display:flex;align-items:center;gap:0.4rem;flex-wrap:wrap;}
-  .badge-new{background:var(--gold);color:var(--bg);font-size:0.62rem;font-weight:900;padding:2px 7px;border-radius:999px;display:flex;flex-direction:column;align-items:center;line-height:1.4;}
-  .badge-new span{font-style:italic;font-size:0.55rem;font-weight:400;}
-  .badge-type{font-size:0.75rem;font-weight:900;padding:2px 8px;border-radius:999px;color:#fff;}
+  .badge-new{background:var(--gold);color:var(--bg);font-size:0.7rem;font-weight:900;padding:2px 8px;border-radius:999px;display:flex;flex-direction:column;align-items:center;line-height:1.4;}
+  .badge-new span{font-size:0.6rem;font-weight:400;}
+  .badge-type{font-size:0.78rem;font-weight:900;padding:2px 8px;border-radius:999px;color:#fff;}
   .badge-dine{background:#5C3A22;}
   .badge-take{background:var(--blue);}
-  .time-ar{font-size:0.72rem;color:var(--dim);}
-  .time-en{font-size:0.82rem;color:var(--border);font-family:'Cormorant Garamond',serif;font-style:italic;}
+  .time-ar{font-size:0.62rem;color:var(--border);}
+  .time-en{font-size:0.78rem;color:var(--dim);font-family:'Cormorant Garamond',serif;}
 
   .card-body{padding:0.7rem 0.9rem;}
-  .items-lbl{font-size:0.82rem;color:var(--dim);letter-spacing:0.07em;text-transform:uppercase;font-family:'Cormorant Garamond',serif;font-style:italic;margin-bottom:0.4rem;}
+  .items-lbl{font-size:0.82rem;color:var(--dim);letter-spacing:0.07em;text-transform:uppercase;font-family:'Cormorant Garamond',serif;margin-bottom:0.4rem;}
   .order-item{display:flex;align-items:center;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(74,46,26,0.4);gap:0.4rem;}
   .order-item:last-child{border-bottom:none;}
   .item-names{flex:1;}
-  .item-name-ar{font-size:0.9rem;color:var(--cream);}
-  .item-name-en{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.95rem;color:var(--dim);}
-  .item-qty{background:var(--gold);color:var(--bg);font-weight:900;font-size:0.68rem;padding:1px 6px;border-radius:999px;white-space:nowrap;}
-  .item-price{font-family:'Cormorant Garamond',serif;font-size:0.78rem;color:var(--dim);direction:ltr;}
-  .card-note{margin-top:0.6rem;padding:0.5rem 0.7rem;background:rgba(217,155,83,0.07);border-radius:8px;font-size:0.78rem;color:var(--dim);border-right:3px solid var(--gold);}
-  .note-lbl{font-size:0.82rem;color:var(--gold);font-family:'Cormorant Garamond',serif;font-style:italic;display:block;margin-bottom:2px;}
+  .item-name-ar{font-size:0.72rem;color:var(--dim);}
+  .item-name-en{font-family:'Cormorant Garamond',serif;font-size:1rem;color:var(--cream);font-weight:600;}
+  .item-qty{background:var(--gold);color:var(--bg);font-weight:900;font-size:0.75rem;padding:2px 7px;border-radius:999px;white-space:nowrap;}
+  .item-price{font-family:'Cormorant Garamond',serif;font-size:0.82rem;color:var(--dim);direction:ltr;}
+  .card-note{margin-top:0.6rem;padding:0.5rem 0.7rem;background:rgba(217,155,83,0.07);border-radius:8px;font-size:0.82rem;color:var(--cream);border-right:3px solid var(--gold);}
+  .note-lbl{font-size:0.72rem;color:var(--gold);font-family:'Cormorant Garamond',serif;display:block;margin-bottom:2px;}
 
   .card-foot{
     padding:0.6rem 0.9rem;border-top:1px solid var(--border);
     display:flex;justify-content:space-between;align-items:center;
     background:rgba(0,0,0,0.1);
   }
-  .total-lbl{font-size:0.7rem;color:var(--dim);}
-  .total-en{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.82rem;color:var(--border);}
-  .total-amt{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:1rem;color:var(--gold);direction:ltr;}
+  .total-lbl{font-size:0.62rem;color:var(--border);}
+  .total-en{font-family:'Cormorant Garamond',serif;font-size:0.88rem;color:var(--dim);}
+  .total-amt{font-family:'Cormorant Garamond',serif;font-weight:700;font-size:1.05rem;color:var(--gold);direction:ltr;}
   .done-btn{
     background:var(--green);color:#fff;border:none;
-    border-radius:8px;padding:5px 12px;
-    font-family:'Tajawal',sans-serif;font-weight:900;font-size:0.78rem;
+    border-radius:8px;padding:6px 14px;
+    font-family:'Cormorant Garamond',serif;font-weight:700;font-size:0.9rem;
     cursor:pointer;transition:all 0.2s;
   }
   .done-btn:hover{opacity:0.85;transform:scale(1.04);}
 
   .empty-state{grid-column:1/-1;text-align:center;padding:4rem 1rem;color:var(--dim);}
   .empty-state svg{width:50px;height:50px;stroke:var(--border);margin-bottom:0.8rem;}
-  .empty-ar{font-size:1rem;margin-bottom:0.3rem;}
-  .empty-en{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.85rem;color:var(--border);}
+  .empty-ar{font-size:0.82rem;color:var(--border);}
+  .empty-en{font-family:'Cormorant Garamond',serif;font-size:1rem;color:var(--dim);}
 
   /* ===== PRODUCTS PANEL ===== */
   .prod-section-title{
@@ -139,10 +139,10 @@
   }
   .prod-card.unavailable{opacity:0.5;border-color:var(--red);}
   .prod-img{width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid var(--border);background:var(--border);}
-  .prod-ar{font-weight:700;font-size:0.82rem;color:var(--cream);}
+  .prod-ar{font-size:0.7rem;color:var(--dim);}
   .prod-ar.struck{text-decoration:line-through;}
-  .prod-en{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.88rem;color:var(--dim);}
-  .prod-price{font-size:0.72rem;color:var(--gold);}
+  .prod-en{font-family:'Cormorant Garamond',serif;font-size:0.95rem;font-weight:700;color:var(--cream);}
+  .prod-price{font-size:0.78rem;color:var(--gold);font-weight:700;}
   .prod-status{
     position:absolute;top:5px;left:5px;
     font-size:0.72rem;font-weight:900;
@@ -243,9 +243,9 @@
   .no-item.unavailable{opacity:0.4;cursor:not-allowed;pointer-events:none;}
   .no-item-img{width:38px;height:38px;border-radius:50%;object-fit:cover;border:1px solid var(--border);background:var(--border);flex-shrink:0;}
   .no-item-name{flex:1;min-width:0;}
-  .no-item-ar{font-size:0.82rem;font-weight:700;color:var(--cream);}
-  .no-item-en{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.78rem;color:var(--dim);}
-  .no-item-price{font-size:0.78rem;color:var(--gold);white-space:nowrap;}
+  .no-item-ar{font-size:0.7rem;color:var(--dim);}
+  .no-item-en{font-family:'Cormorant Garamond',serif;font-size:0.88rem;font-weight:700;color:var(--cream);}
+  .no-item-price{font-size:0.82rem;color:var(--gold);font-weight:700;white-space:nowrap;}
   .no-add-btn{
     background:var(--gold);color:var(--bg);border:none;
     border-radius:7px;padding:0.3rem 0.6rem;
@@ -272,8 +272,8 @@
   }
   .no-cart-row:last-child{border-bottom:none;}
   .no-cart-name{flex:1;}
-  .no-cart-name-ar{font-size:0.82rem;color:var(--cream);}
-  .no-cart-name-en{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.72rem;color:var(--dim);}
+  .no-cart-name-ar{font-size:0.7rem;color:var(--dim);}
+  .no-cart-name-en{font-family:'Cormorant Garamond',serif;font-size:0.88rem;font-weight:700;color:var(--cream);}
   .no-qty-ctrl{display:flex;align-items:center;gap:4px;}
   .no-qty-ctrl button{background:var(--border);border:none;color:var(--cream);width:22px;height:22px;border-radius:50%;cursor:pointer;font-size:0.85rem;display:flex;align-items:center;justify-content:center;}
   .no-qty-ctrl button:hover{background:var(--gold);color:var(--bg);}
@@ -404,14 +404,14 @@
 
 <header>
   <div>
-    <div class="h-title">☕ لوحة تحكم الموظف</div>
-    <div class="h-sub">Staff Dashboard — El Laterra</div>
+    <div class="h-title">☕ El Laterra — Staff Dashboard</div>
+    <div class="h-sub">لوحة تحكم الموظف</div>
   </div>
   <div style="display:flex;align-items:center;gap:0.6rem;">
-    <button class="sound-btn active" id="soundBtn" onclick="toggleSound()" title="اضغط لاختبار الصوت · Click to test sound">🔔 صوت</button>
+    <button class="sound-btn active" id="soundBtn" onclick="toggleSound()" title="Click to test sound">🔔 Sound</button>
     <div class="live-dot">
       <div class="dot"></div>
-      <span>مباشر</span>
+      <span>Live</span>
     </div>
     <button class="sound-btn" onclick="doLogout()" style="border-color:var(--red);color:var(--red);">🚪</button>
   </div>
@@ -420,33 +420,33 @@
 <div class="tabs">
   <button class="tab active" onclick="switchTab('orders')">
     <div>
-      <div>📋 الطلبات</div>
-      <div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.85rem;opacity:0.8;">Orders</div>
+      <div>📋 Orders</div>
+      <div style="font-size:0.68rem;color:inherit;opacity:0.7;">الطلبات</div>
     </div>
     <span class="badge" id="newBadge">0</span>
   </button>
   <button class="tab" onclick="switchTab('products')">
     <div>
-      <div>⚙️ المنتجات</div>
-      <div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.85rem;opacity:0.8;">Products</div>
+      <div>⚙️ Products</div>
+      <div style="font-size:0.68rem;color:inherit;opacity:0.7;">المنتجات</div>
     </div>
   </button>
   <button class="tab" onclick="switchTab('stats')">
     <div>
-      <div>📊 إحصائيات</div>
-      <div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.85rem;opacity:0.8;">Statistics</div>
+      <div>📊 Statistics</div>
+      <div style="font-size:0.68rem;color:inherit;opacity:0.7;">إحصائيات</div>
     </div>
   </button>
   <button class="tab" onclick="switchTab('neworder')">
     <div>
-      <div>➕ طلب جديد</div>
-      <div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.85rem;opacity:0.8;">New Order</div>
+      <div>➕ New Order</div>
+      <div style="font-size:0.68rem;color:inherit;opacity:0.7;">طلب جديد</div>
     </div>
   </button>
   <button class="tab" onclick="switchTab('expenses')">
     <div>
-      <div>💸 مصروفات</div>
-      <div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.85rem;opacity:0.8;">Expenses</div>
+      <div>💸 Expenses</div>
+      <div style="font-size:0.68rem;color:inherit;opacity:0.7;">مصروفات</div>
     </div>
   </button>
 </div>
@@ -455,18 +455,18 @@
 <div class="stats">
   <div class="stat">
     <div class="stat-num" id="statNew">0</div>
-    <div class="stat-ar">جديدة</div>
     <div class="stat-en">New Orders</div>
+    <div class="stat-ar">جديدة</div>
   </div>
   <div class="stat">
     <div class="stat-num" id="statTotal">0</div>
-    <div class="stat-ar">اليوم</div>
     <div class="stat-en">Today Total</div>
+    <div class="stat-ar">اليوم</div>
   </div>
   <div class="stat">
     <div class="stat-num" id="statSales">0</div>
-    <div class="stat-ar">ر.ع اليوم</div>
     <div class="stat-en">OMR Today</div>
+    <div class="stat-ar">ر.ع اليوم</div>
   </div>
 </div>
 
@@ -821,15 +821,15 @@ function renderOrders(orders){
     <div class="order-card ${isNew(o.created_at)?'new-order':''}" id="card-${o.id}">
       <div class="card-head">
         <div>
-          <div class="table-ar">${isT?'🥤':'🪑'} ${isT?'':'طاولة '}${o.table_number}</div>
-          <div class="table-en">${isT?'Takeaway':'Table'} ${o.table_number}</div>
+          <div class="table-en">${isT?'🥤 Takeaway':'🪑 Table'} ${o.table_number}</div>
+          <div class="table-ar">${isT?'تيك أواي':'طاولة'} ${o.table_number}</div>
         </div>
         <div class="card-badges">
-          ${isNew(o.created_at)?`<div class="badge-new">جديد<span>New</span></div>`:''}
+          ${isNew(o.created_at)?`<div class="badge-new">New<span>جديد</span></div>`:''}
           ${o.order_type?`<span class="badge-type ${isT?'badge-take':'badge-dine'}">${isT?'🥤 Takeaway':'🪑 Dine In'}</span>`:''}
           <div>
-            <div class="time-ar">${t.ar}</div>
             <div class="time-en">${t.en}</div>
+            <div class="time-ar">${t.ar}</div>
           </div>
         </div>
       </div>
@@ -838,23 +838,23 @@ function renderOrders(orders){
         ${items.map(item=>`
           <div class="order-item">
             <div class="item-names">
-              <div class="item-name-ar">${item.name}</div>
-              ${item.nameEn?`<div class="item-name-en">${item.nameEn}</div>`:''}
+              <div class="item-name-en">${item.nameEn||item.name}</div>
+              ${item.nameEn?`<div class="item-name-ar">${item.name}</div>`:''}
             </div>
             <span class="item-qty">×${item.qty}</span>
-            ${item.price?`<span class="item-price">ر.ع ${(+item.price * +item.qty).toFixed(3)}</span>`:''}
+            ${item.price?`<span class="item-price">OMR ${(+item.price * +item.qty).toFixed(3)}</span>`:''}
           </div>`).join('')}
-        ${o.note?`<div class="card-note"><span class="note-lbl">ملاحظة · Note</span>${o.note}</div>`:''}
+        ${o.note?`<div class="card-note"><span class="note-lbl">Note · ملاحظة</span>${o.note}</div>`:''}
       </div>
       <div class="card-foot">
         <div>
-          <div class="total-lbl">الإجمالي</div>
           <div class="total-en">Total</div>
+          <div class="total-lbl">الإجمالي</div>
         </div>
         <div style="display:flex;align-items:center;gap:0.7rem;">
-          <span class="total-amt">ر.ع ${total.toFixed(3)}</span>
+          <span class="total-amt">OMR ${total.toFixed(3)}</span>
           <button class="done-btn" onclick="markDone(${o.id})">
-            ✅ تم · Done
+            ✅ Done · تم
           </button>
         </div>
       </div>
@@ -1235,9 +1235,9 @@ function renderProducts(){
         return `<div class="prod-card ${un?'unavailable':''}">
           <span class="prod-status ${un?'un':'av'}">${un?'🚫 Unavailable':'✅ Available'}</span>
           ${item.img?`<img class="prod-img" src="${item.img}" alt="${item.ar}" onerror="this.style.display='none'">`:''}
+          <div class="prod-en ${un?'struck':''}">${item.en}</div>
           <div class="prod-ar ${un?'struck':''}">${item.ar}</div>
-          <div class="prod-en">${item.en}</div>
-          <div class="prod-price">ر.ع ${item.price}</div>
+          <div class="prod-price">OMR ${item.price}</div>
           <button class="prod-toggle ${un?'set-av':'set-un'}" onclick="toggleItem('${item.id}')">
             ${un?'✅ إتاحة · Enable':'🚫 تعطيل · Disable'}
           </button>
@@ -1390,8 +1390,8 @@ function noRenderCart(){
   el.innerHTML = items.map(([key,item])=>`
     <div class="no-cart-row">
       <div class="no-cart-name">
+        <div class="no-cart-name-en">${item.nameEn||item.nameAr}</div>
         <div class="no-cart-name-ar">${item.nameAr}</div>
-        <div class="no-cart-name-en">${item.nameEn}</div>
       </div>
       <div class="no-qty-ctrl">
         <button onclick="noRemoveItem('${key}')">−</button>
@@ -1412,10 +1412,10 @@ function renderNoMenu(){
       return `<div class="no-item ${un?'unavailable':''}">
         ${item.img?`<img class="no-item-img" src="${item.img}" alt="${item.ar}" onerror="this.style.display='none'">`:'<div class="no-item-img"></div>'}
         <div class="no-item-name">
-          <div class="no-item-ar">${item.ar}</div>
           <div class="no-item-en">${item.en}</div>
+          <div class="no-item-ar">${item.ar}</div>
         </div>
-        <span class="no-item-price">ر.ع ${item.price}</span>
+        <span class="no-item-price">OMR ${item.price}</span>
         <button class="no-add-btn" onclick='noAddItem(${JSON.stringify(item)})'>+ أضف</button>
       </div>`;
     }).join('')}
