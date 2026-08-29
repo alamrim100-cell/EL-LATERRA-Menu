@@ -1282,8 +1282,12 @@ async function addMenuItem(){
       document.getElementById('newItemEn').value='';
       document.getElementById('newItemPrice').value='';
       document.getElementById('newItemImg').value='';
-      toast('✅ تم إضافة المنتج · Item Added');
-      loadMenuItems();
+      toast('✅ Item Added · تم إضافة المنتج');
+      await loadMenuItems();
+      // scroll للأسفل لرؤية المنتج الجديد
+      document.getElementById('menuContent').scrollIntoView({behavior:'smooth'});
+    } else {
+      toast('❌ Error ' + r.status);
     }
   }catch(e){ toast('❌ خطأ · Error'); }
 }
