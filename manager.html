@@ -166,13 +166,12 @@
   .menu-btn-toggle-on{background:var(--green);color:#fff;}
   .menu-add-form{background:var(--card);border:1px solid var(--gold);border-radius:14px;padding:1.2rem;margin-bottom:1.5rem;}
   .menu-add-title{font-weight:900;color:var(--gold);font-size:0.95rem;margin-bottom:1rem;}
-  .menu-add-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;}
-  @media(max-width:500px){.menu-add-grid{grid-template-columns:1fr;}}
-  .menu-form-input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:0.5rem 0.7rem;color:var(--cream);font-family:'Tajawal',sans-serif;font-size:0.85rem;outline:none;}
+  .menu-form-input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:0.55rem 0.8rem;color:var(--cream);font-family:'Tajawal',sans-serif;font-size:0.88rem;outline:none;display:block;box-sizing:border-box;}
   .menu-form-input:focus{border-color:var(--gold);}
   .menu-form-input::placeholder{color:var(--dim);}
-  .menu-form-lbl{font-size:0.72rem;color:var(--dim);margin-bottom:0.3rem;}
-  .menu-add-btn{background:var(--gold);color:var(--bg);border:none;border-radius:10px;padding:0.65rem 1.2rem;font-family:'Tajawal',sans-serif;font-weight:900;font-size:0.88rem;cursor:pointer;margin-top:0.6rem;width:100%;}
+  .menu-form-lbl{font-size:0.75rem;color:var(--dim);margin-bottom:0.3rem;display:block;}
+  .menu-form-group{margin-bottom:0.7rem;}
+  .menu-add-btn{background:var(--gold);color:var(--bg);border:none;border-radius:10px;padding:0.65rem;font-family:'Tajawal',sans-serif;font-weight:900;font-size:0.88rem;cursor:pointer;width:100%;margin-top:0.4rem;}
 
   /* نافذة تعديل المنتج */
   .menu-modal{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:90;display:none;align-items:center;justify-content:center;padding:1rem;}
@@ -463,35 +462,33 @@
     <!-- فورم إضافة منتج جديد -->
     <div class="menu-add-form">
       <div class="menu-add-title">➕ Add New Item · إضافة منتج جديد</div>
-      <div style="display:flex;flex-direction:column;gap:0.7rem;">
-        <div>
-          <div class="menu-form-lbl">Arabic Name · الاسم بالعربي</div>
-          <input type="text" id="newItemAr" class="menu-form-input" placeholder="مثال: كابتشينو" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:0.55rem 0.8rem;color:var(--cream);font-family:'Tajawal',sans-serif;font-size:0.88rem;outline:none;display:block;">
-        </div>
-        <div>
-          <div class="menu-form-lbl">English Name · الاسم بالإنجليزي</div>
-          <input type="text" id="newItemEn" class="menu-form-input" placeholder="Example: Cappuccino" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:0.55rem 0.8rem;color:var(--cream);font-family:'Tajawal',sans-serif;font-size:0.88rem;outline:none;display:block;">
-        </div>
-        <div>
-          <div class="menu-form-lbl">Price · السعر (OMR)</div>
-          <input type="number" id="newItemPrice" class="menu-form-input" placeholder="0.000" step="0.001" min="0" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:0.55rem 0.8rem;color:var(--cream);font-family:'Tajawal',sans-serif;font-size:0.88rem;outline:none;display:block;">
-        </div>
-        <div>
-          <div class="menu-form-lbl">Section · القسم</div>
-          <select id="newItemSection" class="menu-form-input" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:0.55rem 0.8rem;color:var(--cream);font-family:'Tajawal',sans-serif;font-size:0.88rem;outline:none;display:block;">
-            <option value="قهوة الاسبريسو">☕ Espresso · قهوة الاسبريسو</option>
-            <option value="القهوة المقطرة">🫗 Drip Coffee · القهوة المقطرة</option>
-            <option value="مشروبات لاتيرا">🥤 Laterra Drinks · مشروبات لاتيرا</option>
-            <option value="ساندويتش">🥪 Sandwich · ساندويتش</option>
-            <option value="الكيك">🍰 Cake · الكيك</option>
-          </select>
-        </div>
-        <div>
-          <div class="menu-form-lbl">Image filename · اسم الصورة</div>
-          <input type="text" id="newItemImg" class="menu-form-input" placeholder="cappuccino.jpeg" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:0.55rem 0.8rem;color:var(--cream);font-family:'Tajawal',sans-serif;font-size:0.88rem;outline:none;display:block;">
-        </div>
-        <button class="menu-add-btn" onclick="addMenuItem()">✅ Add Item · إضافة المنتج</button>
+      <div class="menu-form-group">
+        <label class="menu-form-lbl">Arabic Name · الاسم بالعربي</label>
+        <input type="text" id="newItemAr" class="menu-form-input" placeholder="مثال: كابتشينو">
       </div>
+      <div class="menu-form-group">
+        <label class="menu-form-lbl">English Name · الاسم بالإنجليزي</label>
+        <input type="text" id="newItemEn" class="menu-form-input" placeholder="Cappuccino">
+      </div>
+      <div class="menu-form-group">
+        <label class="menu-form-lbl">Price · السعر (OMR)</label>
+        <input type="number" id="newItemPrice" class="menu-form-input" placeholder="0.000" step="0.001" min="0">
+      </div>
+      <div class="menu-form-group">
+        <label class="menu-form-lbl">Section · القسم</label>
+        <select id="newItemSection" class="menu-form-input">
+          <option value="قهوة الاسبريسو">☕ Espresso · قهوة الاسبريسو</option>
+          <option value="القهوة المقطرة">🫗 Drip Coffee · القهوة المقطرة</option>
+          <option value="مشروبات لاتيرا">🥤 Laterra Drinks · مشروبات لاتيرا</option>
+          <option value="ساندويتش">🥪 Sandwich · ساندويتش</option>
+          <option value="الكيك">🍰 Cake · الكيك</option>
+        </select>
+      </div>
+      <div class="menu-form-group">
+        <label class="menu-form-lbl">Image filename · اسم الصورة (اختياري)</label>
+        <input type="text" id="newItemImg" class="menu-form-input" placeholder="cappuccino.jpeg">
+      </div>
+      <button class="menu-add-btn" onclick="addMenuItem()">✅ Add Item · إضافة المنتج</button>
     </div>
 
     <!-- قائمة المنتجات حسب القسم -->
