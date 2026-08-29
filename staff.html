@@ -735,7 +735,7 @@ async function loadMenu(){
   }catch(e){ console.error('loadMenu error:',e); }
 }
 
-function switchTab(tab){
+async function switchTab(tab){
   activeTab = tab;
   document.querySelectorAll('.tab').forEach((t,i) => {
     t.classList.toggle('active', ['orders','products','stats','neworder','expenses'][i] === tab);
