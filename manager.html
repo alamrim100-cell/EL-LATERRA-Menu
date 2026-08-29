@@ -1177,35 +1177,41 @@ async function loadMenuItems(){
 function renderMenuItems(){
   const c = document.getElementById('menuContent');
   if(allMenuItems.length===0){
-    c.innerHTML=`<div style="text-align:center;padding:2rem;color:var(--dim);">لا توجد منتجات بعد · No items yet</div>`;
+    c.innerHTML=`<div style="text-align:center;padding:2rem;color:var(--dim);">No items yet · لا توجد منتجات بعد</div>`;
     return;
   }
-  // جلب حالة التوفر
-  const unavail = new Set();
-  // نعرض حسب الأقسام
-  const grouped = {};
-  SECTIONS_ORDER.forEach(s=>grouped[s]=[]);
-  allMenuItems.forEach(i=>{ if(grouped[i.section]) grouped[i.section].push(i); else{ grouped[i.section]=grouped[i.section]||[]; grouped[i.section].push(i); } });
 
-  c.innerHTML = SECTIONS_ORDER.filter(s=>grouped[s]&&grouped[s].length>0).map(sec=>`
+  // جمع كل الأقسام الموجودة فعلاً في البيانات
+  const grouped = {};
+  allMenuItems.forEach(i=>{
+    const sec = i.section || 'أخرى';
+    if(!grouped[sec]) grouped[sec] = [];
+    grouped[sec].push(i);
+  });
+
+  // ترتيب الأقسام — المعروفة أولاً ثم الباقي
+  const knownOrder = ['قهوة الاسبريسو','القهوة المقطرة','مشروبات لاتيرا','ساندويتش','الكيك'];
+  const allSections = [...new Set([...knownOrder, ...Object.keys(grouped)])].filter(s=>grouped[s]);
+
+  c.innerHTML = allSections.map(sec=>`
     <div class="menu-section">
       <div class="menu-section-title">
         ${sec}
-        <span style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.75rem;color:var(--dim);font-weight:400;">${grouped[sec].length} منتج</span>
+        <span style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.75rem;color:var(--dim);font-weight:400;">${grouped[sec].length} items</span>
       </div>
       <div class="menu-grid">
         ${grouped[sec].map(item=>`
           <div class="menu-item-card">
             <div style="display:flex;align-items:center;gap:0.5rem;">
-              ${item.img?`<img class="menu-item-img" src="${item.img}" onerror="this.style.display='none'" alt="">`:''}
+              ${item.img?`<img class="menu-item-img" src="${item.img}" onerror="this.style.display='none'" alt="">`:'<div class="menu-item-img" style="display:flex;align-items:center;justify-content:center;font-size:1.2rem;">☕</div>'}
               <div>
+                <div class="menu-item-en">${item.name_en||item.name_ar}</div>
                 <div class="menu-item-ar">${item.name_ar}</div>
-                <div class="menu-item-en">${item.name_en||''}</div>
-                <div class="menu-item-price">ر.ع ${(+item.price).toFixed(3)}</div>
+                <div class="menu-item-price">OMR ${(+item.price).toFixed(3)}</div>
               </div>
             </div>
             <div class="menu-item-actions">
-              <button class="menu-action-btn menu-btn-edit" onclick='openMenuModal(${JSON.stringify(item).replace(/'/g,"&#39;")})'>✏️ تعديل</button>
+              <button class="menu-action-btn menu-btn-edit" onclick='openMenuModal(${JSON.stringify(item).replace(/'/g,"&#39;")})'>✏️ Edit</button>
             </div>
           </div>
         `).join('')}
