@@ -525,7 +525,7 @@
       <!-- طريقة الدفع -->
       <div>
         <div style="font-size:0.78rem;color:var(--dim);margin-bottom:0.4rem;text-align:center;">Payment Method · طريقة الدفع</div>
-        <div style="display:flex;gap:0.4rem;">
+        <div style="display:flex;gap:0.4rem;flex-wrap:wrap;">
           <button class="no-type-btn active" id="payBtnCash" onclick="noSelectPayment('cash')" style="flex:1;font-size:0.75rem;">
             💵 Cash<span class="no-type-en">كاش</span>
           </button>
@@ -534,6 +534,9 @@
           </button>
           <button class="no-type-btn" id="payBtnTransfer" onclick="noSelectPayment('transfer')" style="flex:1;font-size:0.75rem;">
             📲 Transfer<span class="no-type-en">تحويل</span>
+          </button>
+          <button class="no-type-btn" id="payBtnBeanz" onclick="noSelectPayment('beanz')" style="flex:1;font-size:0.75rem;">
+            ☕ Beanz<span class="no-type-en">بينز</span>
           </button>
         </div>
       </div>
@@ -863,6 +866,7 @@ function payLabel(note){
   if(!note) return 'كاش · Cash';
   if(note.includes('Visa')||note.includes('فيزا')) return '💳 فيزا · Visa';
   if(note.includes('Transfer')||note.includes('تحويل')) return '📱 تحويل · Transfer';
+  if(note.includes('Beanz')||note.includes('بينز')) return '☕ Beanz · بينز';
   return '💵 كاش · Cash';
 }
 
@@ -1295,8 +1299,9 @@ function noSelectType(type){
 
 function noSelectPayment(method){
   noPayment = method;
-  ['cash','visa','transfer'].forEach(m => {
-    document.getElementById(`payBtn${m.charAt(0).toUpperCase()+m.slice(1)}`).classList.toggle('active', m===method);
+  ['cash','visa','transfer','beanz'].forEach(m => {
+    const btn = document.getElementById(`payBtn${m.charAt(0).toUpperCase()+m.slice(1)}`);
+    if(btn) btn.classList.toggle('active', m===method);
   });
 }
 
@@ -1430,7 +1435,7 @@ async function noSendOrder(){
   btn.textContent = '⏳ جاري الإرسال... · Sending...';
 
   const items = Object.values(noCart).map(i=>({name:i.nameAr, nameEn:i.nameEn, qty:i.qty, price:i.price}));
-  const payLabels = {cash:'كاش · Cash', visa:'فيزا · Visa', transfer:'تحويل · Transfer'};
+  const payLabels = {cash:'كاش · Cash', visa:'فيزا · Visa', transfer:'تحويل · Transfer', beanz:'Beanz · بينز'};
   const typeLabel = noOrderType==='take' ? 'Takeaway · تيك أواي' : 'Dine In · داخل المقهى';
   const subtotal = noGetTotal();
   const disc = noCalcDiscount(subtotal);

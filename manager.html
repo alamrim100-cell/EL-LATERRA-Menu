@@ -80,6 +80,7 @@
   .pay-cash{background:#5C3A22;color:var(--gold);}
   .pay-visa{background:#2980b9;color:#fff;}
   .pay-transfer{background:#1a6b3a;color:#4caf50;}
+  .pay-beanz{background:#6b3a1a;color:#D99B53;}
   .badge-wa{background:#25D366;color:#fff;font-size:0.65rem;padding:1px 5px;border-radius:999px;}
   .badge-dine2{background:#5C3A22;color:var(--gold);font-size:0.68rem;padding:2px 6px;border-radius:999px;}
   .badge-take2{background:var(--blue);color:#fff;font-size:0.68rem;padding:2px 6px;border-radius:999px;}
@@ -243,10 +244,11 @@
     <div class="stat-card"><div class="stat-num" id="sWA">0</div><div class="stat-ar">أُرسلت واتساب</div><div class="stat-en">WhatsApp Sent</div></div>
   </div>
 
-  <div class="pay-grid">
+  <div class="pay-grid" style="grid-template-columns:repeat(4,1fr);">
     <div class="pay-card"><div class="pay-icon">💵</div><div class="pay-ar">كاش</div><div class="pay-en">Cash</div><div class="pay-amt" id="pCashAmt">0.000</div><div class="pay-count" id="pCashCount">0</div></div>
     <div class="pay-card"><div class="pay-icon">💳</div><div class="pay-ar">فيزا</div><div class="pay-en">Visa</div><div class="pay-amt" id="pVisaAmt">0.000</div><div class="pay-count" id="pVisaCount">0</div></div>
     <div class="pay-card"><div class="pay-icon">📱</div><div class="pay-ar">تحويل</div><div class="pay-en">Transfer</div><div class="pay-amt" id="pTransAmt">0.000</div><div class="pay-count" id="pTransCount">0</div></div>
+    <div class="pay-card"><div class="pay-icon">☕</div><div class="pay-ar">بينز</div><div class="pay-en">Beanz</div><div class="pay-amt" id="pBeanzAmt">0.000</div><div class="pay-count" id="pBeanzCount">0</div></div>
   </div>
 
   <div class="net-card">
@@ -745,17 +747,30 @@ function applyOverview(){
   netEl.textContent=`ر.ع ${net.toFixed(3)}`;
   netEl.style.color=net>=0?'#4caf50':'#e53935';
 
-  const payType=pm=>{if(!pm)return'cash';if(pm.includes('Visa')||pm.includes('فيزا'))return'visa';if(pm.includes('Transfer')||pm.includes('تحويل'))return'transfer';return'cash';};
+  const payType=pm=>{
+    if(!pm) return 'cash';
+    if(pm.includes('Visa')||pm.includes('فيزا')) return 'visa';
+    if(pm.includes('Transfer')||pm.includes('تحويل')) return 'transfer';
+    if(pm.includes('Beanz')||pm.includes('بينز')) return 'beanz';
+    return 'cash';
+  };
   const sumOf=arr=>arr.reduce((s,i)=>s+(+i.total||0),0);
   const cash=inv.filter(i=>payType(i.payment_method)==='cash');
   const visa=inv.filter(i=>payType(i.payment_method)==='visa');
   const trans=inv.filter(i=>payType(i.payment_method)==='transfer');
+  const beanz=inv.filter(i=>payType(i.payment_method)==='beanz');
   document.getElementById('pCashAmt').textContent=`ر.ع ${sumOf(cash).toFixed(3)}`;
   document.getElementById('pCashCount').textContent=`${cash.length} فاتورة`;
   document.getElementById('pVisaAmt').textContent=`ر.ع ${sumOf(visa).toFixed(3)}`;
   document.getElementById('pVisaCount').textContent=`${visa.length} فاتورة`;
   document.getElementById('pTransAmt').textContent=`ر.ع ${sumOf(trans).toFixed(3)}`;
   document.getElementById('pTransCount').textContent=`${trans.length} فاتورة`;
+  // Beanz
+  const beanzEl = document.getElementById('pBeanzAmt');
+  if(beanzEl){
+    beanzEl.textContent=`ر.ع ${sumOf(beanz).toFixed(3)}`;
+    document.getElementById('pBeanzCount').textContent=`${beanz.length} فاتورة`;
+  }
 }
 
 /* ===== CHARTS ===== */
@@ -864,7 +879,7 @@ function renderInvoices(invoices){
       <td>${inv.table_number||'-'}</td>
       <td style="max-width:160px;">${items.slice(0,2).map(i=>`<div style="font-size:0.78rem;">${i.name} ×${i.qty}</div>`).join('')}${items.length>2?`<div style="font-size:0.7rem;color:var(--dim);">+${items.length-2} أخرى</div>`:''}</td>
       <td style="font-weight:900;color:var(--gold);direction:ltr;">ر.ع ${(+inv.total||0).toFixed(3)}</td>
-      <td><span class="badge-pay pay-${pt}">${pt==='cash'?'💵 كاش':pt==='visa'?'💳 فيزا':'📱 تحويل'}</span></td>
+      <td><span class="badge-pay pay-${pt}">${pt==='cash'?'💵 كاش':pt==='visa'?'💳 فيزا':pt==='beanz'?'☕ Beanz':'📱 تحويل'}</span></td>
       <td><span class="${isT?'badge-take2':'badge-dine2'}">${isT?'🥤 Take':'🪑 Dine'}</span></td>
       <td style="font-size:0.72rem;color:var(--dim);">${t.toLocaleString('ar-OM',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'})}</td>
       <td>${inv.whatsapp_sent?'<span class="badge-wa">✓</span>':'-'}</td>
