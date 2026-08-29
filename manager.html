@@ -485,8 +485,14 @@
         </select>
       </div>
       <div class="menu-form-group">
-        <label class="menu-form-lbl">Image filename · اسم الصورة (اختياري)</label>
-        <input type="text" id="newItemImg" class="menu-form-input" placeholder="cappuccino.jpeg">
+        <label class="menu-form-lbl">Image · الصورة (اختياري)</label>
+        <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
+          <input type="file" id="newItemImgFile" accept="image/*" style="display:none;" onchange="previewNewImg(this)">
+          <button type="button" onclick="document.getElementById('newItemImgFile').click()" style="background:var(--border);color:var(--cream);border:1px solid var(--gold);border-radius:8px;padding:0.45rem 0.8rem;font-family:'Tajawal',sans-serif;font-size:0.82rem;cursor:pointer;">📷 رفع صورة · Upload</button>
+          <img id="newItemImgPreview" src="" style="display:none;width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid var(--gold);">
+          <input type="text" id="newItemImg" class="menu-form-input" placeholder="أو اكتب اسم الصورة · or type filename" style="flex:1;min-width:120px;">
+        </div>
+        <div id="newImgUploadStatus" style="font-size:0.72rem;color:var(--dim);margin-top:0.3rem;"></div>
       </div>
       <button class="menu-add-btn" onclick="addMenuItem()">✅ Add Item · إضافة المنتج</button>
     </div>
@@ -529,8 +535,14 @@
         </select>
       </div>
       <div>
-        <div class="menu-form-lbl">اسم الصورة · Image filename</div>
-        <input type="text" id="editMenuImg" class="menu-form-input">
+        <div class="menu-form-lbl">Image · الصورة</div>
+        <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;margin-bottom:0.3rem;">
+          <img id="editMenuImgPreview" src="" style="display:none;width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid var(--gold);">
+          <input type="file" id="editMenuImgFile" accept="image/*" style="display:none;" onchange="previewEditImg(this)">
+          <button type="button" onclick="document.getElementById('editMenuImgFile').click()" style="background:var(--border);color:var(--cream);border:1px solid var(--gold);border-radius:8px;padding:0.4rem 0.7rem;font-family:'Tajawal',sans-serif;font-size:0.78rem;cursor:pointer;">📷 Upload</button>
+        </div>
+        <input type="text" id="editMenuImg" class="menu-form-input" placeholder="أو اسم الصورة الحالي">
+        <div id="editImgUploadStatus" style="font-size:0.72rem;color:var(--dim);margin-top:0.3rem;"></div>
       </div>
     </div>
     <div class="menu-modal-actions">
@@ -1159,6 +1171,68 @@ async function deleteHistEntry(id){
   }catch(e){ toast('❌ خطأ · Error'); }
 }
 
+/* ===== IMAGE UPLOAD ===== */
+const STORAGE_URL = `${SUPA}/storage/v1/object/menu-images/`;
+const STORAGE_PUBLIC = `${SUPA}/storage/v1/object/public/menu-images/`;
+
+async function uploadImage(file, statusEl){
+  if(!file) return null;
+  const ext = file.name.split('.').pop().toLowerCase();
+  const fname = `item_${Date.now()}.${ext}`;
+  statusEl.textContent = '⏳ جاري الرفع... · Uploading...';
+  statusEl.style.color = 'var(--gold)';
+  try{
+    const r = await fetch(`${STORAGE_URL}${fname}`,{
+      method:'POST',
+      headers:{
+        'apikey':KEY,
+        'Authorization':`Bearer ${KEY}`,
+        'Content-Type': file.type,
+        'x-upsert':'true'
+      },
+      body: file
+    });
+    if(r.ok){
+      statusEl.textContent = '✅ تم الرفع · Uploaded';
+      statusEl.style.color = 'var(--green)';
+      return `${STORAGE_PUBLIC}${fname}`;
+    } else {
+      const err = await r.text();
+      console.error('Upload error:', err);
+      statusEl.textContent = '❌ فشل الرفع · Upload failed';
+      statusEl.style.color = 'var(--red)';
+      return null;
+    }
+  }catch(e){
+    statusEl.textContent = '❌ خطأ · Error';
+    statusEl.style.color = 'var(--red)';
+    return null;
+  }
+}
+
+function previewNewImg(input){
+  const file = input.files[0];
+  if(!file) return;
+  const prev = document.getElementById('newItemImgPreview');
+  prev.src = URL.createObjectURL(file);
+  prev.style.display = 'block';
+  // رفع تلقائي
+  uploadImage(file, document.getElementById('newImgUploadStatus')).then(url=>{
+    if(url) document.getElementById('newItemImg').value = url;
+  });
+}
+
+function previewEditImg(input){
+  const file = input.files[0];
+  if(!file) return;
+  const prev = document.getElementById('editMenuImgPreview');
+  prev.src = URL.createObjectURL(file);
+  prev.style.display = 'block';
+  uploadImage(file, document.getElementById('editImgUploadStatus')).then(url=>{
+    if(url) document.getElementById('editMenuImg').value = url;
+  });
+}
+
 /* ===== MENU MANAGEMENT ===== */
 let allMenuItems = [];
 let currentEditMenu = null;
@@ -1228,6 +1302,11 @@ function openMenuModal(item){
   document.getElementById('editMenuPrice').value = item.price||'';
   document.getElementById('editMenuSection').value = item.section||'قهوة الاسبريسو';
   document.getElementById('editMenuImg').value = item.img||'';
+  document.getElementById('editImgUploadStatus').textContent = '';
+  // عرض الصورة الحالية
+  const prev = document.getElementById('editMenuImgPreview');
+  if(item.img){ prev.src = item.img; prev.style.display='block'; }
+  else { prev.style.display='none'; }
   document.getElementById('menuModal').classList.add('open');
 }
 
