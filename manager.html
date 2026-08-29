@@ -606,6 +606,7 @@
           <option value="💵 كاش · Cash">💵 كاش · Cash</option>
           <option value="💳 فيزا · Visa">💳 فيزا · Visa</option>
           <option value="📱 تحويل · Transfer">📱 تحويل · Transfer</option>
+          <option value="☕ Beanz · بينز">☕ Beanz · بينز</option>
         </select>
       </div>
       <div>
@@ -1049,6 +1050,7 @@ function openInvModal(inv){
   const pm = inv.payment_method||'';
   if(pm.includes('Visa')||pm.includes('فيزا')) sel.value='💳 فيزا · Visa';
   else if(pm.includes('Transfer')||pm.includes('تحويل')) sel.value='📱 تحويل · Transfer';
+  else if(pm.includes('Beanz')||pm.includes('بينز')) sel.value='☕ Beanz · بينز';
   else sel.value='💵 كاش · Cash';
   document.getElementById('invModal').classList.add('open');
 }
