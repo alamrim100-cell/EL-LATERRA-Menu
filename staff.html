@@ -1582,6 +1582,9 @@ function doLogin(){
   if(u===STAFF_USER && p===STAFF_PASS){
     sessionStorage.setItem('staff_auth','true');
     document.getElementById('loginScreen').style.display='none';
+    // فتح AudioContext فوراً عند الضغط على Login
+    unlockAudio();
+    setTimeout(()=>playCoffeeBell(), 300);
     init();
   } else {
     const err = document.getElementById('loginErr');
@@ -1601,17 +1604,21 @@ let audioCtx = null;
 let audioUnlocked = false;
 
 function unlockAudio(){
-  if(audioUnlocked) return;
   try{
-    audioCtx = new (window.AudioContext||window.webkitAudioContext)();
-    // نشغل صوت صامت لفتح الـ context
-    const buf = audioCtx.createBuffer(1,1,22050);
+    if(!audioCtx){
+      audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+    }
+    if(audioCtx.state === 'suspended'){
+      audioCtx.resume();
+    }
+    // نشغل صوت صامت لإلغاء قفل المتصفح
+    const buf = audioCtx.createBuffer(1, 1, 22050);
     const src = audioCtx.createBufferSource();
     src.buffer = buf;
     src.connect(audioCtx.destination);
     src.start(0);
     audioUnlocked = true;
-  }catch(e){}
+  }catch(e){ console.log('unlock error:', e); }
 }
 
 // افتح الـ AudioContext عند أول تفاعل
@@ -1621,17 +1628,21 @@ document.addEventListener('touchstart', unlockAudio, {once:false});
 function toggleSound(){
   soundEnabled = !soundEnabled;
   const btn = document.getElementById('soundBtn');
-  btn.textContent = soundEnabled ? '🔔' : '🔕';
+  btn.textContent = soundEnabled ? '🔔 Sound' : '🔕 Muted';
   btn.classList.toggle('active', soundEnabled);
   if(soundEnabled){
     unlockAudio();
-    playCoffeeBell();
+    setTimeout(()=>playCoffeeBell(), 100);
   }
 }
 
 function getAudioCtx(){
-  if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
-  if(audioCtx.state === 'suspended') audioCtx.resume();
+  if(!audioCtx){
+    audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+  }
+  if(audioCtx.state === 'suspended'){
+    audioCtx.resume();
+  }
   return audioCtx;
 }
 
@@ -1639,34 +1650,41 @@ function playCoffeeBell(){
   if(!soundEnabled) return;
   try{
     const ctx = getAudioCtx();
-    if(ctx.state === 'suspended'){ ctx.resume().then(()=>playCoffeeBell()); return; }
-    const t = ctx.currentTime;
-
-    const notes = [
-      {freq:880,  start:0.0, dur:0.25, gain:0.35},
-      {freq:1046, start:0.18,dur:0.25, gain:0.45},
-      {freq:1318, start:0.36,dur:0.4,  gain:0.55},
-      {freq:1046, start:0.65,dur:0.25, gain:0.4},
-      {freq:880,  start:0.85,dur:0.35, gain:0.3},
-    ];
-
-    notes.forEach(n=>{
-      const osc  = ctx.createOscillator();
-      const gain = ctx.createGain();
-      const comp = ctx.createDynamicsCompressor();
-      osc.connect(gain);
-      gain.connect(comp);
-      comp.connect(ctx.destination);
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(n.freq, t+n.start);
-      osc.frequency.exponentialRampToValueAtTime(n.freq*0.96, t+n.start+n.dur);
-      gain.gain.setValueAtTime(0.001, t+n.start);
-      gain.gain.linearRampToValueAtTime(n.gain, t+n.start+0.03);
-      gain.gain.exponentialRampToValueAtTime(0.001, t+n.start+n.dur);
-      osc.start(t+n.start);
-      osc.stop(t+n.start+n.dur+0.05);
-    });
+    if(ctx.state === 'suspended'){
+      ctx.resume().then(()=>{
+        _playNotes(ctx);
+      });
+      return;
+    }
+    _playNotes(ctx);
   }catch(e){ console.log('Audio error:', e); }
+}
+
+function _playNotes(ctx){
+  const t = ctx.currentTime;
+  const notes = [
+    {freq:880,  start:0.0,  dur:0.25, gain:0.35},
+    {freq:1046, start:0.18, dur:0.25, gain:0.45},
+    {freq:1318, start:0.36, dur:0.4,  gain:0.55},
+    {freq:1046, start:0.65, dur:0.25, gain:0.4},
+    {freq:880,  start:0.85, dur:0.35, gain:0.3},
+  ];
+  notes.forEach(n=>{
+    const osc  = ctx.createOscillator();
+    const gain = ctx.createGain();
+    const comp = ctx.createDynamicsCompressor();
+    osc.connect(gain);
+    gain.connect(comp);
+    comp.connect(ctx.destination);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(n.freq, t+n.start);
+    osc.frequency.exponentialRampToValueAtTime(n.freq*0.96, t+n.start+n.dur);
+    gain.gain.setValueAtTime(0.001, t+n.start);
+    gain.gain.linearRampToValueAtTime(n.gain, t+n.start+0.03);
+    gain.gain.exponentialRampToValueAtTime(0.001, t+n.start+n.dur);
+    osc.start(t+n.start);
+    osc.stop(t+n.start+n.dur+0.05);
+  });
 }
 
 /* ===== INIT ===== */
