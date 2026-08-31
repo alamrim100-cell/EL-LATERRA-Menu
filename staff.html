@@ -775,8 +775,14 @@ async function fetchOrders(){
 
     const newOnes = data.filter(o=>!knownIds.has(o.id));
     if(knownIds.size>0 && newOnes.length>0){
-      toast(`🔔 ${newOnes.length} طلب جديد · New Order!`);
+      // صوت
       playCoffeeBell();
+      // إشعار
+      sendNotification(
+        `🔔 New Order! · طلب جديد`,
+        `${newOnes.length} order(s) waiting · ${newOnes.length} طلب ينتظر`
+      );
+      toast(`🔔 ${newOnes.length} New Order · طلب جديد!`);
     }
     data.forEach(o=>knownIds.add(o.id));
 
@@ -1582,6 +1588,29 @@ function renderExpenses(expenses){
   `).join('');
 }
 
+/* ===== WAKE LOCK - منع إطفاء الشاشة ===== */
+let wakeLock = null;
+
+async function requestWakeLock(){
+  try{
+    if('wakeLock' in navigator){
+      wakeLock = await navigator.wakeLock.request('screen');
+      console.log('Wake Lock active');
+      wakeLock.addEventListener('release', ()=>{
+        // أعد الطلب لو انقطع
+        setTimeout(requestWakeLock, 1000);
+      });
+    }
+  }catch(e){ console.log('Wake Lock error:', e); }
+}
+
+// أعد Wake Lock لو الصفحة رجعت للواجهة
+document.addEventListener('visibilitychange', ()=>{
+  if(document.visibilityState === 'visible' && sessionStorage.getItem('staff_auth')==='true'){
+    requestWakeLock();
+  }
+});
+
 /* ===== AUTH ===== */
 const STAFF_USER = 'AKSHAY';
 const STAFF_PASS = 'A1234567';
@@ -1598,8 +1627,10 @@ function doLogin(){
   if(u===STAFF_USER && p===STAFF_PASS){
     sessionStorage.setItem('staff_auth','true');
     document.getElementById('loginScreen').style.display='none';
-    // فتح AudioContext فوراً عند الضغط على Login
+    // فتح AudioContext + طلب إذن الإشعارات
     unlockAudio();
+    requestNotificationPermission();
+    requestWakeLock();
     setTimeout(()=>playCoffeeBell(), 300);
     init();
   } else {
@@ -1614,10 +1645,31 @@ function doLogout(){
   location.reload();
 }
 
-/* ===== SOUND ===== */
+/* ===== NOTIFICATIONS + SOUND ===== */
 let soundEnabled = true;
 let audioCtx = null;
 let audioUnlocked = false;
+
+async function requestNotificationPermission(){
+  if(!('Notification' in window)) return;
+  if(Notification.permission === 'default'){
+    await Notification.requestPermission();
+  }
+}
+
+function sendNotification(title, body){
+  if(Notification.permission === 'granted'){
+    const n = new Notification(title, {
+      body: body,
+      icon: 'logo.jpeg',
+      badge: 'logo.jpeg',
+      vibrate: [200, 100, 200],
+      tag: 'new-order',
+      renotify: true
+    });
+    setTimeout(()=>n.close(), 5000);
+  }
+}
 
 function unlockAudio(){
   try{
