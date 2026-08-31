@@ -150,6 +150,36 @@
   .hist-del{background:none;border:1px solid var(--border);color:var(--dim);border-radius:6px;padding:3px 7px;cursor:pointer;font-size:0.75rem;}
   .hist-del:hover{background:var(--red);color:#fff;border-color:var(--red);}
 
+  /* ===== الإحصائيات المتقدمة ===== */
+  .analytics-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+  @media(max-width:600px){.analytics-grid{grid-template-columns:1fr;}}
+  .analytics-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1rem;margin-bottom:1rem;}
+  .analytics-title{font-size:0.88rem;font-weight:900;color:var(--gold);margin-bottom:0.8rem;padding-bottom:0.4rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+  .analytics-en{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.75rem;color:var(--dim);font-weight:400;}
+  .top-item-row{display:flex;align-items:center;gap:0.6rem;padding:0.45rem 0;border-bottom:1px solid rgba(74,46,26,0.4);}
+  .top-item-row:last-child{border-bottom:none;}
+  .top-item-rank{font-size:1rem;min-width:28px;text-align:center;}
+  .top-item-info{flex:1;}
+  .top-item-name-en{font-family:'Cormorant Garamond',serif;font-size:0.9rem;font-weight:700;color:var(--cream);}
+  .top-item-name-ar{font-size:0.7rem;color:var(--dim);}
+  .top-item-bar-wrap{height:5px;background:var(--border);border-radius:3px;margin-top:3px;}
+  .top-item-bar{height:100%;background:var(--gold);border-radius:3px;transition:width 0.5s;}
+  .top-item-count{font-weight:900;color:var(--gold);font-size:0.85rem;white-space:nowrap;}
+  .top-item-revenue{font-size:0.72rem;color:var(--dim);direction:ltr;}
+  .kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:0.6rem;margin-bottom:1rem;}
+  .kpi-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.7rem;text-align:center;}
+  .kpi-num{font-size:1.4rem;font-weight:900;color:var(--gold);}
+  .kpi-label{font-size:0.7rem;color:var(--dim);}
+  .kpi-en{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.65rem;color:var(--border);}
+  .hour-bar-wrap{display:flex;align-items:flex-end;gap:2px;height:80px;margin-top:0.5rem;}
+  .hour-bar{flex:1;background:var(--gold);border-radius:3px 3px 0 0;min-height:2px;transition:height 0.5s;opacity:0.8;position:relative;}
+  .hour-bar:hover{opacity:1;}
+  .hour-label{font-size:0.5rem;color:var(--dim);text-align:center;margin-top:3px;}
+  .section-revenue-row{display:flex;justify-content:space-between;align-items:center;padding:0.45rem 0;border-bottom:1px solid rgba(74,46,26,0.4);}
+  .section-revenue-row:last-child{border-bottom:none;}
+  .section-name{font-size:0.85rem;color:var(--cream);}
+  .section-amt{font-weight:900;color:var(--gold);direction:ltr;font-size:0.85rem;}
+
   /* ===== إدارة المينيو ===== */
   .menu-section{margin-bottom:1.5rem;}
   .menu-section-title{font-size:0.88rem;font-weight:900;color:var(--gold);margin-bottom:0.6rem;padding-bottom:0.4rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
@@ -216,12 +246,82 @@
 
 <div class="tabs">
   <button class="tab active" onclick="switchTab('overview')">📈 نظرة عامة<span class="tab-en">Overview</span></button>
+  <button class="tab" onclick="switchTab('analytics')">🏆 إحصائيات<span class="tab-en">Analytics</span></button>
   <button class="tab" onclick="switchTab('charts')">📊 رسوم بيانية<span class="tab-en">Charts</span></button>
   <button class="tab" onclick="switchTab('invoices')">📄 الفواتير<span class="tab-en">Invoices</span></button>
   <button class="tab" onclick="switchTab('expenses')">💸 المصروفات<span class="tab-en">Expenses</span></button>
   <button class="tab" onclick="switchTab('fixed')">🏢 مصاريف ثابتة<span class="tab-en">Fixed Costs</span></button>
   <button class="tab" onclick="switchTab('history')">📅 مبيعات سابقة<span class="tab-en">History</span></button>
   <button class="tab" onclick="switchTab('menu')">🍽️ إدارة المينيو<span class="tab-en">Menu Mgmt</span></button>
+</div>
+
+<!-- ===== ANALYTICS ===== -->
+<div class="panel" id="panel-analytics">
+  <div style="margin-top:1rem;">
+
+    <!-- KPIs -->
+    <div class="kpi-grid">
+      <div class="kpi-card"><div class="kpi-num" id="kpiItems">0</div><div class="kpi-label">منتجات مباعة</div><div class="kpi-en">Items Sold</div></div>
+      <div class="kpi-card"><div class="kpi-num" id="kpiAvgOrder">0</div><div class="kpi-label">متوسط الفاتورة</div><div class="kpi-en">Avg Order (OMR)</div></div>
+      <div class="kpi-card"><div class="kpi-num" id="kpiPeakHour">-</div><div class="kpi-label">ساعة الذروة</div><div class="kpi-en">Peak Hour</div></div>
+      <div class="kpi-card"><div class="kpi-num" id="kpiDineVsTake">-</div><div class="kpi-label">داخل / تيك أواي</div><div class="kpi-en">Dine / Take</div></div>
+    </div>
+
+    <div class="analytics-grid">
+
+      <!-- أعلى المبيعات -->
+      <div class="analytics-card">
+        <div class="analytics-title">
+          🏆 أعلى المنتجات مبيعاً
+          <span class="analytics-en">Top Selling Items</span>
+        </div>
+        <div id="topItemsList"><div style="text-align:center;color:var(--dim);padding:1rem;">⏳</div></div>
+      </div>
+
+      <!-- إيرادات حسب القسم -->
+      <div class="analytics-card">
+        <div class="analytics-title">
+          📂 إيرادات حسب القسم
+          <span class="analytics-en">Revenue by Section</span>
+        </div>
+        <div id="sectionRevenue"><div style="text-align:center;color:var(--dim);padding:1rem;">⏳</div></div>
+      </div>
+
+      <!-- توزيع طرق الدفع -->
+      <div class="analytics-card">
+        <div class="analytics-title">
+          💳 توزيع طرق الدفع
+          <span class="analytics-en">Payment Distribution</span>
+        </div>
+        <div id="paymentDist"><div style="text-align:center;color:var(--dim);padding:1rem;">⏳</div></div>
+      </div>
+
+      <!-- مبيعات حسب الساعة -->
+      <div class="analytics-card">
+        <div class="analytics-title">
+          🕐 مبيعات حسب الساعة
+          <span class="analytics-en">Sales by Hour</span>
+        </div>
+        <div class="hour-bar-wrap" id="hourBars"></div>
+        <div style="display:flex;justify-content:space-between;margin-top:4px;">
+          <span style="font-size:0.6rem;color:var(--dim);">6am</span>
+          <span style="font-size:0.6rem;color:var(--dim);">12pm</span>
+          <span style="font-size:0.6rem;color:var(--dim);">6pm</span>
+          <span style="font-size:0.6rem;color:var(--dim);">12am</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- فلتر الفترة -->
+    <div class="filters">
+      <button class="filter-btn active" onclick="setAnalyticsFilter('today')">اليوم</button>
+      <button class="filter-btn" onclick="setAnalyticsFilter('week')">الأسبوع</button>
+      <button class="filter-btn" onclick="setAnalyticsFilter('month')">الشهر</button>
+      <button class="filter-btn" onclick="setAnalyticsFilter('all')">الكل</button>
+    </div>
+
+  </div>
 </div>
 
 <!-- ===== OVERVIEW ===== -->
@@ -663,13 +763,160 @@ function doLogout(){
   location.reload();
 }
 
+/* ===== ANALYTICS ===== */
+let analyticsFilter = 'today';
+
+function setAnalyticsFilter(f){
+  analyticsFilter = f;
+  document.querySelectorAll('#panel-analytics .filter-btn').forEach((b,i)=>{
+    b.classList.toggle('active',['today','week','month','all'][i]===f);
+  });
+  renderAnalytics();
+}
+
+function renderAnalytics(){
+  const inv = filterData(allInvoices, analyticsFilter, 'inv').filter(i=>i.order_type!=='Historical');
+
+  // جمع كل المنتجات
+  const itemCounts = {}, itemRevenue = {}, itemSections = {};
+  let totalItems = 0;
+  inv.forEach(order=>{
+    const items = parseItems(order.items);
+    items.forEach(item=>{
+      const name = item.nameEn || item.name || 'Unknown';
+      const nameAr = item.name || '';
+      const qty = +item.qty||1;
+      const rev = (+item.price||0) * qty;
+      itemCounts[name] = (itemCounts[name]||0) + qty;
+      itemRevenue[name] = (itemRevenue[name]||0) + rev;
+      totalItems += qty;
+
+      // القسم
+      const sec = item.section || 'Other';
+      itemSections[sec] = (itemSections[sec]||0) + rev;
+    });
+  });
+
+  // KPIs
+  const totalSales = inv.reduce((s,i)=>s+(+i.total||0),0);
+  document.getElementById('kpiItems').textContent = totalItems;
+  document.getElementById('kpiAvgOrder').textContent = (inv.length?totalSales/inv.length:0).toFixed(3);
+
+  // ساعة الذروة
+  const hourCounts = Array(24).fill(0);
+  inv.forEach(o=>{ const h=new Date(o.created_at).getHours(); hourCounts[h]++; });
+  const peakHour = hourCounts.indexOf(Math.max(...hourCounts));
+  const peakLabel = peakHour===0?'12am':peakHour<12?`${peakHour}am`:peakHour===12?'12pm':`${peakHour-12}pm`;
+  document.getElementById('kpiPeakHour').textContent = peakLabel;
+
+  // Dine vs Take
+  const dine = inv.filter(o=>!o.order_type||o.order_type.includes('Dine')).length;
+  const take = inv.filter(o=>o.order_type&&o.order_type.includes('Take')).length;
+  document.getElementById('kpiDineVsTake').textContent = `${dine}/${take}`;
+
+  // أعلى المبيعات
+  const medals = ['🥇','🥈','🥉'];
+  const topItems = Object.entries(itemCounts).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const maxQty = topItems[0]?.[1]||1;
+  document.getElementById('topItemsList').innerHTML = topItems.length===0
+    ? `<div style="text-align:center;color:var(--dim);padding:1rem;">No data · لا توجد بيانات</div>`
+    : topItems.map(([name,count],i)=>`
+      <div class="top-item-row">
+        <span class="top-item-rank">${medals[i]||`${i+1}`}</span>
+        <div class="top-item-info">
+          <div class="top-item-name-en">${name}</div>
+          <div class="top-item-bar-wrap">
+            <div class="top-item-bar" style="width:${(count/maxQty*100).toFixed(0)}%"></div>
+          </div>
+        </div>
+        <div style="text-align:left;">
+          <div class="top-item-count">${count}×</div>
+          <div class="top-item-revenue">OMR ${(itemRevenue[name]||0).toFixed(3)}</div>
+        </div>
+      </div>
+    `).join('');
+
+  // إيرادات حسب القسم من الفواتير
+  const sectionRevFromInv = {};
+  inv.forEach(order=>{
+    const items = parseItems(order.items);
+    items.forEach(item=>{
+      // نحاول نعرف القسم من MENU
+      let sec = 'Other';
+      if(item.name){
+        if(['اسبريسو','أمريكانو','كابتشينو','لاتيه','موكا','فلات وايت','سبانيش','قهوة عربية','كريمي اسبريسو','لاتيه مميز'].includes(item.name)) sec='Espresso';
+        else if(['في60 كلاسيك','في60 فروتي','كولد برو باشن','كولد برو'].includes(item.name)) sec='Drip Coffee';
+        else if(['كرواسون','مرتديلا','حلومي'].includes(item.name)) sec='Sandwich';
+        else if(['كريب','تيراميسو','تشيزكيك','لندن كيك','سان سباستيان','كلاسيك كوكيز','مارشميلو كوكيز'].includes(item.name)) sec='Cake';
+        else sec='Drinks';
+      }
+      const rev = (+item.price||0) * (+item.qty||1);
+      sectionRevFromInv[sec] = (sectionRevFromInv[sec]||0) + rev;
+    });
+  });
+
+  const totalSecRev = Object.values(sectionRevFromInv).reduce((s,v)=>s+v,0)||1;
+  const sortedSecs = Object.entries(sectionRevFromInv).sort((a,b)=>b[1]-a[1]);
+  document.getElementById('sectionRevenue').innerHTML = sortedSecs.length===0
+    ? `<div style="text-align:center;color:var(--dim);padding:1rem;">No data</div>`
+    : sortedSecs.map(([sec,rev])=>`
+      <div class="section-revenue-row">
+        <div>
+          <div class="section-name">${sec}</div>
+          <div style="height:4px;background:var(--border);border-radius:2px;margin-top:3px;width:120px;">
+            <div style="height:100%;background:var(--gold);border-radius:2px;width:${(rev/totalSecRev*100).toFixed(0)}%"></div>
+          </div>
+        </div>
+        <div class="section-amt">OMR ${rev.toFixed(3)}</div>
+      </div>
+    `).join('');
+
+  // توزيع الدفع
+  const payDist = {Cash:0,Visa:0,Transfer:0,Beanz:0};
+  inv.forEach(o=>{
+    const pm = o.payment_method||'';
+    if(pm.includes('Visa')||pm.includes('فيزا')) payDist.Visa += +o.total||0;
+    else if(pm.includes('Transfer')||pm.includes('تحويل')) payDist.Transfer += +o.total||0;
+    else if(pm.includes('Beanz')||pm.includes('بينز')) payDist.Beanz += +o.total||0;
+    else payDist.Cash += +o.total||0;
+  });
+  const payIcons = {Cash:'💵',Visa:'💳',Transfer:'📱',Beanz:'☕'};
+  const payTotal = Object.values(payDist).reduce((s,v)=>s+v,0)||1;
+  document.getElementById('paymentDist').innerHTML = Object.entries(payDist)
+    .filter(([,v])=>v>0)
+    .sort((a,b)=>b[1]-a[1])
+    .map(([name,val])=>`
+      <div class="section-revenue-row">
+        <div>
+          <div class="section-name">${payIcons[name]} ${name}</div>
+          <div style="height:4px;background:var(--border);border-radius:2px;margin-top:3px;width:120px;">
+            <div style="height:100%;background:var(--gold);border-radius:2px;width:${(val/payTotal*100).toFixed(0)}%"></div>
+          </div>
+        </div>
+        <div class="section-amt">OMR ${val.toFixed(3)}</div>
+      </div>
+    `).join('') || `<div style="text-align:center;color:var(--dim);padding:1rem;">No data</div>`;
+
+  // مبيعات حسب الساعة (6am - 12am)
+  const hourBars = document.getElementById('hourBars');
+  const maxHour = Math.max(...hourCounts)||1;
+  const hoursToShow = Array.from({length:18},(_,i)=>i+6); // 6am to 11pm
+  hourBars.innerHTML = hoursToShow.map(h=>`
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;">
+      <div class="hour-bar" style="height:${Math.max(4,(hourCounts[h]||0)/maxHour*75)}px;width:100%;"
+           title="${h<12?h+'am':h===12?'12pm':(h-12)+'pm'}: ${hourCounts[h]||0} orders"></div>
+    </div>
+  `).join('');
+}
+
 /* ===== TABS ===== */
 function switchTab(tab){
   document.querySelectorAll('.tab').forEach((t,i)=>{
-    t.classList.toggle('active',['overview','charts','invoices','expenses','fixed','history'][i]===tab);
+    t.classList.toggle('active',['overview','analytics','charts','invoices','expenses','fixed','history','menu'][i]===tab);
   });
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.getElementById(`panel-${tab}`).classList.add('active');
+  if(tab==='analytics') renderAnalytics();
   if(tab==='charts') renderCharts();
   if(tab==='invoices') renderInvoices(filterData(allInvoices,invFilter,'inv'));
   if(tab==='expenses') renderExpenses(filterData(allExpenses,expFilter,'exp'));
