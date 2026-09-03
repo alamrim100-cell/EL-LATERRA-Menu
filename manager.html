@@ -341,7 +341,7 @@
     <!-- فلتر يوم محدد -->
     <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.8rem;align-items:center;">
       <div style="font-size:0.78rem;color:var(--dim);white-space:nowrap;">📅 يوم محدد · Specific Day:</div>
-      <input type="date" class="filter-input" id="dateFilter" onchange="setFilter('custom')">
+      <input type="date" class="filter-input" id="dateFilter" onchange="currentFilter='custom'; setFilter('custom')">
     </div>
 
     <!-- فلتر فترة مخصصة -->
@@ -1025,9 +1025,11 @@ function filterData(data, f, type){
     return data.filter(d => new Date(d[field]) >= y);
   }
   if(f==='custom'){
-    const id = type==='inv' ? 'invDateFilter' : 'dateFilter';
-    const v = document.getElementById(id)?.value;
-    if(v) return data.filter(d => d[field].startsWith(v));
+    const v = document.getElementById('dateFilter')?.value;
+    if(v){
+      const selected = new Date(v + 'T00:00:00');
+      return data.filter(d => new Date(d[field]).toDateString() === selected.toDateString());
+    }
   }
   if(f==='range'){
     const from = document.getElementById('dateFrom')?.value;
