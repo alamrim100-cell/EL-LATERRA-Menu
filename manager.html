@@ -621,6 +621,10 @@
         </div>
         <div id="newImgUploadStatus" style="font-size:0.72rem;color:var(--dim);margin-top:0.3rem;"></div>
       </div>
+      <div style="display:flex;align-items:center;gap:0.8rem;margin-bottom:0.4rem;">
+        <input type="checkbox" id="newItemIsNew" style="width:18px;height:18px;accent-color:var(--gold);cursor:pointer;">
+        <label for="newItemIsNew" style="cursor:pointer;font-size:0.85rem;color:var(--cream);">✨ وضع علامة <strong style="color:var(--gold);">New</strong> على المنتج</label>
+      </div>
       <button class="menu-add-btn" onclick="addMenuItem()">✅ Add Item · إضافة المنتج</button>
     </div>
 
@@ -670,6 +674,10 @@
         </div>
         <input type="text" id="editMenuImg" class="menu-form-input" placeholder="أو اسم الصورة الحالي">
         <div id="editImgUploadStatus" style="font-size:0.72rem;color:var(--dim);margin-top:0.3rem;"></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:0.8rem;">
+        <input type="checkbox" id="editMenuIsNew" style="width:18px;height:18px;accent-color:var(--gold);cursor:pointer;">
+        <label for="editMenuIsNew" style="cursor:pointer;font-size:0.85rem;color:var(--cream);">✨ وضع علامة <strong style="color:var(--gold);">New</strong> على المنتج</label>
       </div>
     </div>
     <div class="menu-modal-actions">
@@ -1619,7 +1627,7 @@ function renderMenuItems(){
             <div style="display:flex;align-items:center;gap:0.5rem;">
               ${item.img?`<img class="menu-item-img" src="${item.img}" onerror="this.style.display='none'" alt="">`:'<div class="menu-item-img" style="display:flex;align-items:center;justify-content:center;font-size:1.2rem;">☕</div>'}
               <div>
-                <div class="menu-item-en">${item.name_en||item.name_ar}</div>
+                <div class="menu-item-en">${item.name_en||item.name_ar} ${item.is_new?'<span style="background:var(--gold);color:var(--bg);font-size:0.6rem;font-weight:900;padding:1px 5px;border-radius:999px;">✨ New</span>':''}</div>
                 <div class="menu-item-ar">${item.name_ar}</div>
                 <div class="menu-item-price">OMR ${(+item.price).toFixed(3)}</div>
               </div>
@@ -1643,6 +1651,7 @@ function openMenuModal(item){
   document.getElementById('editMenuSection').value = item.section||'قهوة الاسبريسو';
   document.getElementById('editMenuImg').value = item.img||'';
   document.getElementById('editImgUploadStatus').textContent = '';
+  if(document.getElementById('editMenuIsNew')) document.getElementById('editMenuIsNew').checked = item.is_new||false;
   // عرض الصورة الحالية
   const prev = document.getElementById('editMenuImgPreview');
   if(item.img){ prev.src = item.img; prev.style.display='block'; }
@@ -1662,12 +1671,13 @@ async function saveMenuEdit(){
   const price = +document.getElementById('editMenuPrice').value;
   const section = document.getElementById('editMenuSection').value;
   const img = document.getElementById('editMenuImg').value.trim();
+  const is_new = document.getElementById('editMenuIsNew')?.checked || false;
   if(!name_ar||!price){ toast('❌ أدخل الاسم والسعر'); return; }
   try{
     await fetch(`${SUPA}/rest/v1/menu_items?id=eq.${id}`,{
       method:'PATCH',
       headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},
-      body:JSON.stringify({name_ar,name_en,price,section,img})
+      body:JSON.stringify({name_ar,name_en,price,section,img,is_new})
     });
     toast('✅ تم التعديل · Updated');
     closeMenuModal();
@@ -1695,21 +1705,22 @@ async function addMenuItem(){
   const price = +document.getElementById('newItemPrice').value;
   const section = document.getElementById('newItemSection').value;
   const img = document.getElementById('newItemImg').value.trim();
+  const is_new = document.getElementById('newItemIsNew')?.checked || false;
   if(!name_ar||!price){ toast('❌ أدخل الاسم والسعر · Enter name and price'); return; }
   try{
     const r = await fetch(`${SUPA}/rest/v1/menu_items`,{
       method:'POST',
       headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},
-      body:JSON.stringify({name_ar,name_en,price,section,img,available:true})
+      body:JSON.stringify({name_ar,name_en,price,section,img,available:true,is_new})
     });
     if(r.ok||r.status===201){
       document.getElementById('newItemAr').value='';
       document.getElementById('newItemEn').value='';
       document.getElementById('newItemPrice').value='';
       document.getElementById('newItemImg').value='';
+      if(document.getElementById('newItemIsNew')) document.getElementById('newItemIsNew').checked=false;
       toast('✅ Item Added · تم إضافة المنتج');
       await loadMenuItems();
-      // scroll للأسفل لرؤية المنتج الجديد
       document.getElementById('menuContent').scrollIntoView({behavior:'smooth'});
     } else {
       toast('❌ Error ' + r.status);

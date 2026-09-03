@@ -219,6 +219,8 @@
   .item-unavailable{opacity:0.45;}
   .item-unavailable .add-btn{background:var(--roast);color:var(--cream-dim);cursor:not-allowed;}
   .unavail-badge{background:#e53935;color:#fff;font-size:0.65rem;font-weight:900;padding:0.15rem 0.5rem;border-radius:999px;display:block;margin-top:3px;}
+  .new-badge{background:linear-gradient(135deg,#D99B53,#e8b060);color:#241510;font-size:0.65rem;font-weight:900;padding:0.15rem 0.6rem;border-radius:999px;display:inline-block;margin-top:3px;letter-spacing:0.05em;animation:newPulse 2s ease-in-out infinite;}
+  @keyframes newPulse{0%,100%{box-shadow:0 0 0 0 rgba(217,155,83,0.4);}50%{box-shadow:0 0 0 6px rgba(217,155,83,0);}}
   .add-btn.disabled{background:var(--roast);color:var(--cream-dim);cursor:not-allowed;pointer-events:none;}
 
   /* ===== نوع الطلب ===== */
@@ -498,6 +500,7 @@
                 <div class="item-name">
                   <span class="en">${nameEn}</span>
                   <span class="ar">${nameAr}</span>
+                  ${item.is_new?'<span class="new-badge">✨ New</span>':''}
                   ${unavail?'<span class="unavail-badge">🚫 Unavailable · غير متوفر</span>':''}
                 </div>
               </div>
