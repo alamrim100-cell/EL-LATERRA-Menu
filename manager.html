@@ -326,13 +326,38 @@
 
 <!-- ===== OVERVIEW ===== -->
 <div class="panel active" id="panel-overview">
-  <div class="filters" style="margin-top:1rem;">
-    <button class="filter-btn active" onclick="setFilter('today')">اليوم · Today</button>
-    <button class="filter-btn" onclick="setFilter('week')">الأسبوع · Week</button>
-    <button class="filter-btn" onclick="setFilter('month')">الشهر · Month</button>
-    <button class="filter-btn" onclick="setFilter('year')">السنة · Year</button>
-    <button class="filter-btn" onclick="setFilter('all')">الكل · All</button>
-    <input type="date" class="filter-input" id="dateFilter" onchange="setFilter('custom')">
+  <div style="margin-top:1rem;">
+
+    <!-- الفلاتر السريعة -->
+    <div class="filters" id="overviewFilters">
+      <button class="filter-btn active" onclick="setFilter('today')">اليوم · Today</button>
+      <button class="filter-btn" onclick="setFilter('yesterday')">أمس · Yesterday</button>
+      <button class="filter-btn" onclick="setFilter('week')">الأسبوع · Week</button>
+      <button class="filter-btn" onclick="setFilter('month')">الشهر · Month</button>
+      <button class="filter-btn" onclick="setFilter('year')">السنة · Year</button>
+      <button class="filter-btn" onclick="setFilter('all')">الكل · All</button>
+    </div>
+
+    <!-- فلتر يوم محدد -->
+    <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.8rem;align-items:center;">
+      <div style="font-size:0.78rem;color:var(--dim);white-space:nowrap;">📅 يوم محدد · Specific Day:</div>
+      <input type="date" class="filter-input" id="dateFilter" onchange="setFilter('custom')">
+    </div>
+
+    <!-- فلتر فترة مخصصة -->
+    <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1rem;align-items:center;">
+      <div style="font-size:0.78rem;color:var(--dim);white-space:nowrap;">📆 فترة مخصصة · Date Range:</div>
+      <input type="date" class="filter-input" id="dateFrom" placeholder="من · From">
+      <span style="color:var(--dim);font-size:0.8rem;">←</span>
+      <input type="date" class="filter-input" id="dateTo" placeholder="إلى · To">
+      <button class="filter-btn" onclick="setFilter('range')" style="background:var(--gold);color:var(--bg);border-color:var(--gold);">
+        ✅ تطبيق · Apply
+      </button>
+    </div>
+
+    <!-- عرض الفترة الحالية -->
+    <div id="currentPeriodLabel" style="font-size:0.78rem;color:var(--gold);margin-bottom:0.8rem;font-family:'Cormorant Garamond',serif;font-style:italic;"></div>
+
   </div>
 
   <div class="stats-grid">
@@ -934,12 +959,32 @@ function switchTab(tab){
 
 /* ===== FILTERS ===== */
 function setFilter(f){
-  currentFilter=f;
-  document.querySelectorAll('#panel-overview .filter-btn').forEach((b,i)=>{
-    b.classList.toggle('active',['today','week','month','year','all'][i]===f);
-  });
+  currentFilter = f;
+  // تحديث الأزرار
+  const btns = document.querySelectorAll('#overviewFilters .filter-btn');
+  const filterMap = ['today','yesterday','week','month','year','all'];
+  btns.forEach((b,i)=> b.classList.toggle('active', filterMap[i]===f));
+
+  // عرض وصف الفترة
+  const lbl = document.getElementById('currentPeriodLabel');
+  const now = new Date();
+  const fmt = d => d.toLocaleDateString('ar-OM',{day:'2-digit',month:'2-digit',year:'numeric'});
+  if(f==='today') lbl.textContent = `📅 اليوم · ${fmt(now)}`;
+  else if(f==='yesterday'){ const y=new Date(now); y.setDate(now.getDate()-1); lbl.textContent=`📅 أمس · ${fmt(y)}`; }
+  else if(f==='week'){ const w=new Date(now); w.setDate(now.getDate()-7); lbl.textContent=`📅 ${fmt(w)} ← ${fmt(now)}`; }
+  else if(f==='month'){ const m=new Date(now); m.setDate(now.getDate()-30); lbl.textContent=`📅 ${fmt(m)} ← ${fmt(now)}`; }
+  else if(f==='year'){ const y=new Date(now); y.setFullYear(now.getFullYear()-1); lbl.textContent=`📅 ${fmt(y)} ← ${fmt(now)}`; }
+  else if(f==='all') lbl.textContent = '📅 كل الفترات · All Time';
+  else if(f==='custom'){ const v=document.getElementById('dateFilter')?.value; if(v) lbl.textContent=`📅 ${v}`; }
+  else if(f==='range'){
+    const from=document.getElementById('dateFrom')?.value;
+    const to=document.getElementById('dateTo')?.value;
+    if(from&&to) lbl.textContent=`📅 ${from} ← ${to}`;
+  }
+
   applyOverview();
 }
+
 function setInvFilter(f){
   invFilter=f;
   document.querySelectorAll('#panel-invoices .filter-btn').forEach((b,i)=>{
@@ -955,17 +1000,46 @@ function setExpFilter(f){
   renderExpenses(filterData(allExpenses,f,'exp'));
 }
 
-function filterData(data,f,type){
-  const now=new Date();
-  const field='created_at';
-  if(f==='today') return data.filter(d=>new Date(d[field]).toDateString()===now.toDateString());
-  if(f==='week'){const w=new Date(now);w.setDate(now.getDate()-7);return data.filter(d=>new Date(d[field])>=w);}
-  if(f==='month'){const m=new Date(now);m.setDate(now.getDate()-30);return data.filter(d=>new Date(d[field])>=m);}
-  if(f==='year'){const y=new Date(now);y.setFullYear(now.getFullYear()-1);return data.filter(d=>new Date(d[field])>=y);}
+function filterData(data, f, type){
+  const now = new Date();
+  const field = 'created_at';
+
+  if(f==='today'){
+    return data.filter(d => new Date(d[field]).toDateString() === now.toDateString());
+  }
+  if(f==='yesterday'){
+    const y = new Date(now);
+    y.setDate(now.getDate()-1);
+    return data.filter(d => new Date(d[field]).toDateString() === y.toDateString());
+  }
+  if(f==='week'){
+    const w = new Date(now); w.setDate(now.getDate()-7);
+    return data.filter(d => new Date(d[field]) >= w);
+  }
+  if(f==='month'){
+    const m = new Date(now); m.setDate(now.getDate()-30);
+    return data.filter(d => new Date(d[field]) >= m);
+  }
+  if(f==='year'){
+    const y = new Date(now); y.setFullYear(now.getFullYear()-1);
+    return data.filter(d => new Date(d[field]) >= y);
+  }
   if(f==='custom'){
-    const id=type==='inv'?'invDateFilter':'dateFilter';
-    const v=document.getElementById(id)?.value;
-    if(v) return data.filter(d=>d[field].startsWith(v));
+    const id = type==='inv' ? 'invDateFilter' : 'dateFilter';
+    const v = document.getElementById(id)?.value;
+    if(v) return data.filter(d => d[field].startsWith(v));
+  }
+  if(f==='range'){
+    const from = document.getElementById('dateFrom')?.value;
+    const to   = document.getElementById('dateTo')?.value;
+    if(from && to){
+      const fromDate = new Date(from + 'T00:00:00');
+      const toDate   = new Date(to   + 'T23:59:59');
+      return data.filter(d => {
+        const dt = new Date(d[field]);
+        return dt >= fromDate && dt <= toDate;
+      });
+    }
   }
   return data;
 }
