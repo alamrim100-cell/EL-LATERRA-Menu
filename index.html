@@ -215,9 +215,10 @@
   .success-box p{color:var(--cream-dim);}
 
   /* ===== غير متوفر ===== */
-  .item.unavailable{opacity:0.45;}
-  .item.unavailable .add-btn{background:var(--roast);color:var(--cream-dim);cursor:not-allowed;pointer-events:none;}
-  .unavail-badge{background:#e53935;color:#fff;font-size:0.65rem;font-weight:900;padding:0.15rem 0.5rem;border-radius:999px;white-space:nowrap;}
+  .item-unavailable{opacity:0.45;}
+  .item-unavailable .add-btn{background:var(--roast);color:var(--cream-dim);cursor:not-allowed;}
+  .unavail-badge{background:#e53935;color:#fff;font-size:0.65rem;font-weight:900;padding:0.15rem 0.5rem;border-radius:999px;display:block;margin-top:3px;}
+  .add-btn.disabled{background:var(--roast);color:var(--cream-dim);cursor:not-allowed;pointer-events:none;}
 
   /* ===== نوع الطلب ===== */
   .order-type-btn{flex:1;background:var(--roast);border:2px solid var(--line);border-radius:14px;padding:0.8rem 0.5rem;font-family:var(--ff-arabic);cursor:pointer;transition:all 0.2s;display:flex;flex-direction:column;align-items:center;gap:0.25rem;color:var(--cream-dim);}
@@ -280,450 +281,18 @@
 
   <!-- NAV -->
   <nav class="nav-tabs" id="navTabs">
-    <a href="#espresso" class="active">قهوة الاسبريسو</a>
-    <a href="#drip">القهوة المقطرة</a>
-    <a href="#drinks">مشروبات لاتيرا</a>
-    <a href="#sandwich">ساندويتش</a>
-    <a href="#cake">الكيك</a>
+    <div style="color:var(--caramel);font-family:var(--ff-display);font-style:italic;padding:0 1rem;">Loading...</div>
   </nav>
 
-  <!-- ESPRESSO -->
-  <section class="menu-section" id="espresso">
-    <div class="section-head">
-      <h2 class="ar-title">قهوة الاسبريسو</h2>
-      <p class="en-title">Espresso Coffee</p>
-      <div class="rule"></div>
+  <!-- MENU DYNAMIC -->
+  <div id="menuSections">
+    <div style="text-align:center;padding:5rem 2rem;color:var(--cream-dim);">
+      <div style="font-size:2rem;margin-bottom:1rem;">☕</div>
+      <div style="font-family:var(--ff-display);font-style:italic;">Loading menu...</div>
     </div>
-    <div class="section-cover">
-      <img src="4cups.jpeg" alt="قهوة الاسبريسو">
-      <div class="ph-label">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M3 10h14a3 3 0 010 6H6a3 3 0 01-3-6z"/><path d="M16 10v3a1 1 0 001 1h1a2 2 0 002-2v-1a1 1 0 00-1-1h-1"/><path d="M6 6c0-1 1-1 1-2M10 6c0-1 1-1 1-2"/></svg>
-        ضع صورة هنا — Espresso Coffee
-      </div>
-    </div>
-    <div class="menu-grid">
+  </div>
 
-      <div class="item">
-        <div class="item-main">
-          <div class="item-thumb"><img src="Expresso.jpeg" alt="اسبريسو"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M9 9h6v6H9z"/></svg></div>
-          <div class="item-name"><span class="ar">اسبريسو</span><span class="en">Espresso</span></div>
-        </div>
-        <div class="item-right">
-          <div class="item-price"><small>ر.ع</small>1.2</div>
-          <button class="add-btn" onclick="addToCart('اسبريسو', 1.2, 'Espresso')">+ أضف</button>
-        </div>
-      </div>
-
-      <div class="item">
-        <div class="item-main">
-          <div class="item-thumb"><img src="Amricano.jpeg" alt="أمريكانو"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M9 9h6v6H9z"/></svg></div>
-          <div class="item-name"><span class="ar">أمريكانو</span><span class="en">Americano</span></div>
-        </div>
-        <div class="item-right">
-          <div class="item-price"><small>ر.ع</small>1.2</div>
-          <button class="add-btn" onclick="addToCart('أمريكانو', 1.2, 'Americano')">+ أضف</button>
-        </div>
-      </div>
-
-      <div class="item">
-        <div class="item-main">
-          <div class="item-thumb"><img src="Cappuccino.jpeg" alt="كابتشينو"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M9 9h6v6H9z"/></svg></div>
-          <div class="item-name"><span class="ar">كابتشينو</span><span class="en">Cappuccino</span></div>
-        </div>
-        <div class="item-right">
-          <div class="item-price"><small>ر.ع</small>1.6</div>
-          <button class="add-btn" onclick="addToCart('كابتشينو', 1.6, 'Cappuccino')">+ أضف</button>
-        </div>
-      </div>
-
-      <div class="item">
-        <div class="item-main">
-          <div class="item-thumb"><img src="lattee22.PNG" alt="لاتيه"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M9 9h6v6H9z"/></svg></div>
-          <div class="item-name"><span class="ar">لاتيه</span><span class="en">Latte</span></div>
-        </div>
-        <div class="item-right">
-          <div class="item-price"><small>ر.ع</small>1.6</div>
-          <button class="add-btn" onclick="addToCart('لاتيه', 1.6, 'Latte')">+ أضف</button>
-        </div>
-      </div>
-
-      <div class="item">
-        <div class="item-main">
-          <div class="item-thumb"><img src="mocha.JPG.png" alt="موكا"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M9 9h6v6H9z"/></svg></div>
-          <div class="item-name"><span class="ar">موكا</span><span class="en">Mocha</span></div>
-        </div>
-        <div class="item-right">
-          <div class="item-price"><small>ر.ع</small>2.0</div>
-          <button class="add-btn" onclick="addToCart('موكا', 2.0, 'Mocha')">+ أضف</button>
-        </div>
-      </div>
-
-      <div class="item">
-        <div class="item-main">
-          <div class="item-thumb"><img src="Café au Lait.jpeg" alt="فلات وايت"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M9 9h6v6H9z"/></svg></div>
-          <div class="item-name"><span class="ar">فلات وايت</span><span class="en">Flat White</span></div>
-        </div>
-        <div class="item-right">
-          <div class="item-price"><small>ر.ع</small>1.6</div>
-          <button class="add-btn" onclick="addToCart('فلات وايت', 1.6, 'Flat White')">+ أضف</button>
-        </div>
-      </div>
-
-      <div class="item">
-        <div class="item-main">
-          <div class="item-thumb"><img src="coldlattee.PNG" alt="سبانيش"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M9 9h6v6H9z"/></svg></div>
-          <div class="item-name"><span class="ar">سبانيش</span><span class="en">Spanish</span></div>
-        </div>
-        <div class="item-right">
-          <div class="item-price"><small>ر.ع</small>1.9</div>
-          <button class="add-btn" onclick="addToCart('سبانيش', 1.9, 'Spanish')">+ أضف</button>
-        </div>
-      </div>
-
-      <div class="item">
-        <div class="item-main">
-          <div class="item-thumb"><img src="omani.jpeg" alt="قهوة عربية"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M9 9h6v6H9z"/></svg></div>
-          <div class="item-name"><span class="ar">قهوة عربية</span><span class="en">Arabic Coffee</span></div>
-        </div>
-        <div class="item-right">
-          <div class="item-price"><small>ر.ع</small>2.5</div>
-          <button class="add-btn" onclick="addToCart('قهوة عربية', 2.5, 'Arabic Coffee')">+ أضف</button>
-        </div>
-      </div>
-
-      <div class="item">
-        <div class="item-main">
-          <div class="item-thumb"><img src="creamy.JPG.PNG" alt="كريمي اسبريسو"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M9 9h6v6H9z"/></svg></div>
-          <div class="item-name"><span class="ar">كريمي اسبريسو</span><span class="en">Steel Coffee</span></div>
-        </div>
-        <div class="item-right">
-          <div class="item-price"><small>ر.ع</small>2.0</div>
-          <button class="add-btn" onclick="addToCart('كريمي اسبريسو', 2.0, 'Steel Coffee')">+ أضف</button>
-        </div>
-      </div>
-
-      <div class="item">
-        <div class="item-main">
-          <div class="item-thumb"><img src="Cappuccino.jpeg" alt="لاتيه مميز"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M9 9h6v6H9z"/></svg></div>
-          <div class="item-name"><span class="ar">لاتيه</span><span class="en">Latte</span><span class="note">عسل، ورد، فستق، زعفران، كراميل</span></div>
-        </div>
-        <div class="item-right">
-          <div class="item-price"><small>ر.ع</small>2.0</div>
-          <button class="add-btn" onclick="addToCart('لاتيه مميز', 2.0, 'Special Latte')">+ أضف</button>
-        </div>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- DRIP COFFEE -->
-  <section class="menu-section" id="drip">
-    <div class="section-head">
-      <h2 class="ar-title">القهوة المقطرة</h2>
-      <p class="en-title">Drip Coffee</p>
-      <div class="rule"></div>
-    </div>
-    <div class="section-cover">
-      <img src="v60p.jpeg" alt="القهوة المقطرة">
-      <div class="ph-label">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M3 10h14a3 3 0 010 6H6a3 3 0 01-3-6z"/><path d="M16 10v3a1 1 0 001 1h1a2 2 0 002-2v-1a1 1 0 00-1-1h-1"/></svg>
-        ضع صورة هنا — Drip Coffee
-      </div>
-    </div>
-    <div class="menu-grid">
-
-      <div class="item">
-        <div class="item-main">
-          <div class="item-thumb"><img src="v60.jpeg" alt="في60 كلاسيك"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M9 9h6v6H9z"/></svg></div>
-          <div class="item-name"><span class="ar">في60 كلاسيك</span><span class="en">V60 Classic</span></div>
-        </div>
-        <div class="item-right">
-          <div class="item-price"><small>ر.ع</small>2.2</div>
-          <button class="add-btn" onclick="addToCart('في60 كلاسيك', 2.2, 'V60 Classic')">+ أضف</button>
-        </div>
-      </div>
-
-      <div class="item">
-        <div class="item-main">
-          <div class="item-thumb"><img src="v60f.jpeg" alt="في60 فروتي"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M9 9h6v6H9z"/></svg></div>
-          <div class="item-name"><span class="ar">في60 فروتي</span><span class="en">V60 Fruti</span></div>
-        </div>
-        <div class="item-right">
-          <div class="item-price"><small>ر.ع</small>2.5</div>
-          <button class="add-btn" onclick="addToCart('في60 فروتي', 2.5, 'V60 Fruti')">+ أضف</button>
-        </div>
-      </div>
-
-      <div class="item">
-        <div class="item-main">
-          <div class="item-thumb"><img src="passioncoldbrew.jpeg" alt="كولد برو باشن"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M9 9h6v6H9z"/></svg></div>
-          <div class="item-name"><span class="ar">كولد برو باشن</span><span class="en">Cold Brew Passion</span></div>
-        </div>
-        <div class="item-right">
-          <div class="item-price"><small>ر.ع</small>2.6</div>
-          <button class="add-btn" onclick="addToCart('كولد برو باشن', 2.6, 'Cold Brew Passion')">+ أضف</button>
-        </div>
-      </div>
-
-      <div class="item">
-        <div class="item-main">
-          <div class="item-thumb"><img src="coldbrew.JPG.PNG" alt="كولد برو"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M9 9h6v6H9z"/></svg></div>
-          <div class="item-name"><span class="ar">كولد برو</span><span class="en">Cold Brew</span></div>
-        </div>
-        <div class="item-right">
-          <div class="item-price"><small>ر.ع</small>2.2</div>
-          <button class="add-btn" onclick="addToCart('كولد برو', 2.2, 'Cold Brew')">+ أضف</button>
-        </div>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- LATERRA DRINKS -->
-  <section class="menu-section" id="drinks">
-    <div class="section-head">
-      <h2 class="ar-title">مشروبات لاتيرا</h2>
-      <p class="en-title">Laterra Drinks</p>
-      <div class="rule"></div>
-    </div>
-    <div class="section-cover">
-      <img src="colddrink.jpeg" alt="مشروبات لاتيرا">
-      <div class="ph-label">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M5 4h14l-2 16H7L5 4z"/><path d="M9 9h6"/></svg>
-        ضع صورة هنا — Laterra Drinks
-      </div>
-    </div>
-    <div class="menu-grid">
-
-      <div class="item">
-        <div class="item-main">
-          <div class="item-thumb"><img src="creamy.JPG.PNG" alt="فرابتشينو"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M6 4h12l-1.5 16h-9L6 4z"/></svg></div>
-          <div class="item-name"><span class="ar">فرابتشينو</span><span class="en">Frappuccino</span></div>
-        </div>
-        <div class="item-right">
-          <div class="item-price"><small>ر.ع</small>2.0</div>
-          <button class="add-btn" onclick="addToCart('فرابتشينو', 2.0, 'Frappuccino')">+ أضف</button>
-        </div>
-      </div>
-
-      <div class="item">
-        <div class="item-main">
-          <div class="item-thumb"><img src="matcha.jpeg" alt="ماتشا"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M6 4h12l-1.5 16h-9L6 4z"/></svg></div>
-          <div class="item-name"><span class="ar">ماتشا</span><span class="en">Matcha</span></div>
-        </div>
-        <div class="item-right">
-          <div class="item-price"><small>ر.ع</small>1.9</div>
-          <button class="add-btn" onclick="addToCart('ماتشا', 1.9, 'Matcha')">+ أضف</button>
-        </div>
-      </div>
-
-      <div class="item">
-        <div class="item-main">
-          <div class="item-thumb"><img src="milkshake.jpeg" alt="ميلك شيك"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M6 4h12l-1.5 16h-9L6 4z"/></svg></div>
-          <div class="item-name"><span class="ar">ميلك شيك</span><span class="en">Milkshake</span></div>
-        </div>
-        <div class="item-right">
-          <div class="item-price"><small>ر.ع</small>1.8</div>
-          <button class="add-btn" onclick="addToCart('ميلك شيك', 1.8, 'Milkshake')">+ أضف</button>
-        </div>
-      </div>
-
-      <div class="item">
-        <div class="item-main">
-          <div class="item-thumb"><img src="icetea.jpeg" alt="آيس تي"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M6 4h12l-1.5 16h-9L6 4z"/></svg></div>
-          <div class="item-name"><span class="ar">آيس تي</span><span class="en">Ice Tea</span></div>
-        </div>
-        <div class="item-right">
-          <div class="item-price"><small>ر.ع</small>1.6</div>
-          <button class="add-btn" onclick="addToCart('آيس تي', 1.6, 'Ice Tea')">+ أضف</button>
-        </div>
-      </div>
-
-      <div class="item">
-        <div class="item-main">
-          <div class="item-thumb"><img src="mojito.jpeg" alt="موهيتو"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M6 4h12l-1.5 16h-9L6 4z"/></svg></div>
-          <div class="item-name"><span class="ar">موهيتو</span><span class="en">Mojito</span></div>
-        </div>
-        <div class="item-right">
-          <div class="item-price"><small>ر.ع</small>1.8</div>
-          <button class="add-btn" onclick="addToCart('موهيتو', 1.8, 'Mojito')">+ أضف</button>
-        </div>
-      </div>
-
-      <div class="item">
-        <div class="item-main">
-          <div class="item-thumb"><img src="logo.jpeg" alt="بلاك لاتيرا"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M6 4h12l-1.5 16h-9L6 4z"/></svg></div>
-          <div class="item-name"><span class="ar">بلاك لاتيرا</span><span class="en">Black Laterra</span></div>
-        </div>
-        <div class="item-right">
-          <div class="item-price"><small>ر.ع</small>1.9</div>
-          <button class="add-btn" onclick="addToCart('بلاك لاتيرا', 1.9, 'Black Laterra')">+ أضف</button>
-        </div>
-      </div>
-
-      <div class="item">
-        <div class="item-main">
-          <div class="item-thumb"><img src="hibiscus.jpeg" alt="كركديه"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M6 4h12l-1.5 16h-9L6 4z"/></svg></div>
-          <div class="item-name"><span class="ar">كركديه</span><span class="en">Hibiscus</span></div>
-        </div>
-        <div class="item-right">
-          <div class="item-price"><small>ر.ع</small>1.5</div>
-          <button class="add-btn" onclick="addToCart('كركديه', 1.5, 'Hibiscus')">+ أضف</button>
-        </div>
-      </div>
-
-      <div class="item">
-        <div class="item-main">
-          <div class="item-thumb"><img src="orange .jpeg" alt="عصير برتقال"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M6 4h12l-1.5 16h-9L6 4z"/></svg></div>
-          <div class="item-name"><span class="ar">عصير برتقال</span><span class="en">Orange Juice</span></div>
-        </div>
-        <div class="item-right">
-          <div class="item-price"><small>ر.ع</small>1.5</div>
-          <button class="add-btn" onclick="addToCart('عصير برتقال', 1.5, 'Orange Juice')">+ أضف</button>
-        </div>
-      </div>
-
-      <div class="item">
-        <div class="item-main">
-          <div class="item-thumb"><img src="hotchokle.jpeg" alt="هوت شوكليت"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M6 4h12l-1.5 16h-9L6 4z"/></svg></div>
-          <div class="item-name"><span class="ar">هوت شوكليت</span><span class="en">Ice Chocolate</span></div>
-        </div>
-        <div class="item-right">
-          <div class="item-price"><small>ر.ع</small>1.5</div>
-          <button class="add-btn" onclick="addToCart('هوت شوكليت', 1.5, 'Ice Chocolate')">+ أضف</button>
-        </div>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- SANDWICH -->
-  <section class="menu-section" id="sandwich">
-    <div class="section-head">
-      <h2 class="ar-title">ساندويتش</h2>
-      <p class="en-title">Sandwich</p>
-      <div class="rule"></div>
-    </div>
-    <div class="section-cover">
-      <img src="sandwich.jpeg" alt="ساندويتش">
-      <div class="ph-label">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M3 12h18M4 12l1-4h14l1 4M4 12l1 5h14l1-5"/></svg>
-        ضع صورة هنا — Sandwich
-      </div>
-    </div>
-    <div class="menu-grid">
-
-      <div class="item">
-        <div class="item-main">
-          <div class="item-thumb"><img src="crassiont.jpeg" alt="كرواسون"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M3 12h18M4 12l1-4h14l1 4M4 12l1 5h14l1-5"/></svg></div>
-          <div class="item-name"><span class="ar">كرواسون</span><span class="en">Croissant</span></div>
-        </div>
-        <div class="item-right">
-          <div class="item-price"><small>ر.ع</small>0.8</div>
-          <button class="add-btn" onclick="addToCart('كرواسون', 0.8, 'Croissant')">+ أضف</button>
-        </div>
-      </div>
-
-      <div class="item">
-        <div class="item-main">
-          <div class="item-thumb"><img src="murtadella.jpeg" alt="مرتديلا"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M3 12h18M4 12l1-4h14l1 4M4 12l1 5h14l1-5"/></svg></div>
-          <div class="item-name"><span class="ar">مرتديلا</span><span class="en">Mortadella</span></div>
-        </div>
-        <div class="item-right">
-          <div class="item-price"><small>ر.ع</small>1.3</div>
-          <button class="add-btn" onclick="addToCart('مرتديلا', 1.3, 'Mortadella')">+ أضف</button>
-        </div>
-      </div>
-
-      <div class="item">
-        <div class="item-main">
-          <div class="item-thumb"><img src="hallumi.jpeg" alt="حلومي"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M3 12h18M4 12l1-4h14l1 4M4 12l1 5h14l1-5"/></svg></div>
-          <div class="item-name"><span class="ar">حلومي</span><span class="en">Halloumi</span></div>
-        </div>
-        <div class="item-right">
-          <div class="item-price"><small>ر.ع</small>1.5</div>
-          <button class="add-btn" onclick="addToCart('حلومي', 1.5, 'Halloumi')">+ أضف</button>
-        </div>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- CAKE -->
-  <section class="menu-section" id="cake">
-    <div class="section-head">
-      <h2 class="ar-title">الكيك</h2>
-      <p class="en-title">Cake</p>
-      <div class="rule"></div>
-    </div>
-    <div class="section-cover">
-      <img src="cakes.png" alt="الكيك">
-      <div class="ph-label">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M4 20h16v-7H4v7zM4 13l8-6 8 6"/></svg>
-        ضع صورة هنا — Cake
-      </div>
-    </div>
-    <div class="menu-grid">
-
-      <div class="item">
-        <div class="item-main">
-          <div class="item-thumb"><img src="crip.jpeg" alt="كريب"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M4 20h16v-7H4v7zM4 13l8-6 8 6"/></svg></div>
-          <div class="item-name"><span class="ar">كريب</span><span class="en">Crepe</span></div>
-        </div>
-        <div class="item-right">
-          <div class="item-price"><small>ر.ع</small>1.9</div>
-          <button class="add-btn" onclick="addToCart('كريب', 1.9, 'Crepe')">+ أضف</button>
-        </div>
-      </div>
-
-      <div class="item">
-        <div class="item-main">
-          <div class="item-thumb"><img src="tramisu.jpeg" alt="تيراميسو"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M4 20h16v-7H4v7zM4 13l8-6 8 6"/></svg></div>
-          <div class="item-name"><span class="ar">تيراميسو</span><span class="en">Tiramisu</span></div>
-        </div>
-        <div class="item-right">
-          <div class="item-price"><small>ر.ع</small>2.1</div>
-          <button class="add-btn" onclick="addToCart('تيراميسو', 2.1, 'Tiramisu')">+ أضف</button>
-        </div>
-      </div>
-
-      <div class="item">
-        <div class="item-main">
-          <div class="item-thumb"><img src="" alt="تشيزكيك"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M4 20h16v-7H4v7zM4 13l8-6 8 6"/></svg></div>
-          <div class="item-name"><span class="ar">تشيزكيك</span><span class="en">Cheesecake</span></div>
-        </div>
-        <div class="item-right">
-          <div class="item-price"><small>ر.ع</small>2.5</div>
-          <button class="add-btn" onclick="addToCart('تشيزكيك', 2.5, 'Cheesecake')">+ أضف</button>
-        </div>
-      </div>
-
-      <div class="item">
-        <div class="item-main">
-          <div class="item-thumb"><img src="london.jpeg" alt="لندن كيك"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M4 20h16v-7H4v7zM4 13l8-6 8 6"/></svg></div>
-          <div class="item-name"><span class="ar">لندن كيك</span><span class="en">London Cake</span></div>
-        </div>
-        <div class="item-right">
-          <div class="item-price"><small>ر.ع</small>2.5</div>
-          <button class="add-btn" onclick="addToCart('لندن كيك', 2.5, 'London Cake')">+ أضف</button>
-        </div>
-      </div>
-
-      <div class="item">
-        <div class="item-main">
-          <div class="item-thumb"><img src="SanSebastian.jpeg" alt="سان سباستيان"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M4 20h16v-7H4v7zM4 13l8-6 8 6"/></svg></div>
-          <div class="item-name"><span class="ar">سان سباستيان</span><span class="en">San Sebastian</span></div>
-        </div>
-        <div class="item-right">
-          <div class="item-price"><small>ر.ع</small>2.5</div>
-          <button class="add-btn" onclick="addToCart('سان سباستيان', 2.5, 'San Sebastian')">+ أضف</button>
-        </div>
-      </div>
-
-    </div>
-  </section>
-
-  <footer>
+    <footer>
     <p class="mark">إيل لاتيرا</p>
     <p class="tag">EL Laterra</p>
     <p class="small">قهوة مختصة · عُمان</p>
@@ -829,45 +398,145 @@
   const SUPA_URL = 'https://fyyxuvqwoykavqhoaowu.supabase.co';
   const SUPA_KEY = 'sb_publishable_CKq5sKxZvi5k43cmEJ1cjw_Cg7jWk_e';
 
-  async function loadAvailability(){
+  // أيقونات الأقسام
+  const SECTION_ICONS = {
+    'قهوة الاسبريسو': {icon:'☕', en:'Espresso Coffee', cover:'4cups.jpeg', id:'espresso'},
+    'القهوة المقطرة': {icon:'🫗', en:'Drip Coffee',     cover:'v60.jpeg',   id:'drip'},
+    'مشروبات لاتيرا': {icon:'🥤', en:'Laterra Drinks',  cover:'',           id:'drinks'},
+    'ساندويتش':       {icon:'🥪', en:'Sandwich',         cover:'',           id:'sandwich'},
+    'الكيك':          {icon:'🍰', en:'Cake & Desserts',  cover:'',           id:'cake'},
+  };
+  const SECTION_ORDER = ['قهوة الاسبريسو','القهوة المقطرة','مشروبات لاتيرا','ساندويتش','الكيك'];
+  const NO_TEMP = ['ساندويتش','الكيك'];
+
+  let unavailableItems = new Set();
+  let allMenuItems = [];
+
+  async function loadMenuAndAvailability(){
     try{
-      const res = await fetch(`${SUPA_URL}/rest/v1/availability?select=*`, {
-        headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${SUPA_KEY}`}
-      });
-      const data = await res.json();
-      if(!Array.isArray(data)) return;
+      const [menuRes, availRes] = await Promise.all([
+        fetch(`${SUPA_URL}/rest/v1/menu_items?select=*&order=section,created_at`,{
+          headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${SUPA_KEY}`}
+        }),
+        fetch(`${SUPA_URL}/rest/v1/availability?select=*`,{
+          headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${SUPA_KEY}`}
+        })
+      ]);
 
-      const unavailable = new Set(data.filter(d => !d.available).map(d => d.item_id));
+      const menuData  = await menuRes.json();
+      const availData = await availRes.json();
 
-      // لكل عنصر في المينيو تحقق من حالته
-      document.querySelectorAll('.item').forEach(itemEl => {
-        const btn = itemEl.querySelector('.add-btn');
-        if(!btn) return;
-        // استخرج اسم المنتج من onclick
-        const onclick = btn.getAttribute('onclick') || '';
-        const match = onclick.match(/addToCart\('([^']+)'/);
-        if(!match) return;
-        const itemName = match[1];
+      if(Array.isArray(availData)){
+        // المنتجات المعطّلة هي اللي موجودة في availability وavailable=false
+        unavailableItems = new Set(availData.filter(d=>!d.available).map(d=>d.item_id));
+      }
 
-        if(unavailable.has(itemName)){
-          itemEl.classList.add('unavailable');
-          // أضف badge غير متوفر
-          const nameEl = itemEl.querySelector('.item-name');
-          if(nameEl && !nameEl.querySelector('.unavail-badge')){
-            const badge = document.createElement('span');
-            badge.className = 'unavail-badge';
-            badge.textContent = '🚫 غير متوفر · Unavailable';
-            nameEl.appendChild(badge);
-          }
-          btn.textContent = 'غير متوفر';
-        }
-      });
-    }catch(e){ console.error(e); }
+      if(Array.isArray(menuData)){
+        allMenuItems = menuData;
+        renderMenu(menuData);
+      }
+    }catch(e){ console.error('Load error:', e); }
   }
 
-  loadAvailability();
+  function renderMenu(items){
+    // تجميع حسب القسم
+    const grouped = {};
+    items.forEach(item=>{
+      const sec = item.section||'أخرى';
+      if(!grouped[sec]) grouped[sec]=[];
+      grouped[sec].push(item);
+    });
+
+    const allSections = [...new Set([...SECTION_ORDER, ...Object.keys(grouped)])].filter(s=>grouped[s]);
+
+    // بناء الـ nav
+    const nav = document.getElementById('navTabs');
+    nav.innerHTML = allSections.map((sec,i)=>`
+      <a href="#${SECTION_ICONS[sec]?.id||'sec'+i}" class="${i===0?'active':''}">${sec}</a>
+    `).join('');
+
+    // بناء الأقسام
+    const container = document.getElementById('menuSections');
+    container.innerHTML = allSections.map((sec,i)=>{
+      const info = SECTION_ICONS[sec]||{icon:'☕',en:sec,cover:'',id:'sec'+i};
+      const secItems = grouped[sec]||[];
+      const isNoTemp = NO_TEMP.includes(sec);
+
+      return `
+      <section class="menu-section" id="${info.id}">
+        <div class="section-head">
+          <h2 class="ar-title">${sec}</h2>
+          <p class="en-title">${info.en}</p>
+          <div class="rule"></div>
+        </div>
+        ${info.cover?`
+        <div class="section-cover">
+          <img src="${info.cover}" alt="${sec}">
+          <div class="ph-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M3 10h14a3 3 0 010 6H6a3 3 0 01-3-6z"/></svg>
+            ${info.icon} ${info.en}
+          </div>
+        </div>`:''}
+        <div class="items-grid">
+          ${secItems.map(item=>{
+            const unavail = unavailableItems.has(item.name_ar);
+            const nameAr = item.name_ar||'';
+            const nameEn = item.name_en||nameAr;
+            const price  = (+item.price).toFixed(3);
+            const imgSrc = item.img||'';
+            const addFn  = isNoTemp
+              ? `addToCart('${nameAr.replace(/'/g,"\\'")}', ${item.price}, '${nameEn.replace(/'/g,"\\'")}')` 
+              : `addToCart('${nameAr.replace(/'/g,"\\'")}', ${item.price}, '${nameEn.replace(/'/g,"\\'")}')`;
+            return `
+            <div class="item${unavail?' item-unavailable':''}">
+              <div class="item-main">
+                <div class="item-thumb">
+                  ${imgSrc?`<img src="${imgSrc}" alt="${nameAr}" onerror="this.style.display='none'">`:''}
+                  <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><circle cx="12" cy="12" r="9"/></svg>
+                </div>
+                <div class="item-name">
+                  <span class="en">${nameEn}</span>
+                  <span class="ar">${nameAr}</span>
+                  ${unavail?'<span class="unavail-badge">🚫 Unavailable · غير متوفر</span>':''}
+                </div>
+              </div>
+              <div class="item-right">
+                <div class="item-price"><small>ر.ع</small>${price}</div>
+                <button class="add-btn${unavail?' disabled':''}" 
+                  ${unavail?'disabled':''} 
+                  onclick="${unavail?'':addFn}">
+                  ${unavail?'غير متوفر':'+ أضف'}
+                </button>
+              </div>
+            </div>`;
+          }).join('')}
+        </div>
+      </section>`;
+    }).join('');
+
+    // تفعيل nav scroll
+    setupNavScroll();
+  }
+
+  function setupNavScroll(){
+    const nav = document.getElementById('navTabs');
+    const links = nav.querySelectorAll('a');
+    const observer = new IntersectionObserver(entries=>{
+      entries.forEach(entry=>{
+        if(entry.isIntersecting){
+          links.forEach(l=>l.classList.remove('active'));
+          const active = nav.querySelector(`a[href="#${entry.target.id}"]`);
+          if(active){ active.classList.add('active'); active.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'}); }
+        }
+      });
+    },{threshold:0.3});
+    document.querySelectorAll('.menu-section').forEach(s=>observer.observe(s));
+  }
+
+  // تحميل عند البداية
+  loadMenuAndAvailability();
   // تحديث كل دقيقة
-  setInterval(loadAvailability, 60000);
+  setInterval(loadMenuAndAvailability, 60000);
 
   // Hero background
   const heroImg = document.getElementById('heroImg');
