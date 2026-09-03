@@ -187,6 +187,22 @@
   }
   .toast.show{opacity:1;}
 
+  /* ===== نافذة تعديل المنتج ===== */
+  .prod-edit-modal{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:90;display:none;align-items:center;justify-content:center;padding:1rem;}
+  .prod-edit-modal.open{display:flex;}
+  .prod-edit-box{background:var(--card);border:1px solid var(--gold);border-radius:16px;width:100%;max-width:380px;overflow:hidden;}
+  .prod-edit-head{background:var(--gold-dim);border-bottom:1px solid var(--border);padding:0.9rem 1.2rem;display:flex;justify-content:space-between;align-items:center;}
+  .prod-edit-title{font-weight:900;color:var(--gold);font-size:0.95rem;}
+  .prod-edit-close{background:none;border:none;color:var(--dim);font-size:1.2rem;cursor:pointer;}
+  .prod-edit-body{padding:1.2rem;display:flex;flex-direction:column;gap:0.8rem;}
+  .prod-edit-lbl{font-size:0.75rem;color:var(--dim);margin-bottom:0.3rem;display:block;}
+  .prod-edit-input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:0.55rem 0.8rem;color:var(--cream);font-family:'Tajawal',sans-serif;font-size:0.88rem;outline:none;box-sizing:border-box;}
+  .prod-edit-input:focus{border-color:var(--gold);}
+  .prod-edit-actions{display:flex;gap:0.6rem;padding:0.9rem 1.2rem;border-top:1px solid var(--border);}
+  .prod-edit-btn{flex:1;padding:0.65rem;border:none;border-radius:10px;font-family:'Tajawal',sans-serif;font-weight:900;font-size:0.82rem;cursor:pointer;}
+  .prod-edit-save{background:var(--gold);color:var(--bg);}
+  .prod-edit-save:hover{opacity:0.85;}
+
   /* ===== نافذة الفاتورة ===== */
   .inv-modal{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:90;display:none;align-items:center;justify-content:center;padding:1rem;overflow-y:auto;}
   .inv-modal.open{display:flex;}
@@ -672,6 +688,44 @@
   </div>
 </div>
 
+<!-- نافذة تعديل المنتج -->
+<div class="prod-edit-modal" id="prodEditModal">
+  <div class="prod-edit-box">
+    <div class="prod-edit-head">
+      <span class="prod-edit-title">✏️ Edit Item · تعديل المنتج</span>
+      <button class="prod-edit-close" onclick="closeProdEdit()">✕</button>
+    </div>
+    <div class="prod-edit-body">
+      <input type="hidden" id="editProdId">
+      <div>
+        <label class="prod-edit-lbl">English Name · الاسم بالإنجليزي</label>
+        <input type="text" id="editProdEn" class="prod-edit-input">
+      </div>
+      <div>
+        <label class="prod-edit-lbl">Arabic Name · الاسم بالعربي</label>
+        <input type="text" id="editProdAr" class="prod-edit-input">
+      </div>
+      <div>
+        <label class="prod-edit-lbl">Price · السعر (OMR)</label>
+        <input type="number" id="editProdPrice" class="prod-edit-input" step="0.001" min="0">
+      </div>
+      <div>
+        <label class="prod-edit-lbl">Image · الصورة</label>
+        <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
+          <img id="editProdImgPreview" src="" style="display:none;width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid var(--gold);">
+          <input type="file" id="editProdImgFile" accept="image/*" style="display:none;" onchange="previewProdImg(this)">
+          <button type="button" onclick="document.getElementById('editProdImgFile').click()" style="background:var(--border);color:var(--cream);border:1px solid var(--gold);border-radius:8px;padding:0.4rem 0.7rem;font-family:'Tajawal',sans-serif;font-size:0.78rem;cursor:pointer;">📷 Upload</button>
+          <input type="text" id="editProdImg" class="prod-edit-input" placeholder="or type image URL" style="flex:1;min-width:100px;">
+        </div>
+        <div id="editProdImgStatus" style="font-size:0.72rem;color:var(--dim);margin-top:0.3rem;"></div>
+      </div>
+    </div>
+    <div class="prod-edit-actions">
+      <button class="prod-edit-btn prod-edit-save" onclick="saveProdEdit()">💾 Save · حفظ</button>
+    </div>
+  </div>
+</div>
+
 <!-- نافذة الفاتورة -->
 <div class="inv-modal" id="invModal">
   <div class="inv-box">
@@ -725,6 +779,7 @@ async function loadMenu(){
       if(!grouped[sec]) grouped[sec]={section:sec, sectionEn:sec, items:[]};
       grouped[sec].items.push({
         id: item.name_ar,
+        dbId: item.id,
         ar: item.name_ar,
         en: item.name_en||item.name_ar,
         price: String(item.price),
@@ -1245,17 +1300,100 @@ function renderProducts(){
         const un = unavailableItems.has(item.id);
         return `<div class="prod-card ${un?'unavailable':''}">
           <span class="prod-status ${un?'un':'av'}">${un?'🚫 Unavailable':'✅ Available'}</span>
-          ${item.img?`<img class="prod-img" src="${item.img}" alt="${item.ar}" onerror="this.style.display='none'">`:''}
+          ${item.img?`<img class="prod-img" src="${item.img}" alt="${item.ar}" onerror="this.style.display='none'">`:'<div class="prod-img" style="display:flex;align-items:center;justify-content:center;font-size:1.2rem;">☕</div>'}
           <div class="prod-en ${un?'struck':''}">${item.en}</div>
           <div class="prod-ar ${un?'struck':''}">${item.ar}</div>
-          <div class="prod-price">OMR ${item.price}</div>
-          <button class="prod-toggle ${un?'set-av':'set-un'}" onclick="toggleItem('${item.id}')">
-            ${un?'✅ إتاحة · Enable':'🚫 تعطيل · Disable'}
-          </button>
+          <div class="prod-price">OMR ${(+item.price).toFixed(3)}</div>
+          <div style="display:flex;gap:0.3rem;margin-top:2px;">
+            <button class="prod-toggle ${un?'set-av':'set-un'}" onclick="toggleItem('${item.id}')" style="flex:1;">
+              ${un?'✅ Enable':'🚫 Disable'}
+            </button>
+            <button style="background:var(--gold);color:var(--bg);border:none;border-radius:7px;padding:0.35rem 0.5rem;cursor:pointer;font-size:0.75rem;font-weight:900;" onclick='openProdEdit(${JSON.stringify(item).replace(/'/g,"&#39;")})'>✏️</button>
+          </div>
         </div>`;
       }).join('')}
     </div>
   `).join('');
+}
+
+/* ===== PRODUCT EDIT ===== */
+const STORAGE_URL_STAFF = `${SUPA}/rest/v1/../storage/v1/object/menu-images/`;
+const STORAGE_PUBLIC_STAFF = `https://fyyxuvqwoykavqhoaowu.supabase.co/storage/v1/object/public/menu-images/`;
+
+async function uploadProdImage(file){
+  const statusEl = document.getElementById('editProdImgStatus');
+  const ext = file.name.split('.').pop().toLowerCase();
+  const fname = `item_${Date.now()}.${ext}`;
+  statusEl.textContent = '⏳ Uploading...';
+  statusEl.style.color = 'var(--gold)';
+  try{
+    const r = await fetch(`https://fyyxuvqwoykavqhoaowu.supabase.co/storage/v1/object/menu-images/${fname}`,{
+      method:'POST',
+      headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Content-Type':file.type,'x-upsert':'true'},
+      body: file
+    });
+    if(r.ok){
+      statusEl.textContent = '✅ Uploaded';
+      statusEl.style.color = 'var(--green)';
+      return `${STORAGE_PUBLIC_STAFF}${fname}`;
+    } else {
+      statusEl.textContent = '❌ Failed';
+      statusEl.style.color = 'var(--red)';
+      return null;
+    }
+  }catch(e){
+    statusEl.textContent = '❌ Error';
+    statusEl.style.color = 'var(--red)';
+    return null;
+  }
+}
+
+function previewProdImg(input){
+  const file = input.files[0];
+  if(!file) return;
+  const prev = document.getElementById('editProdImgPreview');
+  prev.src = URL.createObjectURL(file);
+  prev.style.display = 'block';
+  uploadProdImage(file).then(url=>{
+    if(url) document.getElementById('editProdImg').value = url;
+  });
+}
+
+function openProdEdit(item){
+  document.getElementById('editProdId').value = item.dbId || item.id;
+  document.getElementById('editProdEn').value = item.en || '';
+  document.getElementById('editProdAr').value = item.ar || '';
+  document.getElementById('editProdPrice').value = item.price || '';
+  document.getElementById('editProdImg').value = item.img || '';
+  document.getElementById('editProdImgStatus').textContent = '';
+  const prev = document.getElementById('editProdImgPreview');
+  if(item.img){ prev.src = item.img; prev.style.display='block'; }
+  else { prev.style.display='none'; }
+  document.getElementById('prodEditModal').classList.add('open');
+}
+
+function closeProdEdit(){
+  document.getElementById('prodEditModal').classList.remove('open');
+}
+
+async function saveProdEdit(){
+  const id = document.getElementById('editProdId').value;
+  const name_en = document.getElementById('editProdEn').value.trim();
+  const name_ar = document.getElementById('editProdAr').value.trim();
+  const price = +document.getElementById('editProdPrice').value;
+  const img = document.getElementById('editProdImg').value.trim();
+  if(!name_ar||!price){ toast('❌ Enter name and price'); return; }
+  try{
+    await fetch(`${SUPA}/rest/v1/menu_items?id=eq.${id}`,{
+      method:'PATCH',
+      headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body: JSON.stringify({name_ar, name_en, price, img})
+    });
+    toast('✅ Saved · تم الحفظ');
+    closeProdEdit();
+    await loadMenu();
+    renderProducts();
+  }catch(e){ toast('❌ Error · خطأ'); }
 }
 
 /* ===== STATS ===== */
