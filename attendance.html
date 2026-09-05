@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Attendance · El Laterra</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&family=Cormorant+Garamond:ital,wght@1,500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#1a0f0a;--card:#2d1a10;--border:#4a2e1a;
+    --gold:#D99B53;--gold-dim:rgba(217,155,83,0.12);
+    --cream:#F3E8D8;--dim:#9a7a5a;
+    --green:#4caf50;--red:#e53935;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--cream);font-family:'Tajawal',sans-serif;min-height:100vh;display:flex;flex-direction:column;}
+
+  header{background:var(--card);border-bottom:2px solid var(--gold);padding:1rem 1.5rem;display:flex;align-items:center;justify-content:space-between;}
+  .h-title{font-size:1.1rem;font-weight:900;color:var(--gold);font-family:'Cormorant Garamond',serif;}
+  .h-sub{font-size:0.75rem;color:var(--dim);}
+  .h-link{background:var(--border);color:var(--cream);border:none;border-radius:8px;padding:0.45rem 0.9rem;font-family:'Tajawal',sans-serif;font-size:0.8rem;cursor:pointer;text-decoration:none;}
+  .h-link:hover{background:var(--gold);color:var(--bg);}
+
+  .main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem 1rem;}
+
+  /* PIN Screen */
+  .pin-screen{width:100%;max-width:360px;text-align:center;}
+  .pin-logo{font-size:3rem;margin-bottom:0.5rem;}
+  .pin-title{font-size:1.4rem;font-weight:900;color:var(--gold);font-family:'Cormorant Garamond',serif;margin-bottom:0.3rem;}
+  .pin-sub{font-size:0.85rem;color:var(--dim);margin-bottom:2rem;}
+  .pin-display{
+    background:var(--card);border:2px solid var(--border);border-radius:14px;
+    padding:1rem 1.5rem;font-size:2rem;font-weight:900;letter-spacing:0.5em;
+    color:var(--gold);min-height:64px;display:flex;align-items:center;justify-content:center;
+    margin-bottom:1.5rem;font-family:'Cormorant Garamond',serif;
+  }
+  .pin-display.error{border-color:var(--red);animation:shake 0.4s ease;}
+  @keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-8px);}75%{transform:translateX(8px);}};
+  .pin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0.7rem;margin-bottom:1rem;}
+  .pin-btn{
+    background:var(--card);border:1px solid var(--border);border-radius:14px;
+    padding:1.2rem;font-size:1.5rem;font-weight:900;color:var(--cream);
+    cursor:pointer;transition:all 0.15s;font-family:'Tajawal',sans-serif;
+  }
+  .pin-btn:hover{background:var(--gold-dim);border-color:var(--gold);}
+  .pin-btn:active{transform:scale(0.93);}
+  .pin-btn.delete{font-size:1.1rem;color:var(--dim);}
+  .pin-btn.zero{grid-column:2;}
+
+  /* Attendance Screen */
+  .att-screen{width:100%;max-width:420px;text-align:center;display:none;}
+  .emp-avatar{width:80px;height:80px;border-radius:50%;background:var(--gold);color:var(--bg);font-size:2rem;font-weight:900;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;border:3px solid var(--gold-dim);}
+  .emp-name{font-size:1.5rem;font-weight:900;color:var(--cream);margin-bottom:0.2rem;font-family:'Cormorant Garamond',serif;}
+  .emp-name-ar{font-size:0.9rem;color:var(--dim);margin-bottom:0.5rem;}
+  .emp-status{font-size:0.82rem;color:var(--dim);margin-bottom:2rem;padding:0.5rem 1rem;background:var(--card);border-radius:999px;display:inline-block;}
+  .emp-status.clocked-in{color:var(--green);border:1px solid var(--green);}
+
+  .action-btns{display:flex;flex-direction:column;gap:0.8rem;margin-bottom:1.5rem;}
+  .action-btn{
+    padding:1.2rem;border:none;border-radius:16px;
+    font-family:'Tajawal',sans-serif;font-weight:900;font-size:1.1rem;
+    cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:0.6rem;
+  }
+  .btn-in{background:var(--green);color:#fff;}
+  .btn-in:hover{opacity:0.88;transform:scale(1.02);}
+  .btn-out{background:var(--red);color:#fff;}
+  .btn-out:hover{opacity:0.88;transform:scale(1.02);}
+  .btn-in:disabled,.btn-out:disabled{opacity:0.4;cursor:not-allowed;transform:none;}
+
+  /* Today's Summary */
+  .today-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1rem;margin-bottom:1rem;}
+  .today-title{font-size:0.82rem;color:var(--dim);margin-bottom:0.8rem;text-align:right;}
+  .today-row{display:flex;justify-content:space-between;font-size:0.88rem;padding:0.3rem 0;border-bottom:1px solid rgba(74,46,26,0.4);}
+  .today-row:last-child{border-bottom:none;}
+  .today-lbl{color:var(--dim);}
+  .today-val{font-weight:700;color:var(--cream);}
+  .today-hours{font-size:1.2rem;font-weight:900;color:var(--gold);margin-top:0.5rem;}
+
+  .back-btn{background:none;border:1px solid var(--border);color:var(--dim);border-radius:10px;padding:0.6rem 1.5rem;font-family:'Tajawal',sans-serif;cursor:pointer;font-size:0.85rem;}
+  .back-btn:hover{border-color:var(--gold);color:var(--gold);}
+
+  /* Clock */
+  .live-clock{font-size:0.88rem;color:var(--dim);margin-bottom:1.5rem;font-family:'Cormorant Garamond',serif;font-style:italic;}
+
+  /* Toast */
+  .toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);background:var(--green);color:#fff;padding:0.7rem 1.5rem;border-radius:10px;font-weight:700;font-size:0.88rem;opacity:0;transition:opacity 0.3s;pointer-events:none;z-index:99;white-space:nowrap;}
+  .toast.show{opacity:1;}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="h-title">☕ El Laterra — Attendance</div>
+    <div class="h-sub">تسجيل الحضور والانصراف</div>
+  </div>
+  <a href="staff.html" class="h-link">← Staff</a>
+</header>
+
+<div class="main">
+
+  <!-- PIN Screen -->
+  <div class="pin-screen" id="pinScreen">
+    <div class="pin-logo">👤</div>
+    <div class="pin-title">Enter Your PIN</div>
+    <div class="pin-sub">أدخل رقمك السري</div>
+
+    <div class="pin-display" id="pinDisplay">––––</div>
+
+    <div class="pin-grid">
+      <button class="pin-btn" onclick="pinPress('1')">1</button>
+      <button class="pin-btn" onclick="pinPress('2')">2</button>
+      <button class="pin-btn" onclick="pinPress('3')">3</button>
+      <button class="pin-btn" onclick="pinPress('4')">4</button>
+      <button class="pin-btn" onclick="pinPress('5')">5</button>
+      <button class="pin-btn" onclick="pinPress('6')">6</button>
+      <button class="pin-btn" onclick="pinPress('7')">7</button>
+      <button class="pin-btn" onclick="pinPress('8')">8</button>
+      <button class="pin-btn" onclick="pinPress('9')">9</button>
+      <button class="pin-btn zero" onclick="pinPress('0')">0</button>
+      <button class="pin-btn delete" onclick="pinDelete()">⌫</button>
+    </div>
+  </div>
+
+  <!-- Attendance Screen -->
+  <div class="att-screen" id="attScreen">
+    <div class="emp-avatar" id="empAvatar">A</div>
+    <div class="emp-name" id="empName">Employee</div>
+    <div class="emp-name-ar" id="empNameAr"></div>
+    <div class="live-clock" id="liveClock"></div>
+    <div class="emp-status" id="empStatus">Not clocked in today</div>
+
+    <div class="today-card" id="todayCard" style="display:none;">
+      <div class="today-title">Today's Record · سجل اليوم</div>
+      <div class="today-row"><span class="today-lbl">Clock In</span><span class="today-val" id="todayIn">-</span></div>
+      <div class="today-row"><span class="today-lbl">Clock Out</span><span class="today-val" id="todayOut">-</span></div>
+      <div class="today-row"><span class="today-lbl">Hours Worked</span><span class="today-val today-hours" id="todayHours">-</span></div>
+    </div>
+
+    <div class="action-btns">
+      <button class="action-btn btn-in" id="btnIn" onclick="clockIn()">
+        🟢 Clock In · تسجيل الحضور
+      </button>
+      <button class="action-btn btn-out" id="btnOut" onclick="clockOut()" disabled>
+        🔴 Clock Out · تسجيل الانصراف
+      </button>
+    </div>
+
+    <button class="back-btn" onclick="goBack()">← Back · رجوع</button>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPA = 'https://fyyxuvqwoykavqhoaowu.supabase.co';
+const KEY  = 'sb_publishable_CKq5sKxZvi5k43cmEJ1cjw_Cg7jWk_e';
+
+let pinValue = '';
+let currentEmployee = null;
+let currentAttendance = null;
+
+/* ===== CLOCK ===== */
+function updateClock(){
+  const now = new Date();
+  document.getElementById('liveClock').textContent =
+    now.toLocaleDateString('en-GB',{weekday:'long',day:'2-digit',month:'long',year:'numeric'}) +
+    ' · ' + now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+/* ===== PIN ===== */
+function pinPress(digit){
+  if(pinValue.length >= 6) return;
+  pinValue += digit;
+  updatePinDisplay();
+  if(pinValue.length >= 4) setTimeout(checkPin, 300);
+}
+
+function pinDelete(){
+  pinValue = pinValue.slice(0,-1);
+  updatePinDisplay();
+}
+
+function updatePinDisplay(){
+  const d = document.getElementById('pinDisplay');
+  d.textContent = '●'.repeat(pinValue.length) + '–'.repeat(Math.max(0,4-pinValue.length));
+  d.classList.remove('error');
+}
+
+async function checkPin(){
+  try{
+    const r = await fetch(`${SUPA}/rest/v1/employees?pin=eq.${pinValue}&active=eq.true&select=*`,{
+      headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`}
+    });
+    const data = await r.json();
+    if(Array.isArray(data) && data.length > 0){
+      currentEmployee = data[0];
+      pinValue = '';
+      updatePinDisplay();
+      await loadAttScreen();
+    } else {
+      // PIN خاطئ
+      const d = document.getElementById('pinDisplay');
+      d.classList.add('error');
+      d.textContent = '✕ Wrong PIN';
+      setTimeout(()=>{
+        pinValue='';
+        updatePinDisplay();
+      }, 1200);
+    }
+  }catch(e){ console.error(e); }
+}
+
+/* ===== ATTENDANCE SCREEN ===== */
+async function loadAttScreen(){
+  // عرض معلومات الموظف
+  const initials = (currentEmployee.name_en||currentEmployee.name||'?').charAt(0).toUpperCase();
+  document.getElementById('empAvatar').textContent = initials;
+  document.getElementById('empName').textContent = currentEmployee.name_en || currentEmployee.name;
+  document.getElementById('empNameAr').textContent = currentEmployee.name;
+
+  // جلب سجل اليوم
+  const today = new Date().toISOString().split('T')[0];
+  const r = await fetch(`${SUPA}/rest/v1/attendance?employee_id=eq.${currentEmployee.id}&date=eq.${today}&select=*&order=created_at.desc&limit=1`,{
+    headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`}
+  });
+  const data = await r.json();
+  currentAttendance = Array.isArray(data) && data.length > 0 ? data[0] : null;
+
+  updateAttUI();
+
+  // إظهار شاشة الحضور
+  document.getElementById('pinScreen').style.display = 'none';
+  document.getElementById('attScreen').style.display = 'block';
+}
+
+function updateAttUI(){
+  const btnIn  = document.getElementById('btnIn');
+  const btnOut = document.getElementById('btnOut');
+  const status = document.getElementById('empStatus');
+  const todayCard = document.getElementById('todayCard');
+
+  if(!currentAttendance || !currentAttendance.clock_in){
+    // لم يسجل حضور بعد
+    btnIn.disabled  = false;
+    btnOut.disabled = true;
+    status.textContent = '⚪ Not clocked in today · لم يسجل الحضور بعد';
+    status.className = 'emp-status';
+    todayCard.style.display = 'none';
+  } else if(currentAttendance.clock_in && !currentAttendance.clock_out){
+    // مسجل حضور لكن لم ينصرف
+    btnIn.disabled  = true;
+    btnOut.disabled = false;
+    const inTime = new Date(currentAttendance.clock_in).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+    status.textContent = `🟢 Clocked in at ${inTime}`;
+    status.className = 'emp-status clocked-in';
+    todayCard.style.display = 'block';
+    document.getElementById('todayIn').textContent = inTime;
+    document.getElementById('todayOut').textContent = '-';
+    document.getElementById('todayHours').textContent = calcLiveHours();
+  } else {
+    // سجل حضور وانصراف
+    btnIn.disabled  = true;
+    btnOut.disabled = true;
+    status.textContent = '✅ Shift complete · انتهى الدوام';
+    status.className = 'emp-status';
+    todayCard.style.display = 'block';
+    const inTime  = new Date(currentAttendance.clock_in).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+    const outTime = new Date(currentAttendance.clock_out).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+    document.getElementById('todayIn').textContent  = inTime;
+    document.getElementById('todayOut').textContent = outTime;
+    document.getElementById('todayHours').textContent = `${(+currentAttendance.total_hours||0).toFixed(2)} hrs`;
+  }
+}
+
+function calcLiveHours(){
+  if(!currentAttendance?.clock_in) return '-';
+  const diff = (Date.now() - new Date(currentAttendance.clock_in)) / 3600000;
+  return `${diff.toFixed(2)} hrs`;
+}
+
+async function clockIn(){
+  const now = new Date().toISOString();
+  const today = new Date().toISOString().split('T')[0];
+  try{
+    const r = await fetch(`${SUPA}/rest/v1/attendance`,{
+      method:'POST',
+      headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Content-Type':'application/json','Prefer':'return=representation'},
+      body: JSON.stringify({
+        employee_id: currentEmployee.id,
+        employee_name: currentEmployee.name_en || currentEmployee.name,
+        clock_in: now,
+        date: today
+      })
+    });
+    const data = await r.json();
+    currentAttendance = Array.isArray(data) ? data[0] : data;
+    toast(`🟢 Clocked in! · تم تسجيل الحضور`);
+    updateAttUI();
+  }catch(e){ toast('❌ Error · خطأ'); }
+}
+
+async function clockOut(){
+  if(!currentAttendance) return;
+  const now = new Date();
+  const hours = (now - new Date(currentAttendance.clock_in)) / 3600000;
+  try{
+    await fetch(`${SUPA}/rest/v1/attendance?id=eq.${currentAttendance.id}`,{
+      method:'PATCH',
+      headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body: JSON.stringify({
+        clock_out: now.toISOString(),
+        total_hours: +hours.toFixed(4)
+      })
+    });
+    currentAttendance.clock_out = now.toISOString();
+    currentAttendance.total_hours = hours;
+    toast(`🔴 Clocked out! ${hours.toFixed(2)} hrs · تم تسجيل الانصراف`);
+    updateAttUI();
+  }catch(e){ toast('❌ Error · خطأ'); }
+}
+
+function goBack(){
+  currentEmployee = null;
+  currentAttendance = null;
+  pinValue = '';
+  updatePinDisplay();
+  document.getElementById('attScreen').style.display = 'none';
+  document.getElementById('pinScreen').style.display = 'block';
+}
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>

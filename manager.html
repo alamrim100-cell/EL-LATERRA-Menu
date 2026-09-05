@@ -150,6 +150,34 @@
   .hist-del{background:none;border:1px solid var(--border);color:var(--dim);border-radius:6px;padding:3px 7px;cursor:pointer;font-size:0.75rem;}
   .hist-del:hover{background:var(--red);color:#fff;border-color:var(--red);}
 
+  /* ===== الحضور ===== */
+  .att-filters{display:flex;gap:0.6rem;flex-wrap:wrap;margin-bottom:1rem;align-items:center;}
+  .emp-filter{background:var(--card);border:1px solid var(--border);color:var(--cream);border-radius:8px;padding:0.4rem 0.7rem;font-family:'Tajawal',sans-serif;font-size:0.8rem;outline:none;}
+  .emp-filter:focus{border-color:var(--gold);}
+  .att-stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:0.6rem;margin-bottom:1.2rem;}
+  .att-stat{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.7rem;text-align:center;}
+  .att-stat-num{font-size:1.4rem;font-weight:900;color:var(--gold);}
+  .att-stat-lbl{font-size:0.7rem;color:var(--dim);}
+  .att-emp-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:0.8rem 1rem;margin-bottom:0.6rem;display:flex;align-items:center;gap:0.8rem;}
+  .att-emp-avatar{width:42px;height:42px;border-radius:50%;background:var(--gold);color:var(--bg);font-size:1.1rem;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .att-emp-info{flex:1;}
+  .att-emp-name{font-size:0.95rem;font-weight:700;color:var(--cream);}
+  .att-emp-detail{font-size:0.72rem;color:var(--dim);}
+  .att-emp-hours{font-weight:900;color:var(--gold);font-size:0.95rem;white-space:nowrap;}
+  .att-status-in{color:var(--green);font-size:0.72rem;}
+  .att-status-out{color:var(--dim);font-size:0.72rem;}
+
+  /* إدارة الموظفين */
+  .emp-mgmt-form{background:var(--card);border:1px solid var(--gold);border-radius:12px;padding:1rem;margin-bottom:1rem;display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;}
+  @media(max-width:500px){.emp-mgmt-form{grid-template-columns:1fr;}}
+  .emp-form-input{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:0.5rem 0.7rem;color:var(--cream);font-family:'Tajawal',sans-serif;font-size:0.85rem;outline:none;width:100%;}
+  .emp-form-input:focus{border-color:var(--gold);}
+  .emp-add-btn{background:var(--gold);color:var(--bg);border:none;border-radius:8px;padding:0.55rem;font-family:'Tajawal',sans-serif;font-weight:900;font-size:0.85rem;cursor:pointer;grid-column:1/-1;}
+  .emp-row{display:flex;align-items:center;gap:0.6rem;padding:0.55rem 0.8rem;background:var(--card);border:1px solid var(--border);border-radius:10px;margin-bottom:0.4rem;}
+  .emp-pin-badge{background:var(--border);color:var(--dim);font-size:0.72rem;padding:2px 8px;border-radius:999px;font-family:'Cormorant Garamond',serif;font-style:italic;}
+  .emp-del-btn{background:none;border:1px solid var(--border);color:var(--dim);border-radius:6px;padding:3px 7px;cursor:pointer;font-size:0.75rem;margin-right:auto;}
+  .emp-del-btn:hover{background:var(--red);color:#fff;border-color:var(--red);}
+
   /* ===== الإحصائيات المتقدمة ===== */
   .analytics-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
   @media(max-width:600px){.analytics-grid{grid-template-columns:1fr;}}
@@ -252,6 +280,7 @@
   <button class="tab" onclick="switchTab('expenses')">💸 المصروفات<span class="tab-en">Expenses</span></button>
   <button class="tab" onclick="switchTab('fixed')">🏢 مصاريف ثابتة<span class="tab-en">Fixed Costs</span></button>
   <button class="tab" onclick="switchTab('history')">📅 مبيعات سابقة<span class="tab-en">History</span></button>
+  <button class="tab" onclick="switchTab('attendance')">🕐 الحضور<span class="tab-en">Attendance</span></button>
   <button class="tab" onclick="switchTab('menu')">🍽️ إدارة المينيو<span class="tab-en">Menu Mgmt</span></button>
 </div>
 
@@ -579,6 +608,81 @@
       <div class="sec-title">السجل التاريخي <span class="sec-en">· Historical Records</span></div>
       <div id="histList"><div class="empty-row">لا توجد بيانات سابقة<br><span style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.82rem;">No historical data yet</span></div></div>
     </div>
+  </div>
+</div>
+
+<!-- ===== ATTENDANCE ===== -->
+<div class="panel" id="panel-attendance">
+  <div style="margin-top:1rem;">
+
+    <!-- فلاتر -->
+    <div class="att-filters">
+      <button class="filter-btn active" onclick="setAttFilter('today')">اليوم · Today</button>
+      <button class="filter-btn" onclick="setAttFilter('week')">الأسبوع · Week</button>
+      <button class="filter-btn" onclick="setAttFilter('month')">الشهر · Month</button>
+      <select class="emp-filter" id="attEmpFilter" onchange="renderAttendance()">
+        <option value="all">كل الموظفين · All Staff</option>
+      </select>
+      <input type="date" class="filter-input" id="attDateFilter" onchange="setAttFilter('custom')">
+    </div>
+
+    <!-- إحصائيات -->
+    <div class="att-stats">
+      <div class="att-stat"><div class="att-stat-num" id="attTotalDays">0</div><div class="att-stat-lbl">أيام العمل · Work Days</div></div>
+      <div class="att-stat"><div class="att-stat-num" id="attTotalHours">0</div><div class="att-stat-lbl">إجمالي الساعات · Total Hours</div></div>
+      <div class="att-stat"><div class="att-stat-num" id="attAvgHours">0</div><div class="att-stat-lbl">متوسط اليوم · Avg/Day</div></div>
+      <div class="att-stat"><div class="att-stat-num" id="attClockedIn">0</div><div class="att-stat-lbl">داخل الآن · Clocked In</div></div>
+    </div>
+
+    <!-- سجل الحضور -->
+    <div class="sec-title">
+      🕐 سجل الحضور <span class="sec-en">· Attendance Log</span>
+    </div>
+    <div class="table-wrap" style="margin-bottom:1.5rem;">
+      <table class="inv-table">
+        <thead><tr>
+          <th>الموظف · Employee</th>
+          <th>التاريخ · Date</th>
+          <th>الحضور · Clock In</th>
+          <th>الانصراف · Clock Out</th>
+          <th>الساعات · Hours</th>
+          <th>الحالة · Status</th>
+        </tr></thead>
+        <tbody id="attTableBody">
+          <tr><td colspan="6" style="text-align:center;padding:1.5rem;color:var(--dim);">⏳ جاري التحميل...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- إدارة الموظفين -->
+    <div class="sec-title">👥 إدارة الموظفين <span class="sec-en">· Manage Staff</span></div>
+
+    <div class="emp-mgmt-form">
+      <div>
+        <div style="font-size:0.75rem;color:var(--dim);margin-bottom:0.3rem;">الاسم بالإنجليزي · English Name</div>
+        <input type="text" id="newEmpEn" class="emp-form-input" placeholder="Akshay">
+      </div>
+      <div>
+        <div style="font-size:0.75rem;color:var(--dim);margin-bottom:0.3rem;">الاسم بالعربي · Arabic Name</div>
+        <input type="text" id="newEmpAr" class="emp-form-input" placeholder="أكشاي">
+      </div>
+      <div>
+        <div style="font-size:0.75rem;color:var(--dim);margin-bottom:0.3rem;">PIN (4-6 أرقام)</div>
+        <input type="number" id="newEmpPin" class="emp-form-input" placeholder="1234" max="999999">
+      </div>
+      <div>
+        <div style="font-size:0.75rem;color:var(--dim);margin-bottom:0.3rem;">الدور · Role</div>
+        <select id="newEmpRole" class="emp-form-input">
+          <option value="staff">Staff · موظف</option>
+          <option value="senior">Senior · موظف أول</option>
+          <option value="manager">Manager · مدير</option>
+        </select>
+      </div>
+      <button class="emp-add-btn" onclick="addEmployee()">✅ إضافة موظف · Add Employee</button>
+    </div>
+
+    <div id="empList"><div style="text-align:center;color:var(--dim);padding:1rem;">⏳</div></div>
+
   </div>
 </div>
 
@@ -945,7 +1049,7 @@ function renderAnalytics(){
 /* ===== TABS ===== */
 function switchTab(tab){
   document.querySelectorAll('.tab').forEach((t,i)=>{
-    t.classList.toggle('active',['overview','analytics','charts','invoices','expenses','fixed','history','menu'][i]===tab);
+    t.classList.toggle('active',['overview','analytics','charts','invoices','expenses','fixed','history','attendance','menu'][i]===tab);
   });
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.getElementById(`panel-${tab}`).classList.add('active');
@@ -962,7 +1066,154 @@ function switchTab(tab){
     renderFixed();
   }
   if(tab==='history') renderHistory();
+  if(tab==='attendance'){ loadAttendance(); loadEmployees(); }
   if(tab==='menu'){ loadMenuItems(); }
+}
+
+/* ===== ATTENDANCE ===== */
+let allAttendance = [], allEmployees = [], attFilter = 'today';
+
+function setAttFilter(f){
+  attFilter = f;
+  document.querySelectorAll('#panel-attendance .filter-btn').forEach((b,i)=>{
+    b.classList.toggle('active',['today','week','month'][i]===f);
+  });
+  renderAttendance();
+}
+
+async function loadAttendance(){
+  try{
+    const r = await fetch(`${SUPA}/rest/v1/attendance?select=*&order=created_at.desc&limit=500`,{
+      headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`}
+    });
+    const d = await r.json();
+    if(Array.isArray(d)) allAttendance = d;
+    renderAttendance();
+  }catch(e){ console.error(e); }
+}
+
+async function loadEmployees(){
+  try{
+    const r = await fetch(`${SUPA}/rest/v1/employees?select=*&order=created_at`,{
+      headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`}
+    });
+    const d = await r.json();
+    if(Array.isArray(d)){
+      allEmployees = d;
+      // تحديث فلتر الموظفين
+      const sel = document.getElementById('attEmpFilter');
+      const cur = sel.value;
+      sel.innerHTML = '<option value="all">كل الموظفين · All Staff</option>' +
+        d.map(e=>`<option value="${e.id}">${e.name_en||e.name}</option>`).join('');
+      sel.value = cur;
+      renderEmployeeList();
+    }
+  }catch(e){ console.error(e); }
+}
+
+function filterAttendance(){
+  const now = new Date();
+  const empId = document.getElementById('attEmpFilter')?.value;
+  let filtered = allAttendance;
+
+  // فلتر الفترة
+  if(attFilter==='today') filtered = filtered.filter(a=>new Date(a.created_at).toDateString()===now.toDateString());
+  else if(attFilter==='week'){ const w=new Date(now);w.setDate(now.getDate()-7);filtered=filtered.filter(a=>new Date(a.created_at)>=w); }
+  else if(attFilter==='month'){ const m=new Date(now);m.setDate(now.getDate()-30);filtered=filtered.filter(a=>new Date(a.created_at)>=m); }
+  else if(attFilter==='custom'){
+    const v = document.getElementById('attDateFilter')?.value;
+    if(v) filtered = filtered.filter(a=>a.date===v);
+  }
+
+  // فلتر الموظف
+  if(empId && empId!=='all') filtered = filtered.filter(a=>String(a.employee_id)===String(empId));
+  return filtered;
+}
+
+function renderAttendance(){
+  const filtered = filterAttendance();
+  const completed = filtered.filter(a=>a.clock_in&&a.clock_out);
+  const active = filtered.filter(a=>a.clock_in&&!a.clock_out);
+  const totalHours = completed.reduce((s,a)=>s+(+a.total_hours||0),0);
+
+  document.getElementById('attTotalDays').textContent = completed.length;
+  document.getElementById('attTotalHours').textContent = totalHours.toFixed(1);
+  document.getElementById('attAvgHours').textContent = completed.length?(totalHours/completed.length).toFixed(1):'0';
+  document.getElementById('attClockedIn').textContent = active.length;
+
+  const tbody = document.getElementById('attTableBody');
+  if(filtered.length===0){
+    tbody.innerHTML=`<tr><td colspan="6" style="text-align:center;padding:1.5rem;color:var(--dim);">لا توجد سجلات · No records</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(a=>{
+    const inTime  = a.clock_in  ? new Date(a.clock_in).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})  : '-';
+    const outTime = a.clock_out ? new Date(a.clock_out).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) : '-';
+    const hours   = a.total_hours ? `${(+a.total_hours).toFixed(2)} hrs` : '-';
+    const status  = !a.clock_in ? '<span style="color:var(--dim);">-</span>'
+                  : !a.clock_out ? '<span style="color:var(--green);font-weight:700;">🟢 On Shift</span>'
+                  : '<span style="color:var(--dim);">✅ Done</span>';
+    return `<tr>
+      <td style="font-weight:700;">${a.employee_name||'-'}</td>
+      <td style="font-size:0.78rem;color:var(--dim);">${a.date||'-'}</td>
+      <td style="color:var(--green);font-weight:700;">${inTime}</td>
+      <td style="color:var(--red);font-weight:700;">${outTime}</td>
+      <td style="font-weight:900;color:var(--gold);">${hours}</td>
+      <td>${status}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderEmployeeList(){
+  const el = document.getElementById('empList');
+  if(!allEmployees.length){ el.innerHTML=`<div style="text-align:center;color:var(--dim);padding:1rem;">لا يوجد موظفون بعد</div>`; return; }
+  el.innerHTML = allEmployees.map(e=>`
+    <div class="emp-row">
+      <div style="width:36px;height:36px;border-radius:50%;background:var(--gold);color:var(--bg);font-weight:900;display:flex;align-items:center;justify-content:center;font-size:1rem;">${(e.name_en||e.name||'?').charAt(0)}</div>
+      <div style="flex:1;">
+        <div style="font-weight:700;font-size:0.88rem;">${e.name_en||e.name}</div>
+        <div style="font-size:0.72rem;color:var(--dim);">${e.name} · ${e.role}</div>
+      </div>
+      <span class="emp-pin-badge">PIN: ${e.pin}</span>
+      <button class="emp-del-btn" onclick="deleteEmployee(${e.id})">🗑️</button>
+    </div>
+  `).join('');
+}
+
+async function addEmployee(){
+  const name_en = document.getElementById('newEmpEn').value.trim();
+  const name    = document.getElementById('newEmpAr').value.trim();
+  const pin     = document.getElementById('newEmpPin').value.trim();
+  const role    = document.getElementById('newEmpRole').value;
+  if(!name_en||!pin){ toast('❌ أدخل الاسم والـ PIN'); return; }
+  if(pin.length < 4){ toast('❌ PIN يجب أن يكون 4 أرقام على الأقل'); return; }
+  try{
+    const r = await fetch(`${SUPA}/rest/v1/employees`,{
+      method:'POST',
+      headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify({name_en,name:name||name_en,pin,role,active:true})
+    });
+    if(r.ok||r.status===201){
+      document.getElementById('newEmpEn').value='';
+      document.getElementById('newEmpAr').value='';
+      document.getElementById('newEmpPin').value='';
+      toast('✅ تم إضافة الموظف · Employee Added');
+      loadEmployees();
+    } else { toast('❌ خطأ - تحقق من PIN · Error - check PIN'); }
+  }catch(e){ toast('❌ خطأ · Error'); }
+}
+
+async function deleteEmployee(id){
+  if(!confirm('حذف هذا الموظف؟ · Delete this employee?')) return;
+  try{
+    await fetch(`${SUPA}/rest/v1/employees?id=eq.${id}`,{
+      method:'DELETE',
+      headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Prefer':'return=minimal'}
+    });
+    toast('🗑️ تم الحذف · Deleted');
+    loadEmployees();
+  }catch(e){ toast('❌ خطأ · Error'); }
 }
 
 /* ===== FILTERS ===== */
