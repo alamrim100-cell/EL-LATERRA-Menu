@@ -1187,7 +1187,7 @@ async function addEmployee(){
   const pin     = document.getElementById('newEmpPin').value.trim();
   const role    = document.getElementById('newEmpRole').value;
   if(!name_en||!pin){ toast('❌ أدخل الاسم والـ PIN'); return; }
-  if(pin.length < 4){ toast('❌ PIN يجب أن يكون 4 أرقام على الأقل'); return; }
+  if(pin.length < 5){ toast('❌ PIN يجب أن يكون 5 أرقام على الأقل'); return; }
   try{
     const r = await fetch(`${SUPA}/rest/v1/employees`,{
       method:'POST',

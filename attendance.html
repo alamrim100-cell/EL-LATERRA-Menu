@@ -176,7 +176,7 @@ function pinPress(digit){
   if(pinValue.length >= 6) return;
   pinValue += digit;
   updatePinDisplay();
-  if(pinValue.length >= 4) setTimeout(checkPin, 300);
+  if(pinValue.length >= 5) setTimeout(checkPin, 300);
 }
 
 function pinDelete(){
@@ -186,7 +186,7 @@ function pinDelete(){
 
 function updatePinDisplay(){
   const d = document.getElementById('pinDisplay');
-  d.textContent = '●'.repeat(pinValue.length) + '–'.repeat(Math.max(0,4-pinValue.length));
+  d.textContent = '●'.repeat(pinValue.length) + '–'.repeat(Math.max(0,5-pinValue.length));
   d.classList.remove('error');
 }
 
