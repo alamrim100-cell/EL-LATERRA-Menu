@@ -150,6 +150,41 @@
   .hist-del{background:none;border:1px solid var(--border);color:var(--dim);border-radius:6px;padding:3px 7px;cursor:pointer;font-size:0.75rem;}
   .hist-del:hover{background:var(--red);color:#fff;border-color:var(--red);}
 
+  /* ===== فاتورة يدوية ===== */
+  .mi-layout{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+  @media(max-width:650px){.mi-layout{grid-template-columns:1fr;}}
+  .mi-menu{display:flex;flex-direction:column;gap:0.4rem;max-height:70vh;overflow-y:auto;padding-left:4px;}
+  .mi-section-title{font-size:0.82rem;font-weight:900;color:var(--gold);padding:0.4rem 0;border-bottom:1px solid var(--border);margin-bottom:0.3rem;position:sticky;top:0;background:var(--bg);z-index:1;}
+  .mi-item{display:flex;align-items:center;gap:0.5rem;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:0.5rem 0.7rem;cursor:pointer;transition:all 0.15s;}
+  .mi-item:hover{border-color:var(--gold);}
+  .mi-item-img{width:36px;height:36px;border-radius:50%;object-fit:cover;border:1px solid var(--border);background:var(--border);flex-shrink:0;}
+  .mi-item-en{font-family:'Cormorant Garamond',serif;font-size:0.88rem;font-weight:700;color:var(--cream);}
+  .mi-item-ar{font-size:0.7rem;color:var(--dim);}
+  .mi-item-price{font-size:0.78rem;color:var(--gold);font-weight:700;margin-right:auto;white-space:nowrap;}
+  .mi-add-btn{background:var(--gold);color:var(--bg);border:none;border-radius:6px;padding:0.28rem 0.6rem;font-weight:900;font-size:0.75rem;cursor:pointer;flex-shrink:0;}
+
+  .mi-cart{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1rem;display:flex;flex-direction:column;gap:0.7rem;align-self:start;position:sticky;top:1rem;}
+  .mi-cart-title{font-weight:900;color:var(--gold);font-size:0.95rem;border-bottom:1px solid var(--border);padding-bottom:0.5rem;}
+  .mi-cart-items{display:flex;flex-direction:column;gap:0.4rem;min-height:50px;}
+  .mi-cart-empty{font-size:0.8rem;color:var(--dim);text-align:center;padding:0.8rem 0;}
+  .mi-cart-row{display:flex;align-items:center;gap:0.5rem;padding:0.35rem 0;border-bottom:1px solid rgba(74,46,26,0.4);}
+  .mi-cart-row:last-child{border-bottom:none;}
+  .mi-cart-name{flex:1;font-size:0.82rem;color:var(--cream);}
+  .mi-qty-ctrl{display:flex;align-items:center;gap:4px;}
+  .mi-qty-ctrl button{background:var(--border);border:none;color:var(--cream);width:20px;height:20px;border-radius:50%;cursor:pointer;font-size:0.8rem;}
+  .mi-qty-ctrl button:hover{background:var(--gold);color:var(--bg);}
+  .mi-qty-ctrl span{min-width:16px;text-align:center;font-weight:700;font-size:0.8rem;}
+  .mi-item-tot{font-size:0.75rem;color:var(--gold);direction:ltr;white-space:nowrap;}
+  .mi-input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:0.5rem 0.7rem;color:var(--cream);font-family:'Tajawal',sans-serif;font-size:0.85rem;outline:none;}
+  .mi-input:focus{border-color:var(--gold);}
+  .mi-input::placeholder{color:var(--dim);}
+  .mi-type-btn{flex:1;padding:0.45rem;border:2px solid var(--border);background:transparent;color:var(--dim);border-radius:8px;font-family:'Tajawal',sans-serif;font-size:0.75rem;cursor:pointer;transition:all 0.2s;}
+  .mi-type-btn.active{border-color:var(--gold);background:var(--gold-dim);color:var(--cream);font-weight:700;}
+  .mi-save-btn{width:100%;background:var(--gold);color:var(--bg);border:none;border-radius:10px;padding:0.75rem;font-family:'Tajawal',sans-serif;font-weight:900;font-size:0.9rem;cursor:pointer;}
+  .mi-save-btn:hover{opacity:0.85;}
+  .mi-disc-type{flex:1;padding:0.3rem;border:1px solid var(--border);background:transparent;color:var(--dim);border-radius:6px;font-family:'Tajawal',sans-serif;font-size:0.72rem;cursor:pointer;}
+  .mi-disc-type.active{border-color:var(--gold);background:var(--gold-dim);color:var(--cream);font-weight:700;}
+
   /* ===== الحضور ===== */
   .att-filters{display:flex;gap:0.6rem;flex-wrap:wrap;margin-bottom:1rem;align-items:center;}
   .emp-filter{background:var(--card);border:1px solid var(--border);color:var(--cream);border-radius:8px;padding:0.4rem 0.7rem;font-family:'Tajawal',sans-serif;font-size:0.8rem;outline:none;}
@@ -295,6 +330,7 @@
   <button class="tab" onclick="switchTab('expenses')">💸 المصروفات<span class="tab-en">Expenses</span></button>
   <button class="tab" onclick="switchTab('fixed')">🏢 مصاريف ثابتة<span class="tab-en">Fixed Costs</span></button>
   <button class="tab" onclick="switchTab('history')">📅 مبيعات سابقة<span class="tab-en">History</span></button>
+  <button class="tab" onclick="switchTab('manualinv')">➕ فاتورة يدوية<span class="tab-en">Manual Invoice</span></button>
   <button class="tab" onclick="switchTab('attendance')">🕐 الحضور<span class="tab-en">Attendance</span></button>
   <button class="tab" onclick="switchTab('menu')">🍽️ إدارة المينيو<span class="tab-en">Menu Mgmt</span></button>
 </div>
@@ -622,6 +658,98 @@
     <div>
       <div class="sec-title">السجل التاريخي <span class="sec-en">· Historical Records</span></div>
       <div id="histList"><div class="empty-row">لا توجد بيانات سابقة<br><span style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.82rem;">No historical data yet</span></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MANUAL INVOICE ===== -->
+<div class="panel" id="panel-manualinv">
+  <div style="margin-top:1rem;">
+    <div class="sec-title">➕ فاتورة يدوية <span class="sec-en">· Manual Invoice</span></div>
+    <div class="mi-layout">
+
+      <!-- المينيو -->
+      <div>
+        <div style="font-size:0.78rem;color:var(--dim);margin-bottom:0.5rem;">اختر المنتجات · Select Items</div>
+        <div class="mi-menu" id="miMenuContent">
+          <div style="text-align:center;color:var(--dim);padding:1rem;">⏳</div>
+        </div>
+      </div>
+
+      <!-- السلة والتفاصيل -->
+      <div class="mi-cart">
+        <div class="mi-cart-title">📋 تفاصيل الفاتورة · Invoice Details</div>
+
+        <!-- التاريخ والوقت -->
+        <div>
+          <div style="font-size:0.75rem;color:var(--dim);margin-bottom:0.3rem;">📅 التاريخ والوقت · Date & Time</div>
+          <input type="datetime-local" id="miDateTime" class="mi-input">
+        </div>
+
+        <!-- الطاولة -->
+        <div>
+          <div style="font-size:0.75rem;color:var(--dim);margin-bottom:0.3rem;">🪑 الطاولة / الزبون · Table / Customer</div>
+          <input type="text" id="miTable" class="mi-input" placeholder="Table 1 or Customer Name">
+        </div>
+
+        <!-- نوع الطلب -->
+        <div>
+          <div style="font-size:0.75rem;color:var(--dim);margin-bottom:0.3rem;">نوع الطلب · Order Type</div>
+          <div style="display:flex;gap:0.4rem;">
+            <button class="mi-type-btn active" id="miBtnDine" onclick="miSelectType('dine')">🪑 Dine In</button>
+            <button class="mi-type-btn" id="miBtnTake" onclick="miSelectType('take')">🥤 Takeaway</button>
+          </div>
+        </div>
+
+        <!-- المنتجات المختارة -->
+        <div>
+          <div style="font-size:0.75rem;color:var(--dim);margin-bottom:0.3rem;">المنتجات · Items</div>
+          <div class="mi-cart-items" id="miCartItems">
+            <div class="mi-cart-empty">No items · لا توجد منتجات</div>
+          </div>
+        </div>
+
+        <!-- الخصم -->
+        <div>
+          <div style="font-size:0.75rem;color:var(--dim);margin-bottom:0.3rem;">🏷️ Discount · خصم</div>
+          <div style="display:flex;gap:0.4rem;margin-bottom:0.4rem;">
+            <button class="mi-disc-type active" id="miDiscAmt" onclick="miSetDiscType('amount')">Amount · مبلغ</button>
+            <button class="mi-disc-type" id="miDiscPct" onclick="miSetDiscType('percent')">% Percent · نسبة</button>
+          </div>
+          <div style="display:flex;gap:0.4rem;align-items:center;">
+            <input type="number" id="miDiscVal" class="mi-input" placeholder="0" min="0" oninput="miUpdateCart()" style="flex:1;">
+            <span id="miDiscUnit" style="color:var(--gold);font-weight:900;font-size:0.85rem;min-width:30px;">OMR</span>
+          </div>
+        </div>
+
+        <!-- الإجمالي -->
+        <div style="display:flex;justify-content:space-between;padding:0.5rem 0;border-top:1px solid var(--border);">
+          <span style="color:var(--dim);font-size:0.85rem;">Subtotal</span>
+          <span style="font-weight:900;color:var(--gold);" id="miSubtotal">OMR 0.000</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding-bottom:0.5rem;">
+          <span style="color:var(--red);font-size:0.82rem;">Discount</span>
+          <span style="font-weight:700;color:var(--red);" id="miDiscAmt2">- OMR 0.000</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:0.5rem 0;border-top:2px solid var(--gold);">
+          <span style="font-weight:900;font-size:0.95rem;">Total · الإجمالي</span>
+          <span style="font-weight:900;color:var(--gold);font-size:1.05rem;" id="miTotal">OMR 0.000</span>
+        </div>
+
+        <!-- طريقة الدفع -->
+        <div>
+          <div style="font-size:0.75rem;color:var(--dim);margin-bottom:0.3rem;">💳 Payment · طريقة الدفع</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.4rem;">
+            <button class="mi-type-btn active" id="miPayCash" onclick="miSelectPay('cash')">💵 Cash</button>
+            <button class="mi-type-btn" id="miPayVisa" onclick="miSelectPay('visa')">💳 Visa</button>
+            <button class="mi-type-btn" id="miPayTransfer" onclick="miSelectPay('transfer')">📱 Transfer</button>
+            <button class="mi-type-btn" id="miPayBeanz" onclick="miSelectPay('beanz')">☕ Beanz</button>
+          </div>
+        </div>
+
+        <button class="mi-save-btn" onclick="saveManualInvoice()">💾 حفظ الفاتورة · Save Invoice</button>
+      </div>
+
     </div>
   </div>
 </div>
@@ -1043,7 +1171,7 @@ function renderAnalytics(){
 /* ===== TABS ===== */
 function switchTab(tab){
   document.querySelectorAll('.tab').forEach((t,i)=>{
-    t.classList.toggle('active',['overview','analytics','charts','invoices','expenses','fixed','history','attendance','menu'][i]===tab);
+    t.classList.toggle('active',['overview','analytics','charts','invoices','expenses','fixed','history','manualinv','attendance','menu'][i]===tab);
   });
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.getElementById(`panel-${tab}`).classList.add('active');
@@ -1060,8 +1188,180 @@ function switchTab(tab){
     renderFixed();
   }
   if(tab==='history') renderHistory();
+  if(tab==='manualinv'){ initManualInvoice(); }
   if(tab==='attendance'){ loadAttendance(); loadEmployees(); }
   if(tab==='menu'){ loadMenuItems(); }
+}
+
+/* ===== MANUAL INVOICE ===== */
+let miCart = {}, miOrderType = 'dine', miPayment = 'cash', miDiscType = 'amount';
+let miAllMenuItems = [];
+
+async function initManualInvoice(){
+  // تعيين التاريخ والوقت الحالي
+  const now = new Date();
+  const local = new Date(now - now.getTimezoneOffset()*60000).toISOString().slice(0,16);
+  document.getElementById('miDateTime').value = local;
+
+  // تحميل المنتجات
+  if(miAllMenuItems.length === 0){
+    try{
+      const r = await fetch(`${SUPA}/rest/v1/menu_items?select=*&order=section,created_at`,{
+        headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`}
+      });
+      const d = await r.json();
+      if(Array.isArray(d)) miAllMenuItems = d;
+    }catch(e){ console.error(e); }
+  }
+  renderMiMenu();
+  miCart = {};
+  miUpdateCart();
+}
+
+function renderMiMenu(){
+  const c = document.getElementById('miMenuContent');
+  const grouped = {};
+  miAllMenuItems.forEach(item=>{
+    const sec = item.section||'Other';
+    if(!grouped[sec]) grouped[sec]=[];
+    grouped[sec].push(item);
+  });
+  const ORDER = ['قهوة الاسبريسو','القهوة المقطرة','مشروبات لاتيرا','ساندويتش','الكيك'];
+  const secs = [...new Set([...ORDER,...Object.keys(grouped)])].filter(s=>grouped[s]);
+  c.innerHTML = secs.map(sec=>`
+    <div class="mi-section-title">${sec}</div>
+    ${grouped[sec].map(item=>`
+      <div class="mi-item">
+        ${item.img?`<img class="mi-item-img" src="${item.img}" onerror="this.style.display='none'">`:'<div class="mi-item-img" style="display:flex;align-items:center;justify-content:center;">☕</div>'}
+        <div style="flex:1;min-width:0;">
+          <div class="mi-item-en">${item.name_en||item.name_ar}</div>
+          <div class="mi-item-ar">${item.name_ar}</div>
+        </div>
+        <span class="mi-item-price">OMR ${(+item.price).toFixed(3)}</span>
+        <button class="mi-add-btn" onclick='miAddItem(${JSON.stringify({id:item.id,nameEn:item.name_en||item.name_ar,nameAr:item.name_ar,price:item.price}).replace(/'/g,"&#39;")})'>+ Add</button>
+      </div>
+    `).join('')}
+  `).join('');
+}
+
+function miAddItem(item){
+  const key = item.id;
+  if(miCart[key]) miCart[key].qty++;
+  else miCart[key] = {nameEn:item.nameEn, nameAr:item.nameAr, price:+item.price, qty:1};
+  miUpdateCart();
+}
+
+function miRemoveItem(key){
+  if(miCart[key]){
+    miCart[key].qty--;
+    if(miCart[key].qty<=0) delete miCart[key];
+  }
+  miUpdateCart();
+}
+
+function miGetSubtotal(){ return Object.values(miCart).reduce((s,i)=>s+(i.price*i.qty),0); }
+
+function miCalcDiscount(subtotal){
+  const val = +document.getElementById('miDiscVal')?.value||0;
+  if(miDiscType==='percent') return Math.min(subtotal, subtotal*(val/100));
+  return Math.min(subtotal, val);
+}
+
+function miUpdateCart(){
+  const el = document.getElementById('miCartItems');
+  const items = Object.entries(miCart);
+  const subtotal = miGetSubtotal();
+  const disc = miCalcDiscount(subtotal);
+  const total = Math.max(0, subtotal-disc);
+
+  document.getElementById('miSubtotal').textContent = `OMR ${subtotal.toFixed(3)}`;
+  document.getElementById('miDiscAmt2').textContent = `- OMR ${disc.toFixed(3)}`;
+  document.getElementById('miTotal').textContent = `OMR ${total.toFixed(3)}`;
+
+  if(items.length===0){
+    el.innerHTML='<div class="mi-cart-empty">No items · لا توجد منتجات</div>';
+    return;
+  }
+  el.innerHTML = items.map(([key,item])=>`
+    <div class="mi-cart-row">
+      <div class="mi-cart-name">
+        <div style="font-size:0.82rem;">${item.nameEn}</div>
+        <div style="font-size:0.7rem;color:var(--dim);">${item.nameAr}</div>
+      </div>
+      <div class="mi-qty-ctrl">
+        <button onclick="miRemoveItem('${key}')">−</button>
+        <span>${item.qty}</span>
+        <button onclick="miCart['${key}'].qty++;miUpdateCart()">+</button>
+      </div>
+      <span class="mi-item-tot">OMR ${(item.price*item.qty).toFixed(3)}</span>
+    </div>
+  `).join('');
+}
+
+function miSelectType(type){
+  miOrderType = type;
+  document.getElementById('miBtnDine').classList.toggle('active',type==='dine');
+  document.getElementById('miBtnTake').classList.toggle('active',type==='take');
+}
+
+function miSelectPay(pay){
+  miPayment = pay;
+  ['cash','visa','transfer','beanz'].forEach(p=>{
+    const el = document.getElementById(`miPay${p.charAt(0).toUpperCase()+p.slice(1)}`);
+    if(el) el.classList.toggle('active',p===pay);
+  });
+}
+
+function miSetDiscType(type){
+  miDiscType = type;
+  document.getElementById('miDiscAmt').classList.toggle('active',type==='amount');
+  document.getElementById('miDiscPct').classList.toggle('active',type==='percent');
+  document.getElementById('miDiscUnit').textContent = type==='percent'?'%':'OMR';
+  miUpdateCart();
+}
+
+async function saveManualInvoice(){
+  if(Object.keys(miCart).length===0){ toast('❌ أضف منتجاً · Add items'); return; }
+  const dtVal = document.getElementById('miDateTime').value;
+  if(!dtVal){ toast('❌ حدد التاريخ · Select date'); return; }
+  const table = document.getElementById('miTable').value.trim() || 'Counter';
+  const dt = new Date(dtVal);
+  const subtotal = miGetSubtotal();
+  const disc = miCalcDiscount(subtotal);
+  const total = Math.max(0, subtotal-disc);
+  const payLabels = {cash:'💵 كاش · Cash',visa:'💳 فيزا · Visa',transfer:'📱 تحويل · Transfer',beanz:'☕ Beanz · بينز'};
+  const typeLabel = miOrderType==='take'?'Takeaway · تيك أواي':'Dine In · داخل المقهى';
+  const items = Object.values(miCart).map(i=>({name:i.nameAr,nameEn:i.nameEn,qty:i.qty,price:i.price}));
+  const discNote = disc>0?` | خصم · Disc: OMR ${disc.toFixed(3)}`:'';
+  const invNum = `MINV-${dt.getFullYear()}${String(dt.getMonth()+1).padStart(2,'0')}${String(dt.getDate()).padStart(2,'0')}-${String(dt.getHours()).padStart(2,'0')}${String(dt.getMinutes()).padStart(2,'0')}`;
+
+  try{
+    const r = await fetch(`${SUPA}/rest/v1/invoices`,{
+      method:'POST',
+      headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify({
+        invoice_number: invNum,
+        table_number: table,
+        items: JSON.stringify(items),
+        total: total,
+        payment_method: payLabels[miPayment],
+        order_type: typeLabel,
+        note: `فاتورة يدوية · Manual Invoice${discNote}`,
+        order_time: dt.toISOString(),
+        delivery_time: dt.toISOString(),
+        created_at: dt.toISOString(),
+        whatsapp_sent: false
+      })
+    });
+    if(r.ok||r.status===201){
+      toast('✅ تم حفظ الفاتورة · Invoice Saved');
+      miCart = {};
+      miUpdateCart();
+      document.getElementById('miTable').value='';
+      document.getElementById('miDiscVal').value='';
+      await loadAll();
+    } else { toast('❌ خطأ · Error'); }
+  }catch(e){ toast('❌ خطأ · Error'); console.error(e); }
 }
 
 /* ===== ATTENDANCE ===== */
