@@ -1853,7 +1853,13 @@ function renderCharts(){
 
 /* ===== INVOICES TABLE ===== */
 function parseItems(s){try{return JSON.parse(s);}catch{return[];}}
-function payType(pm){if(!pm)return'cash';if(pm.includes('Visa')||pm.includes('فيزا'))return'visa';if(pm.includes('Transfer')||pm.includes('تحويل'))return'transfer';return'cash';}
+function payType(pm){
+  if(!pm) return 'cash';
+  if(pm.includes('Visa')||pm.includes('فيزا')) return 'visa';
+  if(pm.includes('Transfer')||pm.includes('تحويل')) return 'transfer';
+  if(pm.includes('Beanz')||pm.includes('بينز')) return 'beanz';
+  return 'cash';
+}
 
 function renderInvoices(invoices){
   const tbody=document.getElementById('invTableBody');
