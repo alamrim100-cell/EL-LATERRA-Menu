@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QR — El Laterra</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;1,500&family=Tajawal:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:#1a0f0a;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;}
+  .qr-box{background:#fff;border-radius:20px;padding:1.5rem;box-shadow:0 20px 60px rgba(0,0,0,0.4);}
+  #qrcode canvas,#qrcode img{display:block;}
+  .btns{display:flex;gap:0.8rem;margin-top:1.2rem;}
+  .btn{flex:1;padding:0.7rem;border:none;border-radius:10px;font-family:'Tajawal',sans-serif;font-weight:700;font-size:0.88rem;cursor:pointer;}
+  .btn-print{background:#241510;color:#D99B53;}
+  .btn-dl{background:#D99B53;color:#241510;}
+  @media print{body{background:#fff;}.btns{display:none;}}
+</style>
+</head>
+<body>
+<div class="qr-box">
+  <div id="qrcode"></div>
+</div>
+<div class="btns">
+  <button class="btn btn-print" onclick="window.print()">🖨️ Print</button>
+  <button class="btn btn-dl" onclick="dl()">⬇️ Download</button>
+</div>
+<script>
+new QRCode(document.getElementById('qrcode'),{
+  text:'https://laterra.cafe',
+  width:260,height:260,
+  colorDark:'#241510',colorLight:'#ffffff',
+  correctLevel:QRCode.CorrectLevel.H
+});
+function dl(){
+  setTimeout(()=>{
+    const c=document.querySelector('#qrcode canvas');
+    if(!c)return;
+    const a=document.createElement('a');
+    a.download='laterra-qr.png';
+    a.href=c.toDataURL();
+    a.click();
+  },200);
+}
+</script>
+</body>
+</html>
