@@ -505,6 +505,15 @@
     <button class="filter-btn" onclick="setInvFilter('all')">الكل</button>
     <input type="date" class="filter-input" id="invDateFilter" onchange="setInvFilter('custom')">
   </div>
+  <!-- فلتر طريقة الدفع -->
+  <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.8rem;align-items:center;">
+    <span style="font-size:0.75rem;color:var(--dim);white-space:nowrap;">💳 الدفع · Payment:</span>
+    <button class="filter-btn active" id="payFilt-all" onclick="setPayFilter('all')">الكل · All</button>
+    <button class="filter-btn" id="payFilt-cash" onclick="setPayFilter('cash')">💵 كاش</button>
+    <button class="filter-btn" id="payFilt-visa" onclick="setPayFilter('visa')">💳 فيزا</button>
+    <button class="filter-btn" id="payFilt-transfer" onclick="setPayFilter('transfer')">📱 تحويل</button>
+    <button class="filter-btn" id="payFilt-beanz" onclick="setPayFilter('beanz')">☕ Beanz</button>
+  </div>
   <div class="table-wrap">
     <table class="inv-table">
       <thead><tr>
@@ -1631,6 +1640,17 @@ function setFilter(f){
   applyOverview();
 }
 
+let invPayFilter = 'all';
+
+function setPayFilter(pay){
+  invPayFilter = pay;
+  ['all','cash','visa','transfer','beanz'].forEach(p=>{
+    const el = document.getElementById(`payFilt-${p}`);
+    if(el) el.classList.toggle('active', p===pay);
+  });
+  renderInvoices(filterData(allInvoices,invFilter,'inv'));
+}
+
 function setInvFilter(f){
   invFilter=f;
   document.querySelectorAll('#panel-invoices .filter-btn').forEach((b,i)=>{
@@ -1837,8 +1857,11 @@ function payType(pm){if(!pm)return'cash';if(pm.includes('Visa')||pm.includes('ف
 
 function renderInvoices(invoices){
   const tbody=document.getElementById('invTableBody');
-  if(invoices.length===0){tbody.innerHTML=`<tr><td colspan="8" class="empty-row">لا توجد فواتير · No invoices</td></tr>`;return;}
-  const sorted=[...invoices].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
+  // تطبيق فلتر طريقة الدفع
+  let filtered = invPayFilter==='all' ? invoices : invoices.filter(i=>payType(i.payment_method)===invPayFilter);
+  if(filtered.length===0){tbody.innerHTML=`<tr><td colspan="9" class="empty-row">لا توجد فواتير · No invoices</td></tr>`;return;}
+  const sorted=[...filtered].filter(i=>i.order_type!=='Historical').sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
+  if(sorted.length===0){tbody.innerHTML=`<tr><td colspan="9" class="empty-row">لا توجد فواتير · No invoices</td></tr>`;return;}
   tbody.innerHTML=sorted.map(inv=>{
     const items=parseItems(inv.items);
     const pt=payType(inv.payment_method);
@@ -1847,17 +1870,16 @@ function renderInvoices(invoices){
     return `<tr>
       <td style="font-size:0.72rem;color:var(--dim);">${inv.invoice_number||'-'}</td>
       <td>${inv.table_number||'-'}</td>
-      <td style="max-width:160px;">${items.slice(0,2).map(i=>`<div style="font-size:0.78rem;">${i.name} ×${i.qty}</div>`).join('')}${items.length>2?`<div style="font-size:0.7rem;color:var(--dim);">+${items.length-2} أخرى</div>`:''}</td>
-      <td style="font-weight:900;color:var(--gold);direction:ltr;">ر.ع ${(+inv.total||0).toFixed(3)}</td>
-      <td><span class="badge-pay pay-${pt}">${pt==='cash'?'💵 كاش':pt==='visa'?'💳 فيزا':pt==='beanz'?'☕ Beanz':'📱 تحويل'}</span></td>
+      <td style="max-width:160px;">${items.slice(0,2).map(i=>`<div style="font-size:0.78rem;">${i.nameEn||i.name} ×${i.qty}</div>`).join('')}${items.length>2?`<div style="font-size:0.7rem;color:var(--dim);">+${items.length-2} more</div>`:''}</td>
+      <td style="font-weight:900;color:var(--gold);direction:ltr;">OMR ${(+inv.total||0).toFixed(3)}</td>
+      <td><span class="badge-pay pay-${pt}">${pt==='cash'?'💵 Cash':pt==='visa'?'💳 Visa':pt==='beanz'?'☕ Beanz':'📱 Transfer'}</span></td>
       <td><span class="${isT?'badge-take2':'badge-dine2'}">${isT?'🥤 Take':'🪑 Dine'}</span></td>
-      <td style="font-size:0.72rem;color:var(--dim);">${t.toLocaleString('ar-OM',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'})}</td>
+      <td style="font-size:0.72rem;color:var(--dim);">${t.toLocaleString('en-GB',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'})}</td>
       <td>${inv.whatsapp_sent?'<span class="badge-wa">✓</span>':'-'}</td>
+      <td><button style="background:var(--gold);color:var(--bg);border:none;border-radius:6px;padding:3px 8px;cursor:pointer;font-size:0.72rem;font-weight:700;" onclick='openInvModal(${JSON.stringify(inv).replace(/'/g,"&#39;")})'>✏️</button></td>
     </tr>`;
   }).join('');
 }
-
-/* ===== EXPENSES TABLE ===== */
 let currentEditExp = null;
 
 function openExpModal(exp){
@@ -2393,31 +2415,6 @@ async function loadAll(){
 }
 
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
-
-// تعديل renderInvoices لإضافة زر التعديل
-function renderInvoices(invoices){
-  const tbody=document.getElementById('invTableBody');
-  if(invoices.length===0){tbody.innerHTML=`<tr><td colspan="9" class="empty-row">لا توجد فواتير · No invoices</td></tr>`;return;}
-  const sorted=[...invoices].filter(i=>i.order_type!=='Historical').sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
-  if(sorted.length===0){tbody.innerHTML=`<tr><td colspan="9" class="empty-row">لا توجد فواتير · No invoices</td></tr>`;return;}
-  tbody.innerHTML=sorted.map(inv=>{
-    const items=parseItems(inv.items);
-    const pt=payType(inv.payment_method);
-    const isT=inv.order_type&&inv.order_type.includes('Take');
-    const t=new Date(inv.created_at);
-    return `<tr>
-      <td style="font-size:0.72rem;color:var(--dim);">${inv.invoice_number||'-'}</td>
-      <td>${inv.table_number||'-'}</td>
-      <td style="max-width:140px;">${items.slice(0,2).map(i=>`<div style="font-size:0.75rem;">${i.name} ×${i.qty}</div>`).join('')}${items.length>2?`<div style="font-size:0.68rem;color:var(--dim);">+${items.length-2} أخرى</div>`:''}</td>
-      <td style="font-weight:900;color:var(--gold);direction:ltr;">ر.ع ${(+inv.total||0).toFixed(3)}</td>
-      <td><span class="badge-pay pay-${pt}">${pt==='cash'?'💵':pt==='visa'?'💳':'📱'}</span></td>
-      <td><span class="${isT?'badge-take2':'badge-dine2'}">${isT?'🥤':'🪑'}</span></td>
-      <td style="font-size:0.7rem;color:var(--dim);">${t.toLocaleString('ar-OM',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'})}</td>
-      <td>${inv.whatsapp_sent?'<span class="badge-wa">✓</span>':'-'}</td>
-      <td><button style="background:var(--gold);color:var(--bg);border:none;border-radius:6px;padding:3px 8px;cursor:pointer;font-size:0.72rem;font-weight:700;" onclick='openInvModal(${JSON.stringify(inv).replace(/'/g,"&#39;")})'>✏️</button></td>
-    </tr>`;
-  }).join('');
-}
 
 checkAuth();
 if(sessionStorage.getItem('mgr_auth')==='true') loadAll();
