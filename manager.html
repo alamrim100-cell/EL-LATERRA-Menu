@@ -210,6 +210,17 @@
   .inv-form-lbl{font-size:0.72rem;color:var(--dim);margin-bottom:0.25rem;display:block;}
   .inv-add-btn{background:var(--gold);color:var(--bg);border:none;border-radius:10px;padding:0.65rem;font-family:'Tajawal',sans-serif;font-weight:900;font-size:0.88rem;cursor:pointer;grid-column:1/-1;}
   .inv-add-btn:hover{opacity:0.85;}
+
+  /* قائمة الموردين */
+  .supplier-wrap{position:relative;}
+  .supplier-dropdown{position:absolute;top:100%;right:0;left:0;background:var(--card);border:1px solid var(--gold);border-radius:8px;z-index:50;max-height:160px;overflow-y:auto;display:none;box-shadow:0 4px 15px rgba(0,0,0,0.3);}
+  .supplier-dropdown.open{display:block;}
+  .supplier-opt{padding:0.5rem 0.8rem;cursor:pointer;font-size:0.82rem;color:var(--cream);display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(74,46,26,0.3);}
+  .supplier-opt:last-child{border-bottom:none;}
+  .supplier-opt:hover{background:var(--gold-dim);}
+  .supplier-opt-phone{font-size:0.7rem;color:var(--dim);}
+  .supplier-add-new{padding:0.5rem 0.8rem;cursor:pointer;font-size:0.78rem;color:var(--gold);font-weight:700;border-top:1px solid var(--border);}
+  .supplier-add-new:hover{background:var(--gold-dim);}
   .inv-stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:0.6rem;margin-bottom:1rem;}
   .inv-stat{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.7rem;text-align:center;}
   .inv-stat-num{font-size:1.3rem;font-weight:900;color:var(--gold);}
@@ -475,6 +486,8 @@
     <div class="stat-card"><div class="stat-num" id="sAvg">0</div><div class="stat-ar">متوسط الفاتورة</div><div class="stat-en">Avg Invoice</div></div>
     <div class="stat-card"><div class="stat-num" id="sExpenses">0</div><div class="stat-ar">المصروفات</div><div class="stat-en">Expenses (OMR)</div></div>
     <div class="stat-card"><div class="stat-num" id="sFixed">0</div><div class="stat-ar">مصاريف ثابتة</div><div class="stat-en">Fixed Costs</div></div>
+    <div class="stat-card"><div class="stat-num" id="sDiscCount" style="color:var(--red);">0</div><div class="stat-ar">عدد الخصومات</div><div class="stat-en">Discounts Given</div></div>
+    <div class="stat-card"><div class="stat-num" id="sDiscTotal" style="color:var(--red);">0</div><div class="stat-ar">إجمالي الخصم</div><div class="stat-en">Total Discount (OMR)</div></div>
     <div class="stat-card"><div class="stat-num" id="sWA">0</div><div class="stat-ar">أُرسلت واتساب</div><div class="stat-en">WhatsApp Sent</div></div>
   </div>
 
@@ -835,7 +848,14 @@
         </div>
         <div>
           <label class="inv-form-lbl">رقم / اسم المورد · Supplier</label>
-          <input type="text" id="invSupplier" class="inv-form-input" placeholder="اسم أو رقم هاتف المورد">
+          <div class="supplier-wrap">
+            <input type="text" id="invSupplier" class="inv-form-input" placeholder="اكتب أو اختر مورد..."
+              autocomplete="off"
+              oninput="filterSupplierList('invSupplier','invSupplierDrop')"
+              onfocus="openSupplierDrop('invSupplierDrop')"
+              onblur="setTimeout(()=>closeSupplierDrop('invSupplierDrop'),200)">
+            <div class="supplier-dropdown" id="invSupplierDrop"></div>
+          </div>
         </div>
         <div>
           <label class="inv-form-lbl">تاريخ الشراء · Purchase Date</label>
@@ -937,7 +957,14 @@
       </div>
       <div>
         <label class="inv-form-lbl">المورد · Supplier</label>
-        <input type="text" id="editInvSupplier" class="inv-form-input">
+        <div class="supplier-wrap">
+          <input type="text" id="editInvSupplier" class="inv-form-input" placeholder="اكتب أو اختر مورد..."
+            autocomplete="off"
+            oninput="filterSupplierList('editInvSupplier','editInvSupplierDrop')"
+            onfocus="openSupplierDrop('editInvSupplierDrop')"
+            onblur="setTimeout(()=>closeSupplierDrop('editInvSupplierDrop'),200)">
+          <div class="supplier-dropdown" id="editInvSupplierDrop"></div>
+        </div>
       </div>
       <div>
         <label class="inv-form-lbl">التاريخ · Date</label>
@@ -1424,8 +1451,89 @@ function switchTab(tab){
   if(tab==='history') renderHistory();
   if(tab==='manualinv'){ initManualInvoice(); }
   if(tab==='attendance'){ loadAttendance(); loadEmployees(); }
-  if(tab==='inventory'){ loadInventory(); }
+  if(tab==='inventory'){ loadSuppliers(); loadInventory(); }
   if(tab==='menu'){ loadMenuItems(); }
+}
+
+/* ===== SUPPLIERS ===== */
+let allSuppliers = [];
+
+async function loadSuppliers(){
+  try{
+    const r = await fetch(`${SUPA}/rest/v1/suppliers?select=*&order=name`,{
+      headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`}
+    });
+    const d = await r.json();
+    if(Array.isArray(d)) allSuppliers = d;
+  }catch(e){ console.error(e); }
+}
+
+async function saveSupplierIfNew(name, phone){
+  if(!name) return;
+  const exists = allSuppliers.find(s=>s.name.trim().toLowerCase()===name.trim().toLowerCase());
+  if(!exists){
+    try{
+      await fetch(`${SUPA}/rest/v1/suppliers`,{
+        method:'POST',
+        headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},
+        body:JSON.stringify({name:name.trim(), phone:phone||''})
+      });
+      await loadSuppliers();
+    }catch(e){ console.error(e); }
+  }
+}
+
+function openSupplierDrop(dropId){
+  renderSupplierDrop(dropId, document.getElementById(dropId.replace('Drop',''))?.value||'');
+  document.getElementById(dropId)?.classList.add('open');
+}
+
+function closeSupplierDrop(dropId){
+  document.getElementById(dropId)?.classList.remove('open');
+}
+
+function filterSupplierList(inputId, dropId){
+  const q = document.getElementById(inputId)?.value?.toLowerCase()||'';
+  renderSupplierDrop(dropId, q);
+  document.getElementById(dropId)?.classList.add('open');
+}
+
+function renderSupplierDrop(dropId, query){
+  const drop = document.getElementById(dropId);
+  if(!drop) return;
+  const filtered = query
+    ? allSuppliers.filter(s=>s.name.toLowerCase().includes(query)||(s.phone||'').includes(query))
+    : allSuppliers;
+
+  const inputId = dropId.replace('Drop','');
+  drop.innerHTML = filtered.map(s=>`
+    <div class="supplier-opt" onmousedown="selectSupplier('${inputId}','${dropId}','${s.name.replace(/'/g,"\\'")}')">
+      <span>${s.name}</span>
+      <span class="supplier-opt-phone">${s.phone||''}</span>
+    </div>
+  `).join('') + `<div class="supplier-add-new" onmousedown="addNewSupplier('${inputId}','${dropId}')">➕ إضافة مورد جديد · Add New</div>`;
+}
+
+function selectSupplier(inputId, dropId, name){
+  const el = document.getElementById(inputId);
+  if(el) el.value = name;
+  closeSupplierDrop(dropId);
+}
+
+async function addNewSupplier(inputId, dropId){
+  const name = document.getElementById(inputId)?.value?.trim();
+  if(!name){ toast('❌ اكتب اسم المورد أولاً'); return; }
+  const phone = prompt(`رقم هاتف المورد "${name}" (اختياري) · Phone (optional):`)||'';
+  try{
+    await fetch(`${SUPA}/rest/v1/suppliers`,{
+      method:'POST',
+      headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify({name, phone})
+    });
+    await loadSuppliers();
+    toast(`✅ تم حفظ المورد · Supplier Saved`);
+    closeSupplierDrop(dropId);
+  }catch(e){ toast('❌ المورد موجود أو خطأ · Error'); }
 }
 
 /* ===== INVENTORY ===== */
@@ -1556,6 +1664,8 @@ async function addInventoryItem(){
   if(!name){ toast('❌ أدخل اسم المنتج'); return; }
   if(!qty||qty<=0){ toast('❌ أدخل الكمية'); return; }
   if(!price||price<=0){ toast('❌ أدخل سعر الوحدة'); return; }
+  // حفظ المورد إذا كان جديداً
+  if(supplier) await saveSupplierIfNew(supplier, '');
 
   try{
     const existing = allInventory.find(i=>
@@ -1629,6 +1739,7 @@ async function saveInvEdit(){
   const supplier = document.getElementById('editInvSupplier').value.trim();
   const date     = document.getElementById('editInvDate').value;
   const notes    = document.getElementById('editInvNotes').value.trim();
+  if(supplier) await saveSupplierIfNew(supplier, '');
   try{
     await fetch(`${SUPA}/rest/v1/inventory?id=eq.${id}`,{
       method:'PATCH',
@@ -2185,6 +2296,20 @@ function applyOverview(){
   document.getElementById('sExpenses').textContent=expenses.toFixed(3);
   document.getElementById('sFixed').textContent=fixedTotal.toFixed(3);
   document.getElementById('sWA').textContent=inv.filter(i=>i.whatsapp_sent).length;
+
+  // حساب الخصومات — نقرأها من حقل note في الفواتير
+  let discCount = 0, discTotal = 0;
+  inv.forEach(i=>{
+    const note = i.note||'';
+    // نمط: "خصم · Disc: OMR 0.500" أو "خصم · Disc: ر.ع 0.500"
+    const match = note.match(/[Dd]isc[^:]*:\s*(?:OMR|ر\.ع)\s*([0-9.]+)/);
+    if(match && +match[1]>0){
+      discCount++;
+      discTotal += +match[1];
+    }
+  });
+  document.getElementById('sDiscCount').textContent = discCount;
+  document.getElementById('sDiscTotal').textContent = discTotal.toFixed(3);
 
   const netEl=document.getElementById('netProfit');
   netEl.textContent=`ر.ع ${net.toFixed(3)}`;
@@ -2896,6 +3021,7 @@ async function loadAll(){
     if(Array.isArray(invD)) allInvoices=invD;
     if(Array.isArray(expD)) allExpenses=expD;
     await loadFixed();
+    await loadSuppliers();
     applyOverview();
   }catch(e){console.error(e);}
 }
