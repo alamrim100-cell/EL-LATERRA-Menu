@@ -1143,6 +1143,33 @@ async function saveInvoice(waSent){
       method:'DELETE',
       headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Prefer':'return=minimal'}
     });
+
+    // خصم منتجات الكيك من المخزون تلقائياً
+    const cakeItems = items.filter(i=>{
+      const sec = MENU.find(s=>s.items.some(m=>m.ar===i.name||m.en===i.name))?.section||'';
+      return sec==='الكيك';
+    });
+    for(const cake of cakeItems){
+      try{
+        const invName = cake.nameEn||cake.name;
+        // ابحث عن المنتج في المخزون بالاسم الإنجليزي أو العربي
+        const [rEn, rAr] = await Promise.all([
+          fetch(`${SUPA}/rest/v1/inventory?product_name=eq.${encodeURIComponent(invName)}&select=id,quantity`,{headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`}}),
+          fetch(`${SUPA}/rest/v1/inventory?product_name=eq.${encodeURIComponent(cake.name)}&select=id,quantity`,{headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`}})
+        ]);
+        const dEn = await rEn.json();
+        const dAr = await rAr.json();
+        const found = (Array.isArray(dEn)&&dEn.length>0) ? dEn[0] : (Array.isArray(dAr)&&dAr.length>0) ? dAr[0] : null;
+        if(found && +found.quantity>0){
+          const newQty = Math.max(0, +found.quantity-(+cake.qty||1));
+          await fetch(`${SUPA}/rest/v1/inventory?id=eq.${found.id}`,{
+            method:'PATCH',
+            headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},
+            body:JSON.stringify({quantity:newQty})
+          });
+        }
+      }catch(e){ console.error('Cake deduct error:', e); }
+    }
     allOrders = allOrders.filter(o=>o.id!==currentInvoice.id);
     knownIds.delete(currentInvoice.id);
     document.getElementById('invModal').classList.remove('open');

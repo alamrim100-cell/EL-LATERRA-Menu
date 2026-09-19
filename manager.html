@@ -2850,6 +2850,22 @@ async function addMenuItem(){
       document.getElementById('newItemImg').value='';
       if(document.getElementById('newItemIsNew')) document.getElementById('newItemIsNew').checked=false;
       toast('✅ Item Added · تم إضافة المنتج');
+      // لو المنتج من قسم الكيك — أضفه تلقائياً في المخزون
+      if(section === 'الكيك'){
+        await fetch(`${SUPA}/rest/v1/inventory`,{
+          method:'POST',
+          headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},
+          body:JSON.stringify({
+            product_name: name_en||name_ar,
+            quantity: 0,
+            unit: 'قطعة',
+            unit_price: 0,
+            amount_paid: 0,
+            purchase_date: new Date().toISOString().split('T')[0],
+            notes: `تم الإضافة تلقائياً من المينيو · Auto-added from menu`
+          })
+        });
+      }
       await loadMenuItems();
       document.getElementById('menuContent').scrollIntoView({behavior:'smooth'});
     } else {
