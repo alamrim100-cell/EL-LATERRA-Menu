@@ -885,7 +885,7 @@
   <div class="inv-edit-box">
     <div class="inv-edit-head">
       <span style="font-weight:900;color:var(--gold);">✏️ تعديل الصنف · Edit Item</span>
-      <button onclick="closeInvModal()" style="background:none;border:none;color:var(--dim);font-size:1.2rem;cursor:pointer;">✕</button>
+      <button onclick="closeInvStockModal()" style="background:none;border:none;color:var(--dim);font-size:1.2rem;cursor:pointer;">✕</button>
     </div>
     <div class="inv-edit-body">
       <input type="hidden" id="editInvStockId">
@@ -1579,7 +1579,7 @@ function openInvEditModal(item){
   document.getElementById('invEditModal').classList.add('open');
 }
 
-function closeInvModal(){
+function closeInvStockModal(){
   document.getElementById('invEditModal').classList.remove('open');
   currentEditInvItem = null;
 }
@@ -1601,7 +1601,7 @@ async function saveInvEdit(){
       body:JSON.stringify({product_name:name,quantity:qty,unit,unit_price:price,amount_paid:paid,supplier_contact:supplier,purchase_date:date,notes})
     });
     toast('✅ تم التعديل · Updated');
-    closeInvModal();
+    closeInvStockModal();
     loadInventory();
   }catch(e){ toast('❌ خطأ · Error'); }
 }
@@ -1615,7 +1615,7 @@ async function deleteInvItem(){
       headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Prefer':'return=minimal'}
     });
     toast('🗑️ تم الحذف · Deleted');
-    closeInvModal();
+    closeInvStockModal();
     loadInventory();
   }catch(e){ toast('❌ خطأ · Error'); }
 }
