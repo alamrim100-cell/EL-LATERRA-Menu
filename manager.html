@@ -903,10 +903,36 @@
           <th>إجراء</th>
         </tr></thead>
         <tbody id="invTableBodyStock">
-          <tr><td colspan="9" style="text-align:center;padding:1.5rem;color:var(--dim);">⏳ جاري التحميل...</td></tr>
+          <tr><td colspan="11" style="text-align:center;padding:1.5rem;color:var(--dim);">⏳ جاري التحميل...</td></tr>
         </tbody>
       </table>
     </div>
+
+    <!-- إدارة الموردين -->
+    <div class="sec-title" style="margin-top:1.5rem;">🚚 إدارة الموردين <span class="sec-en">· Suppliers</span></div>
+
+    <!-- فورم إضافة مورد -->
+    <div style="background:var(--card);border:1px solid var(--gold);border-radius:12px;padding:1rem;margin-bottom:1rem;">
+      <div style="font-weight:900;color:var(--gold);font-size:0.88rem;margin-bottom:0.7rem;">➕ إضافة مورد · Add Supplier</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;">
+        <div>
+          <label class="inv-form-lbl">اسم المورد · Supplier Name</label>
+          <input type="text" id="newSupplierName" class="inv-form-input" placeholder="اسم المورد أو الشركة">
+        </div>
+        <div>
+          <label class="inv-form-lbl">رقم الهاتف · Phone</label>
+          <input type="text" id="newSupplierPhone" class="inv-form-input" placeholder="+968 XXXX XXXX">
+        </div>
+        <div style="grid-column:1/-1;">
+          <label class="inv-form-lbl">ملاحظات · Notes (اختياري)</label>
+          <input type="text" id="newSupplierNotes" class="inv-form-input" placeholder="مثال: يوصل كل أسبوع...">
+        </div>
+      </div>
+      <button class="inv-add-btn" style="margin-top:0.6rem;" onclick="addSupplier()">✅ حفظ المورد · Save Supplier</button>
+    </div>
+
+    <!-- قائمة الموردين -->
+    <div id="supplierList"><div style="text-align:center;color:var(--dim);padding:1rem;">⏳</div></div>
 
   </div>
 </div>
@@ -1464,8 +1490,65 @@ async function loadSuppliers(){
       headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`}
     });
     const d = await r.json();
-    if(Array.isArray(d)) allSuppliers = d;
+    if(Array.isArray(d)){ allSuppliers=d; renderSupplierList(); }
   }catch(e){ console.error(e); }
+}
+
+function renderSupplierList(){
+  const el = document.getElementById('supplierList');
+  if(!el) return;
+  if(allSuppliers.length===0){
+    el.innerHTML=`<div style="text-align:center;color:var(--dim);padding:1rem;">لا يوجد موردون بعد · No suppliers yet</div>`;
+    return;
+  }
+  el.innerHTML = allSuppliers.map(s=>`
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.7rem 1rem;margin-bottom:0.5rem;display:flex;align-items:center;gap:0.8rem;">
+      <div style="width:38px;height:38px;border-radius:50%;background:var(--gold-dim);border:1px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;">🚚</div>
+      <div style="flex:1;">
+        <div style="font-weight:700;font-size:0.92rem;color:var(--cream);">${s.name}</div>
+        ${s.phone?`<div style="font-size:0.8rem;color:var(--gold);direction:ltr;">📞 ${s.phone}</div>`:''}
+        ${s.notes?`<div style="font-size:0.72rem;color:var(--dim);">${s.notes}</div>`:''}
+      </div>
+      <div style="display:flex;flex-direction:column;gap:0.3rem;">
+        <a href="tel:${s.phone||''}" style="background:var(--green);color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:0.75rem;font-weight:700;text-decoration:none;text-align:center;">📞 Call</a>
+        <a href="https://wa.me/${(s.phone||'').replace(/[^0-9]/g,'')}" target="_blank" style="background:#25D366;color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:0.75rem;font-weight:700;text-decoration:none;text-align:center;">💬 WA</a>
+        <button onclick="deleteSupplier(${s.id})" style="background:var(--red);color:#fff;border:none;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:0.72rem;">🗑️</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function addSupplier(){
+  const name  = document.getElementById('newSupplierName').value.trim();
+  const phone = document.getElementById('newSupplierPhone').value.trim();
+  const notes = document.getElementById('newSupplierNotes').value.trim();
+  if(!name){ toast('❌ أدخل اسم المورد'); return; }
+  try{
+    const r = await fetch(`${SUPA}/rest/v1/suppliers`,{
+      method:'POST',
+      headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify({name,phone,notes})
+    });
+    if(r.ok||r.status===201){
+      document.getElementById('newSupplierName').value='';
+      document.getElementById('newSupplierPhone').value='';
+      document.getElementById('newSupplierNotes').value='';
+      toast('✅ تم حفظ المورد · Supplier Saved');
+      await loadSuppliers();
+    } else { toast('❌ المورد موجود مسبقاً · Already exists'); }
+  }catch(e){ toast('❌ خطأ · Error'); }
+}
+
+async function deleteSupplier(id){
+  if(!confirm('حذف هذا المورد؟ · Delete supplier?')) return;
+  try{
+    await fetch(`${SUPA}/rest/v1/suppliers?id=eq.${id}`,{
+      method:'DELETE',
+      headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Prefer':'return=minimal'}
+    });
+    toast('🗑️ تم الحذف · Deleted');
+    await loadSuppliers();
+  }catch(e){ toast('❌ خطأ · Error'); }
 }
 
 async function saveSupplierIfNew(name, phone){
