@@ -936,6 +936,39 @@
   </div>
 </div>
 
+<!-- نافذة سحب كمية -->
+<div class="inv-edit-modal" id="withdrawModal">
+  <div class="inv-edit-box">
+    <div class="inv-edit-head">
+      <span style="font-weight:900;color:var(--red);">📤 سحب كمية · Withdraw</span>
+      <button onclick="closeWithdrawModal()" style="background:none;border:none;color:var(--dim);font-size:1.2rem;cursor:pointer;">✕</button>
+    </div>
+    <div class="inv-edit-body">
+      <input type="hidden" id="withdrawItemId">
+      <div style="font-size:0.85rem;color:var(--cream);">المنتج: <strong id="withdrawItemName" style="color:var(--gold);"></strong></div>
+      <div style="font-size:0.82rem;color:var(--dim);">المتوفر: <span id="withdrawAvailable" style="color:var(--green);font-weight:700;"></span></div>
+      <div>
+        <label class="inv-form-lbl">الكمية المسحوبة · Quantity to Withdraw</label>
+        <input type="number" id="withdrawQty" class="inv-form-input" placeholder="0" min="0" step="0.01">
+      </div>
+      <div>
+        <label class="inv-form-lbl">السبب · Reason</label>
+        <select id="withdrawReason" class="inv-form-input">
+          <option value="استهلاك">☕ استهلاك · Consumption</option>
+          <option value="تالف">❌ تالف · Damaged</option>
+          <option value="منتهي الصلاحية">⏰ منتهي الصلاحية · Expired</option>
+          <option value="مرتجع">↩️ مرتجع · Returned</option>
+          <option value="أخرى">📝 أخرى · Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="inv-edit-actions">
+      <button class="inv-edit-btn inv-btn-del" onclick="confirmWithdraw()">📤 سحب · Withdraw</button>
+      <button class="inv-edit-btn" style="background:var(--border);color:var(--cream);" onclick="closeWithdrawModal()">إلغاء · Cancel</button>
+    </div>
+  </div>
+</div>
+
 <!-- ===== ATTENDANCE ===== -->
 <div class="panel" id="panel-attendance">
   <div style="margin-top:1rem;">
@@ -1386,6 +1419,43 @@ function calcInvTotal(){
   document.getElementById('invTotal').value = (qty*price).toFixed(3);
 }
 
+let currentWithdrawItem = null;
+
+function openWithdrawModal(item){
+  currentWithdrawItem = item;
+  document.getElementById('withdrawItemId').value = item.id;
+  document.getElementById('withdrawItemName').textContent = item.product_name;
+  document.getElementById('withdrawAvailable').textContent = `${item.quantity} ${item.unit||''}`;
+  document.getElementById('withdrawQty').value = '';
+  document.getElementById('withdrawModal').classList.add('open');
+}
+
+function closeWithdrawModal(){
+  document.getElementById('withdrawModal').classList.remove('open');
+  currentWithdrawItem = null;
+}
+
+async function confirmWithdraw(){
+  const id  = document.getElementById('withdrawItemId').value;
+  const qty = +document.getElementById('withdrawQty').value;
+  const reason = document.getElementById('withdrawReason').value;
+  if(!qty||qty<=0){ toast('❌ أدخل الكمية'); return; }
+  const item = currentWithdrawItem;
+  if(qty > +item.quantity){ toast('❌ الكمية أكبر من المتوفر'); return; }
+  const newQty = +item.quantity - qty;
+  const note = `${item.notes||''} | سحب: ${qty} ${item.unit||''} (${reason})`.trim();
+  try{
+    await fetch(`${SUPA}/rest/v1/inventory?id=eq.${id}`,{
+      method:'PATCH',
+      headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify({quantity:newQty, notes:note})
+    });
+    toast(`✅ تم سحب ${qty} ${item.unit||''} · Withdrawn`);
+    closeWithdrawModal();
+    loadInventory();
+  }catch(e){ toast('❌ خطأ · Error'); }
+}
+
 async function loadInventory(){
   try{
     const r = await fetch(`${SUPA}/rest/v1/inventory?select=*&order=created_at.desc`,{
@@ -1428,7 +1498,8 @@ function renderInventory(){
       <td style="direction:ltr;${rem>0?'color:var(--red);font-weight:700;':'color:var(--green);font-weight:700;'}">${rem>0?`OMR ${rem.toFixed(3)}`:'✅ مسدد'}</td>
       <td style="font-size:0.78rem;color:var(--dim);">${item.supplier_contact||'-'}</td>
       <td style="font-size:0.75rem;color:var(--dim);">${item.purchase_date||'-'}</td>
-      <td><button style="background:var(--gold);color:var(--bg);border:none;border-radius:6px;padding:3px 8px;cursor:pointer;font-size:0.72rem;font-weight:700;" onclick='openInvEditModal(${JSON.stringify(item).replace(/'/g,"&#39;")})'>✏️</button></td>
+      <td><button style="background:var(--gold);color:var(--bg);border:none;border-radius:6px;padding:3px 8px;cursor:pointer;font-size:0.72rem;font-weight:700;margin-left:3px;" onclick='openInvEditModal(${JSON.stringify(item).replace(/'/g,"&#39;")})'>✏️</button>
+      <button style="background:var(--red);color:#fff;border:none;border-radius:6px;padding:3px 7px;cursor:pointer;font-size:0.72rem;font-weight:700;" onclick='openWithdrawModal(${JSON.stringify(item).replace(/'/g,"&#39;")})'>📤</button></td>
     </tr>`;
   }).join('');
 }
@@ -1445,18 +1516,53 @@ async function addInventoryItem(){
   if(!name){ toast('❌ أدخل اسم المنتج'); return; }
   if(!qty||qty<=0){ toast('❌ أدخل الكمية'); return; }
   if(!price||price<=0){ toast('❌ أدخل سعر الوحدة'); return; }
+
   try{
-    const r = await fetch(`${SUPA}/rest/v1/inventory`,{
-      method:'POST',
-      headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},
-      body:JSON.stringify({product_name:name,quantity:qty,unit,unit_price:price,supplier_contact:supplier,purchase_date:date||new Date().toISOString().split('T')[0],amount_paid:paid,notes})
+    // تحقق هل المنتج من نفس المورد موجود مسبقاً
+    const existing = allInventory.find(i=>
+      i.product_name.trim().toLowerCase() === name.toLowerCase() &&
+      (i.supplier_contact||'').trim() === supplier.trim()
+    );
+
+    if(existing){
+      // أضف الكمية والمدفوع للسجل الموجود
+      const newQty  = (+existing.quantity||0) + qty;
+      const newPaid = (+existing.amount_paid||0) + paid;
+      // متوسط السعر الجديد
+      const oldTotal = (+existing.quantity||0) * (+existing.unit_price||0);
+      const newTotal = qty * price;
+      const avgPrice = (oldTotal + newTotal) / newQty;
+
+      const r = await fetch(`${SUPA}/rest/v1/inventory?id=eq.${existing.id}`,{
+        method:'PATCH',
+        headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},
+        body:JSON.stringify({
+          quantity: newQty,
+          unit_price: +avgPrice.toFixed(4),
+          amount_paid: newPaid,
+          purchase_date: date||existing.purchase_date,
+          notes: notes ? (existing.notes?existing.notes+' | '+notes:notes) : existing.notes
+        })
+      });
+      if(r.ok){
+        toast(`✅ تم إضافة ${qty} ${unit} للمخزون الحالي`);
+      }
+    } else {
+      // سجل جديد
+      const r = await fetch(`${SUPA}/rest/v1/inventory`,{
+        method:'POST',
+        headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},
+        body:JSON.stringify({product_name:name,quantity:qty,unit,unit_price:price,supplier_contact:supplier,purchase_date:date||new Date().toISOString().split('T')[0],amount_paid:paid,notes})
+      });
+      if(r.ok||r.status===201) toast('✅ تم الإضافة · Added');
+    }
+
+    ['invName','invQty','invUnitPrice','invSupplier','invPaid','invNotes','invTotal'].forEach(id=>{
+      const el=document.getElementById(id);if(el)el.value='';
     });
-    if(r.ok||r.status===201){
-      ['invName','invQty','invUnitPrice','invSupplier','invPaid','invNotes','invTotal'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-      toast('✅ تم الإضافة · Added');
-      loadInventory();
-    } else { toast('❌ خطأ · Error'); }
-  }catch(e){ toast('❌ خطأ · Error'); }
+    loadInventory();
+
+  }catch(e){ toast('❌ خطأ · Error'); console.error(e); }
 }
 
 function openInvEditModal(item){
