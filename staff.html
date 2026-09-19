@@ -465,6 +465,12 @@
       <div style="font-size:0.68rem;color:inherit;opacity:0.7;">مصروفات</div>
     </div>
   </button>
+  <button class="tab" onclick="switchTab('stock')">
+    <div>
+      <div>📦 Stock</div>
+      <div style="font-size:0.68rem;color:inherit;opacity:0.7;">مخزون</div>
+    </div>
+  </button>
 </div>
 
 <!-- STATS BAR -->
@@ -688,6 +694,16 @@
   </div>
 </div>
 
+<!-- تبويب المخزون -->
+<div class="panel" id="panel-stock">
+  <div style="padding:0.8rem 0;">
+    <div style="font-size:0.88rem;font-weight:900;color:var(--gold);margin-bottom:0.8rem;font-family:'Cormorant Garamond',serif;">📦 Stock Usage · تسجيل الاستهلاك</div>
+    <div id="stockList" style="display:flex;flex-direction:column;gap:0.5rem;">
+      <div style="text-align:center;color:var(--dim);padding:1rem;">⏳ Loading...</div>
+    </div>
+  </div>
+</div>
+
 <!-- نافذة تعديل المنتج -->
 <div class="prod-edit-modal" id="prodEditModal">
   <div class="prod-edit-box">
@@ -804,6 +820,81 @@ async function switchTab(tab){
   if(tab === 'stats') renderStats();
   if(tab === 'neworder'){ await loadMenu(); renderNoMenu(); }
   if(tab === 'expenses'){ setExpenseDate(); loadExpenses(); }
+  if(tab === 'stock'){ loadStockItems(); }
+}
+
+/* ===== STOCK USAGE ===== */
+let allStockItems = [];
+
+async function loadStockItems(){
+  try{
+    const r = await fetch(`${SUPA}/rest/v1/inventory?select=*&order=product_name`,{
+      headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`}
+    });
+    const d = await r.json();
+    if(Array.isArray(d)){ allStockItems=d; renderStockItems(); }
+  }catch(e){ console.error(e); }
+}
+
+function renderStockItems(){
+  const el = document.getElementById('stockList');
+  if(allStockItems.length===0){
+    el.innerHTML='<div style="text-align:center;color:var(--dim);">No stock items</div>';
+    return;
+  }
+  el.innerHTML = allStockItems.map(item=>`
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.7rem 0.9rem;display:flex;align-items:center;gap:0.7rem;">
+      <div style="flex:1;">
+        <div style="font-weight:700;font-size:0.88rem;">${item.product_name}</div>
+        <div style="font-size:0.72rem;color:${+item.quantity<=5?'var(--red)':'var(--dim)'};">
+          ${+item.quantity<=5?'⚠️ ':''}Available: ${item.quantity} ${item.unit||''}
+        </div>
+      </div>
+      <div style="display:flex;gap:0.4rem;align-items:center;">
+        <input type="number" id="use_${item.id}" placeholder="0" min="0" step="0.01"
+          style="width:65px;background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:0.35rem 0.5rem;color:var(--cream);font-family:'Tajawal',sans-serif;font-size:0.82rem;outline:none;text-align:center;">
+        <button onclick="useStockItem(${item.id},'${item.product_name}',${item.quantity},'${item.unit||''}')"
+          style="background:var(--red);color:#fff;border:none;border-radius:7px;padding:0.35rem 0.7rem;cursor:pointer;font-size:0.78rem;font-weight:700;white-space:nowrap;">
+          📤 Use
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function useStockItem(id, name, currentQty, unit){
+  const useQty = +document.getElementById(`use_${id}`)?.value||0;
+  if(!useQty||useQty<=0){ toast('❌ Enter quantity'); return; }
+  if(useQty > +currentQty){ toast(`❌ Only ${currentQty} ${unit} available`); return; }
+  const newQty = +currentQty - useQty;
+  try{
+    await fetch(`${SUPA}/rest/v1/inventory?id=eq.${id}`,{
+      method:'PATCH',
+      headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify({quantity:newQty})
+    });
+    toast(`✅ Used ${useQty} ${unit} of ${name}`);
+    document.getElementById(`use_${id}`).value='';
+    loadStockItems();
+  }catch(e){ toast('❌ Error'); }
+}
+
+/* خصم الأكواب تلقائياً عند Takeaway */
+async function deductCupFromStock(isHot){
+  const cupName = isHot ? 'أكواب ساخنة' : 'أكواب باردة';
+  try{
+    const r = await fetch(`${SUPA}/rest/v1/inventory?product_name=eq.${encodeURIComponent(cupName)}&select=id,quantity`,{
+      headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`}
+    });
+    const d = await r.json();
+    if(Array.isArray(d)&&d.length>0&&+d[0].quantity>0){
+      await fetch(`${SUPA}/rest/v1/inventory?id=eq.${d[0].id}`,{
+        method:'PATCH',
+        headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},
+        body:JSON.stringify({quantity:+d[0].quantity-1})
+      });
+    }
+  }catch(e){ console.error('Cup deduct error:', e); }
 }
 
 /* ===== HELPERS ===== */
@@ -1612,6 +1703,20 @@ async function noSendOrder(){
     });
     if(res.ok || res.status===201){
       toast('✅ Order Sent · تم إرسال الطلب');
+
+      // خصم الأكواب عند Takeaway حسب نوع المشروب
+      if(noOrderType === 'take'){
+        const cartItems = Object.values(noCart);
+        // تحديد بارد أو ساخن من السلة
+        const hasHot  = cartItems.some(i=>i.temp==='hot'  || (i.nameEn&&i.nameEn.includes('Hot')));
+        const hasCold = cartItems.some(i=>i.temp==='cold' || !i.temp || (i.nameEn&&!i.nameEn.includes('Hot')));
+        const hotCount  = cartItems.filter(i=>i.temp==='hot').reduce((s,i)=>s+(+i.qty||1),0);
+        const coldCount = cartItems.filter(i=>i.temp!=='hot').reduce((s,i)=>s+(+i.qty||1),0);
+        // خصم حسب العدد
+        if(hotCount>0)  for(let i=0;i<hotCount;i++)  deductCupFromStock(true);
+        if(coldCount>0) for(let i=0;i<coldCount;i++) deductCupFromStock(false);
+      }
+
       noCart = {};
       noRenderCart();
       document.getElementById('noTableInput').value = '';
