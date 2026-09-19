@@ -1873,11 +1873,22 @@ function renderInvoices(invoices){
     const pt=payType(inv.payment_method);
     const isT=inv.order_type&&inv.order_type.includes('Take');
     const t=new Date(inv.created_at);
+
+    // حساب السعر قبل الخصم من المنتجات
+    const subtotal = items.reduce((s,i)=>s+((+i.price||0)*(+i.qty||1)),0);
+    const total = +inv.total||0;
+    const disc = Math.max(0, subtotal - total);
+    const hasDisc = disc > 0.0005;
+
     return `<tr>
       <td style="font-size:0.72rem;color:var(--dim);">${inv.invoice_number||'-'}</td>
       <td>${inv.table_number||'-'}</td>
       <td style="max-width:160px;">${items.slice(0,2).map(i=>`<div style="font-size:0.78rem;">${i.nameEn||i.name} ×${i.qty}</div>`).join('')}${items.length>2?`<div style="font-size:0.7rem;color:var(--dim);">+${items.length-2} more</div>`:''}</td>
-      <td style="font-weight:900;color:var(--gold);direction:ltr;">OMR ${(+inv.total||0).toFixed(3)}</td>
+      <td style="direction:ltr;">
+        ${hasDisc?`<div style="font-size:0.72rem;color:var(--dim);text-decoration:line-through;">OMR ${subtotal.toFixed(3)}</div>`:''}
+        <div style="font-weight:900;color:var(--gold);">OMR ${total.toFixed(3)}</div>
+        ${hasDisc?`<div style="font-size:0.7rem;color:var(--red);">- OMR ${disc.toFixed(3)}</div>`:''}
+      </td>
       <td><span class="badge-pay pay-${pt}">${pt==='cash'?'💵 Cash':pt==='visa'?'💳 Visa':pt==='beanz'?'☕ Beanz':'📱 Transfer'}</span></td>
       <td><span class="${isT?'badge-take2':'badge-dine2'}">${isT?'🥤 Take':'🪑 Dine'}</span></td>
       <td style="font-size:0.72rem;color:var(--dim);">${t.toLocaleString('en-GB',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'})}</td>
