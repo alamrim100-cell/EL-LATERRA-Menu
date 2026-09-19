@@ -199,6 +199,34 @@
   .att-emp-name{font-size:0.95rem;font-weight:700;color:var(--cream);}
   .att-emp-detail{font-size:0.72rem;color:var(--dim);}
   .att-emp-hours{font-weight:900;color:var(--gold);font-size:0.95rem;white-space:nowrap;}
+
+  /* ===== المخزون ===== */
+  .inv-form{background:var(--card);border:1px solid var(--gold);border-radius:14px;padding:1.2rem;margin-bottom:1.2rem;}
+  .inv-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;}
+  @media(max-width:540px){.inv-form-grid{grid-template-columns:1fr;}}
+  .inv-form-input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:0.5rem 0.7rem;color:var(--cream);font-family:'Tajawal',sans-serif;font-size:0.85rem;outline:none;}
+  .inv-form-input:focus{border-color:var(--gold);}
+  .inv-form-input::placeholder{color:var(--dim);}
+  .inv-form-lbl{font-size:0.72rem;color:var(--dim);margin-bottom:0.25rem;display:block;}
+  .inv-add-btn{background:var(--gold);color:var(--bg);border:none;border-radius:10px;padding:0.65rem;font-family:'Tajawal',sans-serif;font-weight:900;font-size:0.88rem;cursor:pointer;grid-column:1/-1;}
+  .inv-add-btn:hover{opacity:0.85;}
+  .inv-stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:0.6rem;margin-bottom:1rem;}
+  .inv-stat{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.7rem;text-align:center;}
+  .inv-stat-num{font-size:1.3rem;font-weight:900;color:var(--gold);}
+  .inv-stat-lbl{font-size:0.68rem;color:var(--dim);}
+  .inv-remaining{color:var(--red)!important;}
+  .inv-paid-bar{height:5px;background:var(--border);border-radius:3px;margin-top:4px;overflow:hidden;}
+  .inv-paid-fill{height:100%;background:var(--green);border-radius:3px;transition:width 0.4s;}
+  /* نافذة تعديل المخزون */
+  .inv-edit-modal{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:90;display:none;align-items:center;justify-content:center;padding:1rem;}
+  .inv-edit-modal.open{display:flex;}
+  .inv-edit-box{background:var(--card);border:1px solid var(--gold);border-radius:16px;width:100%;max-width:420px;overflow:hidden;}
+  .inv-edit-head{background:var(--gold-dim);border-bottom:1px solid var(--border);padding:0.9rem 1.2rem;display:flex;justify-content:space-between;align-items:center;}
+  .inv-edit-body{padding:1.2rem;display:flex;flex-direction:column;gap:0.7rem;}
+  .inv-edit-actions{display:flex;gap:0.6rem;padding:0.9rem 1.2rem;border-top:1px solid var(--border);}
+  .inv-edit-btn{flex:1;padding:0.65rem;border:none;border-radius:10px;font-family:'Tajawal',sans-serif;font-weight:900;font-size:0.82rem;cursor:pointer;}
+  .inv-btn-save{background:var(--gold);color:var(--bg);}
+  .inv-btn-del{background:var(--red);color:#fff;}
   .att-status-in{color:var(--green);font-size:0.72rem;}
   .att-status-out{color:var(--dim);font-size:0.72rem;}
 
@@ -332,6 +360,7 @@
   <button class="tab" onclick="switchTab('history')">📅 مبيعات سابقة<span class="tab-en">History</span></button>
   <button class="tab" onclick="switchTab('manualinv')">➕ فاتورة يدوية<span class="tab-en">Manual Invoice</span></button>
   <button class="tab" onclick="switchTab('attendance')">🕐 الحضور<span class="tab-en">Attendance</span></button>
+  <button class="tab" onclick="switchTab('inventory')">📦 المخزون<span class="tab-en">Inventory</span></button>
   <button class="tab" onclick="switchTab('menu')">🍽️ إدارة المينيو<span class="tab-en">Menu Mgmt</span></button>
 </div>
 
@@ -763,6 +792,150 @@
   </div>
 </div>
 
+<!-- ===== INVENTORY ===== -->
+<div class="panel" id="panel-inventory">
+  <div style="margin-top:1rem;">
+
+    <!-- إحصائيات -->
+    <div class="inv-stats">
+      <div class="inv-stat"><div class="inv-stat-num" id="invStatItems">0</div><div class="inv-stat-lbl">عدد الأصناف · Items</div></div>
+      <div class="inv-stat"><div class="inv-stat-num" id="invStatTotal">0</div><div class="inv-stat-lbl">إجمالي القيمة · Total Value (OMR)</div></div>
+      <div class="inv-stat"><div class="inv-stat-num" id="invStatPaid">0</div><div class="inv-stat-lbl">المدفوع · Paid (OMR)</div></div>
+      <div class="inv-stat"><div class="inv-stat-num inv-remaining" id="invStatRemaining">0</div><div class="inv-stat-lbl">المتبقي · Remaining (OMR)</div></div>
+    </div>
+
+    <!-- فورم الإضافة -->
+    <div class="inv-form">
+      <div style="font-weight:900;color:var(--gold);font-size:0.92rem;margin-bottom:0.8rem;">➕ إضافة صنف · Add Item</div>
+      <div class="inv-form-grid">
+        <div>
+          <label class="inv-form-lbl">اسم المنتج · Product Name</label>
+          <input type="text" id="invName" class="inv-form-input" placeholder="مثال: حليب، قهوة، سكر...">
+        </div>
+        <div>
+          <label class="inv-form-lbl">العدد / الكمية · Quantity</label>
+          <input type="number" id="invQty" class="inv-form-input" placeholder="0" min="0" step="0.01">
+        </div>
+        <div>
+          <label class="inv-form-lbl">الوحدة · Unit</label>
+          <select id="invUnit" class="inv-form-input">
+            <option value="قطعة">قطعة · Piece</option>
+            <option value="كيلو">كيلو · KG</option>
+            <option value="لتر">لتر · Liter</option>
+            <option value="علبة">علبة · Box</option>
+            <option value="كرتون">كرتون · Carton</option>
+            <option value="باكيت">باكيت · Packet</option>
+            <option value="أخرى">أخرى · Other</option>
+          </select>
+        </div>
+        <div>
+          <label class="inv-form-lbl">سعر الوحدة · Unit Price (OMR)</label>
+          <input type="number" id="invUnitPrice" class="inv-form-input" placeholder="0.000" step="0.001" min="0" oninput="calcInvTotal()">
+        </div>
+        <div>
+          <label class="inv-form-lbl">رقم / اسم المورد · Supplier</label>
+          <input type="text" id="invSupplier" class="inv-form-input" placeholder="اسم أو رقم هاتف المورد">
+        </div>
+        <div>
+          <label class="inv-form-lbl">تاريخ الشراء · Purchase Date</label>
+          <input type="date" id="invDate" class="inv-form-input">
+        </div>
+        <div>
+          <label class="inv-form-lbl">المبلغ الكلي · Total Amount (OMR)</label>
+          <input type="number" id="invTotal" class="inv-form-input" placeholder="0.000" step="0.001" min="0" readonly style="opacity:0.7;">
+        </div>
+        <div>
+          <label class="inv-form-lbl">المبلغ المدفوع · Amount Paid (OMR)</label>
+          <input type="number" id="invPaid" class="inv-form-input" placeholder="0.000" step="0.001" min="0" oninput="calcInvTotal()">
+        </div>
+        <div style="grid-column:1/-1;">
+          <label class="inv-form-lbl">ملاحظات · Notes</label>
+          <input type="text" id="invNotes" class="inv-form-input" placeholder="اختياري · Optional">
+        </div>
+        <button class="inv-add-btn" onclick="addInventoryItem()">✅ إضافة · Add</button>
+      </div>
+    </div>
+
+    <!-- جدول المخزون -->
+    <div class="sec-title">📦 قائمة المخزون <span class="sec-en">· Inventory List</span></div>
+    <div class="table-wrap" style="margin-bottom:1.5rem;">
+      <table class="inv-table">
+        <thead><tr>
+          <th>المنتج · Product</th>
+          <th>الكمية · Qty</th>
+          <th>سعر الوحدة · Unit Price</th>
+          <th>المجموع · Total</th>
+          <th>المدفوع · Paid</th>
+          <th>المتبقي · Remaining</th>
+          <th>المورد · Supplier</th>
+          <th>التاريخ · Date</th>
+          <th>تعديل</th>
+        </tr></thead>
+        <tbody id="invTableBodyStock">
+          <tr><td colspan="9" style="text-align:center;padding:1.5rem;color:var(--dim);">⏳ جاري التحميل...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<!-- نافذة تعديل المخزون -->
+<div class="inv-edit-modal" id="invEditModal">
+  <div class="inv-edit-box">
+    <div class="inv-edit-head">
+      <span style="font-weight:900;color:var(--gold);">✏️ تعديل الصنف · Edit Item</span>
+      <button onclick="closeInvModal()" style="background:none;border:none;color:var(--dim);font-size:1.2rem;cursor:pointer;">✕</button>
+    </div>
+    <div class="inv-edit-body">
+      <input type="hidden" id="editInvStockId">
+      <div>
+        <label class="inv-form-lbl">اسم المنتج · Product</label>
+        <input type="text" id="editInvName" class="inv-form-input">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;">
+        <div>
+          <label class="inv-form-lbl">الكمية · Qty</label>
+          <input type="number" id="editInvQty" class="inv-form-input" step="0.01" oninput="calcEditInvTotal()">
+        </div>
+        <div>
+          <label class="inv-form-lbl">الوحدة · Unit</label>
+          <select id="editInvUnit" class="inv-form-input">
+            <option value="قطعة">قطعة</option><option value="كيلو">كيلو</option>
+            <option value="لتر">لتر</option><option value="علبة">علبة</option>
+            <option value="كرتون">كرتون</option><option value="باكيت">باكيت</option>
+            <option value="أخرى">أخرى</option>
+          </select>
+        </div>
+        <div>
+          <label class="inv-form-lbl">سعر الوحدة · Unit Price</label>
+          <input type="number" id="editInvUnitPrice" class="inv-form-input" step="0.001" oninput="calcEditInvTotal()">
+        </div>
+        <div>
+          <label class="inv-form-lbl">المدفوع · Paid</label>
+          <input type="number" id="editInvPaid" class="inv-form-input" step="0.001">
+        </div>
+      </div>
+      <div>
+        <label class="inv-form-lbl">المورد · Supplier</label>
+        <input type="text" id="editInvSupplier" class="inv-form-input">
+      </div>
+      <div>
+        <label class="inv-form-lbl">التاريخ · Date</label>
+        <input type="date" id="editInvDate" class="inv-form-input">
+      </div>
+      <div>
+        <label class="inv-form-lbl">ملاحظات · Notes</label>
+        <input type="text" id="editInvNotes" class="inv-form-input">
+      </div>
+    </div>
+    <div class="inv-edit-actions">
+      <button class="inv-edit-btn inv-btn-save" onclick="saveInvEdit()">💾 حفظ · Save</button>
+      <button class="inv-edit-btn inv-btn-del" onclick="deleteInvItem()">🗑️ حذف · Delete</button>
+    </div>
+  </div>
+</div>
+
 <!-- ===== ATTENDANCE ===== -->
 <div class="panel" id="panel-attendance">
   <div style="margin-top:1rem;">
@@ -1180,7 +1353,7 @@ function renderAnalytics(){
 /* ===== TABS ===== */
 function switchTab(tab){
   document.querySelectorAll('.tab').forEach((t,i)=>{
-    t.classList.toggle('active',['overview','analytics','charts','invoices','expenses','fixed','history','manualinv','attendance','menu'][i]===tab);
+    t.classList.toggle('active',['overview','analytics','charts','invoices','expenses','fixed','history','manualinv','attendance','inventory','menu'][i]===tab);
   });
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.getElementById(`panel-${tab}`).classList.add('active');
@@ -1199,7 +1372,146 @@ function switchTab(tab){
   if(tab==='history') renderHistory();
   if(tab==='manualinv'){ initManualInvoice(); }
   if(tab==='attendance'){ loadAttendance(); loadEmployees(); }
+  if(tab==='inventory'){ loadInventory(); }
   if(tab==='menu'){ loadMenuItems(); }
+}
+
+/* ===== INVENTORY ===== */
+let allInventory = [];
+let currentEditInvItem = null;
+
+function calcInvTotal(){
+  const qty   = +document.getElementById('invQty')?.value||0;
+  const price = +document.getElementById('invUnitPrice')?.value||0;
+  document.getElementById('invTotal').value = (qty*price).toFixed(3);
+}
+
+async function loadInventory(){
+  try{
+    const r = await fetch(`${SUPA}/rest/v1/inventory?select=*&order=created_at.desc`,{
+      headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`}
+    });
+    const d = await r.json();
+    if(Array.isArray(d)){ allInventory=d; renderInventory(); }
+  }catch(e){ console.error(e); }
+}
+
+function renderInventory(){
+  const totalVal  = allInventory.reduce((s,i)=>s+((+i.quantity||0)*(+i.unit_price||0)),0);
+  const totalPaid = allInventory.reduce((s,i)=>s+(+i.amount_paid||0),0);
+  const remaining = Math.max(0, totalVal-totalPaid);
+  document.getElementById('invStatItems').textContent     = allInventory.length;
+  document.getElementById('invStatTotal').textContent     = totalVal.toFixed(3);
+  document.getElementById('invStatPaid').textContent      = totalPaid.toFixed(3);
+  document.getElementById('invStatRemaining').textContent = remaining.toFixed(3);
+
+  const tbody = document.getElementById('invTableBodyStock');
+  if(allInventory.length===0){
+    tbody.innerHTML=`<tr><td colspan="9" style="text-align:center;padding:1.5rem;color:var(--dim);">لا توجد أصناف بعد · No items yet</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = allInventory.map(item=>{
+    const total   = (+item.quantity||0)*(+item.unit_price||0);
+    const paid    = +item.amount_paid||0;
+    const rem     = Math.max(0, total-paid);
+    const paidPct = total>0 ? Math.min(100,(paid/total*100)) : 0;
+    return `<tr>
+      <td style="font-weight:700;">${item.product_name}</td>
+      <td style="text-align:center;">${item.quantity} <span style="font-size:0.72rem;color:var(--dim);">${item.unit||''}</span></td>
+      <td style="direction:ltr;color:var(--dim);">OMR ${(+item.unit_price||0).toFixed(3)}</td>
+      <td style="font-weight:900;color:var(--gold);direction:ltr;">OMR ${total.toFixed(3)}</td>
+      <td>
+        <div style="color:var(--green);font-weight:700;direction:ltr;">OMR ${paid.toFixed(3)}</div>
+        <div class="inv-paid-bar"><div class="inv-paid-fill" style="width:${paidPct.toFixed(0)}%"></div></div>
+        <div style="font-size:0.68rem;color:var(--dim);">${paidPct.toFixed(0)}%</div>
+      </td>
+      <td style="direction:ltr;${rem>0?'color:var(--red);font-weight:700;':'color:var(--green);font-weight:700;'}">${rem>0?`OMR ${rem.toFixed(3)}`:'✅ مسدد'}</td>
+      <td style="font-size:0.78rem;color:var(--dim);">${item.supplier_contact||'-'}</td>
+      <td style="font-size:0.75rem;color:var(--dim);">${item.purchase_date||'-'}</td>
+      <td><button style="background:var(--gold);color:var(--bg);border:none;border-radius:6px;padding:3px 8px;cursor:pointer;font-size:0.72rem;font-weight:700;" onclick='openInvEditModal(${JSON.stringify(item).replace(/'/g,"&#39;")})'>✏️</button></td>
+    </tr>`;
+  }).join('');
+}
+
+async function addInventoryItem(){
+  const name     = document.getElementById('invName').value.trim();
+  const qty      = +document.getElementById('invQty').value;
+  const unit     = document.getElementById('invUnit').value;
+  const price    = +document.getElementById('invUnitPrice').value;
+  const supplier = document.getElementById('invSupplier').value.trim();
+  const date     = document.getElementById('invDate').value;
+  const paid     = +document.getElementById('invPaid').value||0;
+  const notes    = document.getElementById('invNotes').value.trim();
+  if(!name){ toast('❌ أدخل اسم المنتج'); return; }
+  if(!qty||qty<=0){ toast('❌ أدخل الكمية'); return; }
+  if(!price||price<=0){ toast('❌ أدخل سعر الوحدة'); return; }
+  try{
+    const r = await fetch(`${SUPA}/rest/v1/inventory`,{
+      method:'POST',
+      headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify({product_name:name,quantity:qty,unit,unit_price:price,supplier_contact:supplier,purchase_date:date||new Date().toISOString().split('T')[0],amount_paid:paid,notes})
+    });
+    if(r.ok||r.status===201){
+      ['invName','invQty','invUnitPrice','invSupplier','invPaid','invNotes','invTotal'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+      toast('✅ تم الإضافة · Added');
+      loadInventory();
+    } else { toast('❌ خطأ · Error'); }
+  }catch(e){ toast('❌ خطأ · Error'); }
+}
+
+function openInvEditModal(item){
+  currentEditInvItem = item;
+  document.getElementById('editInvStockId').value   = item.id;
+  document.getElementById('editInvName').value      = item.product_name||'';
+  document.getElementById('editInvQty').value       = item.quantity||'';
+  document.getElementById('editInvUnit').value      = item.unit||'قطعة';
+  document.getElementById('editInvUnitPrice').value = item.unit_price||'';
+  document.getElementById('editInvPaid').value      = item.amount_paid||'';
+  document.getElementById('editInvSupplier').value  = item.supplier_contact||'';
+  document.getElementById('editInvDate').value      = item.purchase_date||'';
+  document.getElementById('editInvNotes').value     = item.notes||'';
+  document.getElementById('invEditModal').classList.add('open');
+}
+
+function closeInvModal(){
+  document.getElementById('invEditModal').classList.remove('open');
+  currentEditInvItem = null;
+}
+
+async function saveInvEdit(){
+  const id       = document.getElementById('editInvStockId').value;
+  const name     = document.getElementById('editInvName').value.trim();
+  const qty      = +document.getElementById('editInvQty').value;
+  const unit     = document.getElementById('editInvUnit').value;
+  const price    = +document.getElementById('editInvUnitPrice').value;
+  const paid     = +document.getElementById('editInvPaid').value||0;
+  const supplier = document.getElementById('editInvSupplier').value.trim();
+  const date     = document.getElementById('editInvDate').value;
+  const notes    = document.getElementById('editInvNotes').value.trim();
+  try{
+    await fetch(`${SUPA}/rest/v1/inventory?id=eq.${id}`,{
+      method:'PATCH',
+      headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify({product_name:name,quantity:qty,unit,unit_price:price,amount_paid:paid,supplier_contact:supplier,purchase_date:date,notes})
+    });
+    toast('✅ تم التعديل · Updated');
+    closeInvModal();
+    loadInventory();
+  }catch(e){ toast('❌ خطأ · Error'); }
+}
+
+async function deleteInvItem(){
+  if(!confirm('حذف هذا الصنف؟ · Delete this item?')) return;
+  const id = document.getElementById('editInvStockId').value;
+  try{
+    await fetch(`${SUPA}/rest/v1/inventory?id=eq.${id}`,{
+      method:'DELETE',
+      headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Prefer':'return=minimal'}
+    });
+    toast('🗑️ تم الحذف · Deleted');
+    closeInvModal();
+    loadInventory();
+  }catch(e){ toast('❌ خطأ · Error'); }
 }
 
 /* ===== MANUAL INVOICE ===== */
