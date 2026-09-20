@@ -1629,6 +1629,12 @@ function calcInvTotal(){
   document.getElementById('invTotal').value = (qty*price).toFixed(3);
 }
 
+function calcEditInvTotal(){
+  const qty   = +document.getElementById('editInvQty')?.value||0;
+  const price = +document.getElementById('editInvUnitPrice')?.value||0;
+  // لا يوجد عرض للمجموع في نافذة التعديل — بس نتركها تعمل بدون خطأ
+}
+
 let currentWithdrawItem = null;
 
 function openWithdrawModal(item){
@@ -2554,7 +2560,7 @@ function renderInvoices(invoices){
       <td><span class="${isT?'badge-take2':'badge-dine2'}">${isT?'🥤 Take':'🪑 Dine'}</span></td>
       <td style="font-size:0.72rem;color:var(--dim);">${t.toLocaleString('en-GB',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'})}</td>
       <td>${inv.whatsapp_sent?'<span class="badge-wa">✓</span>':'-'}</td>
-      <td><button style="background:var(--gold);color:var(--bg);border:none;border-radius:6px;padding:3px 8px;cursor:pointer;font-size:0.72rem;font-weight:700;" onclick='openInvModal(${JSON.stringify(inv).replace(/'/g,"&#39;")})'>✏️</button></td>
+      <td><button class="inv-edit-btn-row" data-id="${inv.id}" style="background:var(--gold);color:var(--bg);border:none;border-radius:6px;padding:3px 8px;cursor:pointer;font-size:0.72rem;font-weight:700;">✏️</button></td>
     </tr>`;
   }).join('');
 }
@@ -2708,13 +2714,15 @@ function renderFixed(){
 }
 
 /* ===== INVOICE EDIT ===== */
+let currentInvData = {};
+
 function openInvModal(inv){
   currentEditInv = inv;
-  document.getElementById('editInvId').value = inv.id;
+  currentInvData = inv;
+  document.getElementById('editInvId').value = String(inv.id);
   document.getElementById('editTable').value = inv.table_number||'';
   document.getElementById('editTotal').value = inv.total||'';
   document.getElementById('editNote').value = inv.note||'';
-  // اختيار طريقة الدفع
   const sel = document.getElementById('editPayment');
   const pm = inv.payment_method||'';
   if(pm.includes('Visa')||pm.includes('فيزا')) sel.value='💳 فيزا · Visa';
@@ -3110,6 +3118,15 @@ async function loadAll(){
 }
 
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+
+// Event delegation لأزرار تعديل الفواتير
+document.addEventListener('click', e=>{
+  const btn = e.target.closest('.inv-edit-btn-row');
+  if(!btn) return;
+  const id = +btn.dataset.id;
+  const inv = allInvoices.find(i=>i.id===id);
+  if(inv) openInvModal(inv);
+});
 
 checkAuth();
 if(sessionStorage.getItem('mgr_auth')==='true') loadAll();
