@@ -900,6 +900,7 @@
           <th>المتبقي · Remaining</th>
           <th>المورد · Supplier</th>
           <th>التاريخ · Date</th>
+          <th>للموظف · Staff</th>
           <th>إجراء</th>
         </tr></thead>
         <tbody id="invTableBodyStock">
@@ -1672,6 +1673,18 @@ async function confirmWithdraw(){
   }catch(e){ toast('❌ خطأ · Error'); }
 }
 
+async function toggleStaffVisibility(id, current){
+  try{
+    await fetch(`${SUPA}/rest/v1/inventory?id=eq.${id}`,{
+      method:'PATCH',
+      headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify({show_in_staff:!current})
+    });
+    toast(!current ? '✅ ظاهر للموظف · Visible to Staff' : '⬜ مخفي عن الموظف · Hidden from Staff');
+    loadInventory();
+  }catch(e){ toast('❌ خطأ · Error'); }
+}
+
 async function loadInventory(){
   try{
     const r = await fetch(`${SUPA}/rest/v1/inventory?select=*&order=created_at.desc`,{
@@ -1731,8 +1744,14 @@ function renderInventory(){
       <td style="direction:ltr;${rem>0?'color:var(--red);font-weight:700;':'color:var(--green);font-weight:700;'}">${rem>0?`OMR ${rem.toFixed(3)}`:'✅ مسدد'}</td>
       <td style="font-size:0.75rem;color:var(--dim);">${item.supplier_contact||'-'}</td>
       <td style="font-size:0.72rem;color:var(--dim);">${item.purchase_date||'-'}</td>
+      <td style="text-align:center;">
+        <button onclick="toggleStaffVisibility(${item.id},${item.show_in_staff?'true':'false'})"
+          style="background:${item.show_in_staff?'var(--green)':'var(--border)'};color:${item.show_in_staff?'#fff':'var(--dim)'};border:none;border-radius:20px;padding:3px 10px;cursor:pointer;font-size:0.72rem;font-weight:700;transition:all 0.2s;white-space:nowrap;">
+          ${item.show_in_staff?'✅ ظاهر':'⬜ مخفي'}
+        </button>
+      </td>
       <td>
-        <button style="background:var(--gold);color:var(--bg);border:none;border-radius:6px;padding:3px 7px;cursor:pointer;font-size:0.72rem;font-weight:700;" onclick='openInvEditModal(${JSON.stringify(item).replace(/'/g,"&#39;")})'>✏️</button>
+        <button class="inv-edit-btn-row" data-invid="${item.id}" style="background:var(--gold);color:var(--bg);border:none;border-radius:6px;padding:3px 7px;cursor:pointer;font-size:0.72rem;font-weight:700;">✏️</button>
         <button style="background:var(--red);color:#fff;border:none;border-radius:6px;padding:3px 7px;cursor:pointer;font-size:0.72rem;font-weight:700;margin-top:2px;" onclick='openWithdrawModal(${JSON.stringify(item).replace(/'/g,"&#39;")})'>📤</button>
       </td>
     </tr>`;
@@ -3121,11 +3140,20 @@ function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t
 
 // Event delegation لأزرار تعديل الفواتير
 document.addEventListener('click', e=>{
-  const btn = e.target.closest('.inv-edit-btn-row');
-  if(!btn) return;
-  const id = +btn.dataset.id;
-  const inv = allInvoices.find(i=>i.id===id);
-  if(inv) openInvModal(inv);
+  const invRowBtn = e.target.closest('.inv-edit-btn-row');
+  if(!invRowBtn) return;
+  // فاتورة
+  if(invRowBtn.dataset.id){
+    const id = +invRowBtn.dataset.id;
+    const inv = allInvoices.find(i=>i.id===id);
+    if(inv) openInvModal(inv);
+  }
+  // مخزون
+  if(invRowBtn.dataset.invid){
+    const id = +invRowBtn.dataset.invid;
+    const item = allInventory.find(i=>i.id===id);
+    if(item) openInvEditModal(item);
+  }
 });
 
 checkAuth();

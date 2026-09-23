@@ -828,18 +828,23 @@ let allStockItems = [];
 
 async function loadStockItems(){
   try{
-    const r = await fetch(`${SUPA}/rest/v1/inventory?select=*&order=product_name`,{
+    const r = await fetch(`${SUPA}/rest/v1/inventory?select=*&show_in_staff=eq.true&order=product_name`,{
       headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`}
     });
     const d = await r.json();
     if(Array.isArray(d)){ allStockItems=d; renderStockItems(); }
+    else { allStockItems=[]; renderStockItems(); }
   }catch(e){ console.error(e); }
 }
 
 function renderStockItems(){
   const el = document.getElementById('stockList');
   if(allStockItems.length===0){
-    el.innerHTML='<div style="text-align:center;color:var(--dim);">No stock items</div>';
+    el.innerHTML=`<div style="text-align:center;color:var(--dim);padding:2rem;">
+      <div style="font-size:2rem;margin-bottom:0.5rem;">📦</div>
+      <div>No stock items assigned · لا توجد أصناف محددة</div>
+      <div style="font-size:0.75rem;margin-top:0.3rem;font-family:'Cormorant Garamond',serif;font-style:italic;">Ask manager to enable items · تواصل مع المدير لتفعيل الأصناف</div>
+    </div>`;
     return;
   }
   el.innerHTML = allStockItems.map(item=>`
