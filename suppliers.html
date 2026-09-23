@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Suppliers · El Laterra</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&family=Cormorant+Garamond:ital,wght@0,600;1,500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#1a0f0a;--card:#2d1a10;--border:#4a2e1a;
+    --gold:#D99B53;--gold-dim:rgba(217,155,83,0.12);
+    --cream:#F3E8D8;--dim:#9a7a5a;--red:#e53935;
+    --green:#4caf50;--blue:#2980b9;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--cream);font-family:'Tajawal',sans-serif;min-height:100vh;}
+  header{background:var(--card);border-bottom:2px solid var(--gold);padding:0.9rem 1.2rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:20;}
+  .h-title{font-size:1.1rem;font-weight:900;color:var(--gold);font-family:'Cormorant Garamond',serif;}
+  .h-sub{font-size:0.72rem;color:var(--dim);}
+  .h-link{background:var(--border);color:var(--cream);border:none;border-radius:8px;padding:0.45rem 0.9rem;font-family:'Tajawal',sans-serif;font-size:0.8rem;cursor:pointer;text-decoration:none;display:inline-block;}
+  .h-link:hover{background:var(--gold);color:var(--bg);}
+
+  .container{max-width:900px;margin:0 auto;padding:1rem;}
+
+  /* إحصائيات */
+  .stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:0.7rem;margin-bottom:1.2rem;}
+  .stat-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:0.9rem;text-align:center;}
+  .stat-num{font-size:1.5rem;font-weight:900;color:var(--gold);}
+  .stat-lbl{font-size:0.7rem;color:var(--dim);margin-top:0.2rem;}
+
+  /* فلتر الموردين */
+  .supplier-tabs{display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1rem;}
+  .sup-tab{background:var(--card);border:1px solid var(--border);color:var(--dim);border-radius:20px;padding:0.35rem 0.9rem;cursor:pointer;font-size:0.8rem;font-family:'Tajawal',sans-serif;transition:all 0.2s;}
+  .sup-tab.active{background:var(--gold);color:var(--bg);border-color:var(--gold);font-weight:700;}
+
+  /* بطاقة المورد */
+  .supplier-card{background:var(--card);border:1px solid var(--border);border-radius:14px;margin-bottom:1rem;overflow:hidden;}
+  .sup-header{background:var(--gold-dim);border-bottom:1px solid var(--border);padding:0.9rem 1.1rem;display:flex;align-items:center;gap:0.8rem;cursor:pointer;}
+  .sup-avatar{width:44px;height:44px;border-radius:50%;background:var(--gold);color:var(--bg);font-weight:900;font-size:1.2rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .sup-name{font-weight:900;font-size:0.95rem;color:var(--cream);}
+  .sup-phone{font-size:0.75rem;color:var(--gold);}
+  .sup-summary{margin-right:auto;display:flex;gap:1rem;text-align:center;}
+  .sup-sum-num{font-weight:900;font-size:0.9rem;}
+  .sup-sum-lbl{font-size:0.62rem;color:var(--dim);}
+  .sup-actions{display:flex;gap:0.4rem;}
+  .sup-btn{background:none;border:1px solid var(--border);color:var(--dim);border-radius:7px;padding:4px 10px;cursor:pointer;font-size:0.75rem;font-family:'Tajawal',sans-serif;text-decoration:none;display:flex;align-items:center;}
+  .sup-btn:hover{border-color:var(--gold);color:var(--gold);}
+
+  /* فواتير المورد */
+  .sup-invoices{padding:0.8rem 1rem;display:none;}
+  .sup-invoices.open{display:block;}
+
+  /* فورم فاتورة جديدة */
+  .inv-form{background:rgba(217,155,83,0.05);border:1px dashed var(--gold);border-radius:10px;padding:0.9rem;margin-bottom:0.8rem;}
+  .inv-form-title{font-size:0.82rem;font-weight:700;color:var(--gold);margin-bottom:0.7rem;}
+  .inv-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;}
+  @media(max-width:500px){.inv-form-grid{grid-template-columns:1fr;}}
+  .inv-input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:0.45rem 0.7rem;color:var(--cream);font-family:'Tajawal',sans-serif;font-size:0.83rem;outline:none;}
+  .inv-input:focus{border-color:var(--gold);}
+  .inv-input::placeholder{color:var(--dim);}
+  .inv-lbl{font-size:0.7rem;color:var(--dim);margin-bottom:0.25rem;display:block;}
+  .inv-add-btn{background:var(--gold);color:var(--bg);border:none;border-radius:8px;padding:0.5rem 1rem;font-family:'Tajawal',sans-serif;font-weight:900;font-size:0.82rem;cursor:pointer;margin-top:0.5rem;width:100%;}
+
+  /* قائمة الفواتير */
+  .inv-row{background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:0.7rem 0.9rem;margin-bottom:0.5rem;}
+  .inv-row-head{display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap;}
+  .inv-num{font-size:0.72rem;color:var(--dim);font-family:'Cormorant Garamond',serif;}
+  .inv-desc{flex:1;font-weight:700;font-size:0.85rem;}
+  .inv-date{font-size:0.72rem;color:var(--dim);}
+  .inv-amounts{display:flex;gap:1rem;margin-top:0.5rem;flex-wrap:wrap;}
+  .inv-amt{text-align:center;}
+  .inv-amt-num{font-weight:900;font-size:0.88rem;}
+  .inv-amt-lbl{font-size:0.62rem;color:var(--dim);}
+  .inv-progress{height:6px;background:var(--border);border-radius:3px;margin-top:0.5rem;overflow:hidden;}
+  .inv-progress-fill{height:100%;background:var(--green);border-radius:3px;transition:width 0.4s;}
+  .inv-pay-row{display:flex;gap:0.4rem;margin-top:0.6rem;align-items:center;}
+  .inv-pay-input{flex:1;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:0.35rem 0.6rem;color:var(--cream);font-family:'Tajawal',sans-serif;font-size:0.8rem;outline:none;}
+  .inv-pay-btn{background:var(--green);color:#fff;border:none;border-radius:6px;padding:0.35rem 0.8rem;cursor:pointer;font-size:0.78rem;font-weight:700;white-space:nowrap;}
+  .inv-del-btn{background:none;border:1px solid var(--border);color:var(--dim);border-radius:6px;padding:0.3rem 0.6rem;cursor:pointer;font-size:0.72rem;}
+  .inv-del-btn:hover{background:var(--red);color:#fff;border-color:var(--red);}
+  .badge-paid{background:var(--green);color:#fff;font-size:0.65rem;font-weight:700;padding:2px 8px;border-radius:999px;}
+  .badge-partial{background:var(--gold);color:var(--bg);font-size:0.65rem;font-weight:700;padding:2px 8px;border-radius:999px;}
+  .badge-unpaid{background:var(--red);color:#fff;font-size:0.65rem;font-weight:700;padding:2px 8px;border-radius:999px;}
+
+  /* فورم إضافة مورد */
+  .add-supplier-form{background:var(--card);border:1px solid var(--gold);border-radius:14px;padding:1.2rem;margin-bottom:1.2rem;}
+  .add-supplier-title{font-weight:900;color:var(--gold);font-size:0.95rem;margin-bottom:0.8rem;}
+
+  /* Toast */
+  .toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);background:var(--green);color:#fff;padding:0.6rem 1.2rem;border-radius:10px;font-weight:700;font-size:0.85rem;opacity:0;transition:opacity 0.3s;pointer-events:none;z-index:99;white-space:nowrap;}
+  .toast.show{opacity:1;}
+
+  .empty{text-align:center;padding:2rem;color:var(--dim);}
+  .sec-title{font-size:0.88rem;font-weight:900;color:var(--gold);margin-bottom:0.8rem;padding-bottom:0.4rem;border-bottom:1px solid var(--border);}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="h-title">🚚 Suppliers · الموردون</div>
+    <div class="h-sub">إدارة فواتير الموردين · Supplier Invoice Management</div>
+  </div>
+  <a href="manager.html" class="h-link">← Manager</a>
+</header>
+
+<div class="container">
+
+  <!-- إحصائيات -->
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-num" id="statSuppliers">0</div><div class="stat-lbl">Suppliers · موردون</div></div>
+    <div class="stat-card"><div class="stat-num" id="statInvoices">0</div><div class="stat-lbl">Invoices · فواتير</div></div>
+    <div class="stat-card"><div class="stat-num" id="statTotal">0</div><div class="stat-lbl">Total (OMR) · الإجمالي</div></div>
+    <div class="stat-card"><div class="stat-num" id="statPaid" style="color:var(--green);">0</div><div class="stat-lbl">Paid (OMR) · المدفوع</div></div>
+    <div class="stat-card"><div class="stat-num" id="statRemaining" style="color:var(--red);">0</div><div class="stat-lbl">Remaining (OMR) · المتبقي</div></div>
+  </div>
+
+  <!-- إضافة مورد جديد -->
+  <div class="add-supplier-form">
+    <div class="add-supplier-title">➕ Add Supplier · إضافة مورد</div>
+    <div class="inv-form-grid">
+      <div>
+        <label class="inv-lbl">Supplier Name · اسم المورد</label>
+        <input type="text" id="newSupName" class="inv-input" placeholder="اسم المورد أو الشركة">
+      </div>
+      <div>
+        <label class="inv-lbl">Phone · رقم الهاتف</label>
+        <input type="text" id="newSupPhone" class="inv-input" placeholder="+968 XXXX XXXX">
+      </div>
+      <div style="grid-column:1/-1;">
+        <label class="inv-lbl">Notes · ملاحظات (اختياري)</label>
+        <input type="text" id="newSupNotes" class="inv-input" placeholder="مثال: يوصل كل أسبوع...">
+      </div>
+    </div>
+    <button class="inv-add-btn" onclick="addSupplier()">✅ Save Supplier · حفظ المورد</button>
+  </div>
+
+  <!-- فلتر -->
+  <div class="sec-title">📋 Supplier Invoices · فواتير الموردين</div>
+  <div class="supplier-tabs" id="supplierTabs">
+    <button class="sup-tab active" onclick="setSupFilter('all')">All · الكل</button>
+    <button class="sup-tab" onclick="setSupFilter('unpaid')">🔴 Unpaid · غير مدفوع</button>
+    <button class="sup-tab" onclick="setSupFilter('partial')">🟡 Partial · جزئي</button>
+    <button class="sup-tab" onclick="setSupFilter('paid')">🟢 Paid · مدفوع</button>
+  </div>
+
+  <!-- قائمة الموردين -->
+  <div id="suppliersList"><div class="empty">⏳ Loading...</div></div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPA = 'https://fyyxuvqwoykavqhoaowu.supabase.co';
+const KEY  = 'sb_publishable_CKq5sKxZvi5k43cmEJ1cjw_Cg7jWk_e';
+
+let allSuppliers = [], allSupInvoices = [], supFilter = 'all';
+
+/* ===== LOAD ===== */
+async function loadAll(){
+  try{
+    const [supR, invR] = await Promise.all([
+      fetch(`${SUPA}/rest/v1/suppliers?select=*&order=name`,{headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`}}),
+      fetch(`${SUPA}/rest/v1/supplier_invoices?select=*&order=created_at.desc`,{headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`}})
+    ]);
+    const supD = await supR.json();
+    const invD = await invR.json();
+    if(Array.isArray(supD)) allSuppliers = supD;
+    if(Array.isArray(invD)) allSupInvoices = invD;
+    renderAll();
+  }catch(e){ console.error(e); }
+}
+
+function renderAll(){
+  // إحصائيات
+  const total     = allSupInvoices.reduce((s,i)=>s+(+i.total_amount||0),0);
+  const paid      = allSupInvoices.reduce((s,i)=>s+(+i.amount_paid||0),0);
+  const remaining = Math.max(0,total-paid);
+  document.getElementById('statSuppliers').textContent = allSuppliers.length;
+  document.getElementById('statInvoices').textContent  = allSupInvoices.length;
+  document.getElementById('statTotal').textContent     = total.toFixed(3);
+  document.getElementById('statPaid').textContent      = paid.toFixed(3);
+  document.getElementById('statRemaining').textContent = remaining.toFixed(3);
+
+  const el = document.getElementById('suppliersList');
+  if(allSuppliers.length===0){
+    el.innerHTML='<div class="empty">No suppliers yet · لا يوجد موردون بعد</div>';
+    return;
+  }
+
+  el.innerHTML = allSuppliers.map(sup=>{
+    let invs = allSupInvoices.filter(i=>i.supplier_id===sup.id);
+    // فلتر
+    if(supFilter==='paid')    invs = invs.filter(i=>(+i.amount_paid||0)>=(+i.total_amount||0)&&(+i.total_amount||0)>0);
+    if(supFilter==='unpaid')  invs = invs.filter(i=>(+i.amount_paid||0)===0);
+    if(supFilter==='partial') invs = invs.filter(i=>(+i.amount_paid||0)>0&&(+i.amount_paid||0)<(+i.total_amount||0));
+
+    const supTotal   = allSupInvoices.filter(i=>i.supplier_id===sup.id).reduce((s,i)=>s+(+i.total_amount||0),0);
+    const supPaid    = allSupInvoices.filter(i=>i.supplier_id===sup.id).reduce((s,i)=>s+(+i.amount_paid||0),0);
+    const supRem     = Math.max(0,supTotal-supPaid);
+
+    return `
+    <div class="supplier-card" id="sc_${sup.id}">
+      <div class="sup-header" onclick="toggleSupplier(${sup.id})">
+        <div class="sup-avatar">${(sup.name||'?').charAt(0).toUpperCase()}</div>
+        <div>
+          <div class="sup-name">${sup.name}</div>
+          <div class="sup-phone">${sup.phone?'📞 '+sup.phone:''}</div>
+        </div>
+        <div class="sup-summary">
+          <div class="sup-amt">
+            <div class="sup-sum-num" style="color:var(--gold);">OMR ${supTotal.toFixed(3)}</div>
+            <div class="sup-sum-lbl">Total</div>
+          </div>
+          <div class="sup-amt">
+            <div class="sup-sum-num" style="color:var(--green);">OMR ${supPaid.toFixed(3)}</div>
+            <div class="sup-sum-lbl">Paid</div>
+          </div>
+          <div class="sup-amt">
+            <div class="sup-sum-num" style="color:${supRem>0?'var(--red)':'var(--green)'};">${supRem>0?'OMR '+supRem.toFixed(3):'✅'}</div>
+            <div class="sup-sum-lbl">Remaining</div>
+          </div>
+        </div>
+        <div class="sup-actions">
+          ${sup.phone?`<a href="https://wa.me/${(sup.phone||'').replace(/[^0-9]/g,'')}" target="_blank" class="sup-btn" onclick="event.stopPropagation()">💬</a>`:''}
+          <button class="sup-btn" onclick="event.stopPropagation();deleteSupplier(${sup.id})">🗑️</button>
+        </div>
+      </div>
+
+      <div class="sup-invoices" id="si_${sup.id}">
+
+        <!-- فورم إضافة فاتورة -->
+        <div class="inv-form">
+          <div class="inv-form-title">➕ Add Invoice · إضافة فاتورة</div>
+          <div class="inv-form-grid">
+            <div>
+              <label class="inv-lbl">Description · الوصف</label>
+              <input type="text" id="invDesc_${sup.id}" class="inv-input" placeholder="مواد غذائية، مستلزمات...">
+            </div>
+            <div>
+              <label class="inv-lbl">Invoice No. · رقم الفاتورة</label>
+              <input type="text" id="invNum_${sup.id}" class="inv-input" placeholder="INV-001">
+            </div>
+            <div>
+              <label class="inv-lbl">Total Amount · المبلغ الكلي (OMR)</label>
+              <input type="number" id="invTotal_${sup.id}" class="inv-input" placeholder="0.000" step="0.001" min="0">
+            </div>
+            <div>
+              <label class="inv-lbl">Amount Paid · المدفوع (OMR)</label>
+              <input type="number" id="invPaid_${sup.id}" class="inv-input" placeholder="0.000" step="0.001" min="0">
+            </div>
+            <div>
+              <label class="inv-lbl">Invoice Date · تاريخ الفاتورة</label>
+              <input type="date" id="invDate_${sup.id}" class="inv-input" value="${new Date().toISOString().split('T')[0]}">
+            </div>
+            <div>
+              <label class="inv-lbl">Due Date · تاريخ الاستحقاق</label>
+              <input type="date" id="invDue_${sup.id}" class="inv-input">
+            </div>
+            <div style="grid-column:1/-1;">
+              <label class="inv-lbl">Notes · ملاحظات</label>
+              <input type="text" id="invNotes_${sup.id}" class="inv-input" placeholder="اختياري...">
+            </div>
+          </div>
+          <button class="inv-add-btn" onclick="addInvoice(${sup.id})">✅ Save Invoice · حفظ الفاتورة</button>
+        </div>
+
+        <!-- قائمة الفواتير -->
+        ${invs.length===0
+          ? '<div class="empty" style="padding:1rem;">No invoices yet · لا توجد فواتير بعد</div>'
+          : invs.map(inv=>{
+              const total   = +inv.total_amount||0;
+              const paid2   = +inv.amount_paid||0;
+              const rem     = Math.max(0,total-paid2);
+              const pct     = total>0?Math.min(100,(paid2/total*100)):0;
+              const badge   = rem<=0&&total>0?'<span class="badge-paid">✅ Paid</span>'
+                            : paid2>0?'<span class="badge-partial">🟡 Partial</span>'
+                            : '<span class="badge-unpaid">🔴 Unpaid</span>';
+              return `
+              <div class="inv-row">
+                <div class="inv-row-head">
+                  <div>
+                    <div class="inv-num">${inv.invoice_number||'-'} · ${inv.invoice_date||''}</div>
+                    <div class="inv-desc">${inv.description||'-'}</div>
+                    ${inv.due_date?`<div style="font-size:0.7rem;color:${new Date(inv.due_date)<new Date()&&rem>0?'var(--red)':'var(--dim)'};">Due: ${inv.due_date}</div>`:''}
+                  </div>
+                  ${badge}
+                  <button class="inv-del-btn" onclick="deleteInvoice(${inv.id})">🗑️</button>
+                </div>
+                <div class="inv-amounts">
+                  <div class="inv-amt"><div class="inv-amt-num" style="color:var(--gold);">OMR ${total.toFixed(3)}</div><div class="inv-amt-lbl">Total</div></div>
+                  <div class="inv-amt"><div class="inv-amt-num" style="color:var(--green);">OMR ${paid2.toFixed(3)}</div><div class="inv-amt-lbl">Paid</div></div>
+                  <div class="inv-amt"><div class="inv-amt-num" style="color:${rem>0?'var(--red)':'var(--green)'};">${rem>0?'OMR '+rem.toFixed(3):'✅ Clear'}</div><div class="inv-amt-lbl">Remaining</div></div>
+                </div>
+                <div class="inv-progress"><div class="inv-progress-fill" style="width:${pct.toFixed(0)}%;"></div></div>
+                ${rem>0?`
+                <div class="inv-pay-row">
+                  <input type="number" id="pay_${inv.id}" class="inv-pay-input" placeholder="Amount to pay · ادفع مبلغ" step="0.001" min="0" max="${rem}">
+                  <button class="inv-pay-btn" onclick="payInvoice(${inv.id},${paid2},${total})">💰 Pay</button>
+                  <button class="inv-pay-btn" style="background:var(--blue);" onclick="payFullInvoice(${inv.id},${total})">✅ Pay Full</button>
+                </div>`:''}
+                ${inv.notes?`<div style="font-size:0.75rem;color:var(--dim);margin-top:0.4rem;">📝 ${inv.notes}</div>`:''}
+              </div>`;
+            }).join('')
+        }
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleSupplier(id){
+  const el = document.getElementById(`si_${id}`);
+  el.classList.toggle('open');
+}
+
+function setSupFilter(f){
+  supFilter = f;
+  document.querySelectorAll('.sup-tab').forEach((b,i)=>{
+    b.classList.toggle('active',['all','unpaid','partial','paid'][i]===f);
+  });
+  renderAll();
+}
+
+/* ===== SUPPLIERS ===== */
+async function addSupplier(){
+  const name  = document.getElementById('newSupName').value.trim();
+  const phone = document.getElementById('newSupPhone').value.trim();
+  const notes = document.getElementById('newSupNotes').value.trim();
+  if(!name){ toast('❌ Enter supplier name'); return; }
+  try{
+    const r = await fetch(`${SUPA}/rest/v1/suppliers`,{
+      method:'POST',
+      headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify({name,phone,notes})
+    });
+    if(r.ok||r.status===201){
+      document.getElementById('newSupName').value='';
+      document.getElementById('newSupPhone').value='';
+      document.getElementById('newSupNotes').value='';
+      toast('✅ Supplier saved · تم حفظ المورد');
+      loadAll();
+    } else { toast('❌ Supplier already exists'); }
+  }catch(e){ toast('❌ Error'); }
+}
+
+async function deleteSupplier(id){
+  if(!confirm('Delete this supplier and all their invoices?')) return;
+  try{
+    await fetch(`${SUPA}/rest/v1/supplier_invoices?supplier_id=eq.${id}`,{method:'DELETE',headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Prefer':'return=minimal'}});
+    await fetch(`${SUPA}/rest/v1/suppliers?id=eq.${id}`,{method:'DELETE',headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Prefer':'return=minimal'}});
+    toast('🗑️ Deleted');
+    loadAll();
+  }catch(e){ toast('❌ Error'); }
+}
+
+/* ===== INVOICES ===== */
+async function addInvoice(supId){
+  const desc  = document.getElementById(`invDesc_${supId}`).value.trim();
+  const num   = document.getElementById(`invNum_${supId}`).value.trim();
+  const total = +document.getElementById(`invTotal_${supId}`).value||0;
+  const paid  = +document.getElementById(`invPaid_${supId}`).value||0;
+  const date  = document.getElementById(`invDate_${supId}`).value;
+  const due   = document.getElementById(`invDue_${supId}`).value;
+  const notes = document.getElementById(`invNotes_${supId}`).value.trim();
+  if(!desc||!total){ toast('❌ Enter description and total · أدخل الوصف والمبلغ'); return; }
+  try{
+    const r = await fetch(`${SUPA}/rest/v1/supplier_invoices`,{
+      method:'POST',
+      headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify({supplier_id:supId,description:desc,invoice_number:num,total_amount:total,amount_paid:paid,invoice_date:date,due_date:due||null,notes})
+    });
+    if(r.ok||r.status===201){
+      document.getElementById(`invDesc_${supId}`).value='';
+      document.getElementById(`invNum_${supId}`).value='';
+      document.getElementById(`invTotal_${supId}`).value='';
+      document.getElementById(`invPaid_${supId}`).value='';
+      document.getElementById(`invNotes_${supId}`).value='';
+      toast('✅ Invoice saved · تم حفظ الفاتورة');
+      loadAll();
+      setTimeout(()=>document.getElementById(`si_${supId}`).classList.add('open'),300);
+    }
+  }catch(e){ toast('❌ Error'); console.error(e); }
+}
+
+async function payInvoice(id, currentPaid, total){
+  const amount = +document.getElementById(`pay_${id}`)?.value||0;
+  if(!amount||amount<=0){ toast('❌ Enter amount'); return; }
+  const newPaid = Math.min(total, currentPaid+amount);
+  try{
+    await fetch(`${SUPA}/rest/v1/supplier_invoices?id=eq.${id}`,{
+      method:'PATCH',
+      headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify({amount_paid:newPaid})
+    });
+    toast(`💰 Paid OMR ${amount.toFixed(3)}`);
+    loadAll();
+  }catch(e){ toast('❌ Error'); }
+}
+
+async function payFullInvoice(id, total){
+  if(!confirm('Mark as fully paid?')) return;
+  try{
+    await fetch(`${SUPA}/rest/v1/supplier_invoices?id=eq.${id}`,{
+      method:'PATCH',
+      headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify({amount_paid:total})
+    });
+    toast('✅ Fully paid · تم الدفع الكامل');
+    loadAll();
+  }catch(e){ toast('❌ Error'); }
+}
+
+async function deleteInvoice(id){
+  if(!confirm('Delete this invoice?')) return;
+  try{
+    await fetch(`${SUPA}/rest/v1/supplier_invoices?id=eq.${id}`,{
+      method:'DELETE',
+      headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Prefer':'return=minimal'}
+    });
+    toast('🗑️ Deleted');
+    loadAll();
+  }catch(e){ toast('❌ Error'); }
+}
+
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+loadAll();
+</script>
+</body>
+</html>
