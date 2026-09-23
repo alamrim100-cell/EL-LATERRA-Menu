@@ -936,6 +936,45 @@
     <!-- قائمة الموردين -->
     <div id="supplierList"><div style="text-align:center;color:var(--dim);padding:1rem;">⏳</div></div>
 
+    <!-- قواعد ربط المصروفات بالمخزون -->
+    <div class="sec-title" style="margin-top:1.5rem;">⚙️ قواعد ربط المصروفات <span class="sec-en">· Expense Auto-Rules</span></div>
+    <div style="font-size:0.78rem;color:var(--dim);margin-bottom:0.8rem;">عند كتابة الموظف اسم مصروف يطابق الكلمة المفتاحية — تُضاف الكمية تلقائياً للمخزون</div>
+
+    <div style="background:var(--card);border:1px solid var(--gold);border-radius:12px;padding:1rem;margin-bottom:1rem;">
+      <div style="font-weight:900;color:var(--gold);font-size:0.88rem;margin-bottom:0.7rem;">➕ إضافة قاعدة · Add Rule</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;">
+        <div>
+          <label class="inv-form-lbl">الكلمة المفتاحية · Keyword (English)</label>
+          <input type="text" id="ruleKeyword" class="inv-form-input" placeholder="milk, cream, coffee...">
+        </div>
+        <div>
+          <label class="inv-form-lbl">اسم المنتج في المخزون · Inventory Name</label>
+          <input type="text" id="ruleInvName" class="inv-form-input" placeholder="حليب، قهوة اسبريسو...">
+        </div>
+        <div>
+          <label class="inv-form-lbl">الكمية لكل مصروف · Qty per Expense</label>
+          <input type="number" id="ruleQty" class="inv-form-input" placeholder="4" step="0.01" min="0">
+        </div>
+        <div>
+          <label class="inv-form-lbl">الوحدة · Unit</label>
+          <select id="ruleUnit" class="inv-form-input">
+            <option value="لتر">لتر · Liter</option>
+            <option value="كيلو">كيلو · KG</option>
+            <option value="قطعة">قطعة · Piece</option>
+            <option value="علبة">علبة · Box</option>
+            <option value="كرتون">كرتون · Carton</option>
+          </select>
+        </div>
+        <div style="grid-column:1/-1;">
+          <label class="inv-form-lbl">المورد (اختياري) · Supplier (optional)</label>
+          <input type="text" id="ruleSupplier" class="inv-form-input" placeholder="اسم المورد إن وُجد">
+        </div>
+      </div>
+      <button class="inv-add-btn" style="margin-top:0.6rem;" onclick="addExpenseRule()">✅ حفظ القاعدة · Save Rule</button>
+    </div>
+
+    <div id="rulesList"><div style="text-align:center;color:var(--dim);padding:1rem;">⏳</div></div>
+
   </div>
 </div>
 
@@ -1497,8 +1536,77 @@ function switchTab(tab){
   if(tab==='history') renderHistory();
   if(tab==='manualinv'){ initManualInvoice(); }
   if(tab==='attendance'){ loadAttendance(); loadEmployees(); }
-  if(tab==='inventory'){ loadSuppliers(); loadInventory(); }
+  if(tab==='inventory'){ loadSuppliers(); loadInventory(); loadExpenseRules(); }
   if(tab==='menu'){ loadMenuItems(); }
+}
+
+/* ===== EXPENSE RULES ===== */
+let allExpenseRules = [];
+
+async function loadExpenseRules(){
+  try{
+    const r = await fetch(`${SUPA}/rest/v1/expense_inventory_rules?select=*&order=expense_keyword`,{
+      headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`}
+    });
+    const d = await r.json();
+    if(Array.isArray(d)){ allExpenseRules=d; renderExpenseRules(); }
+  }catch(e){ console.error(e); }
+}
+
+function renderExpenseRules(){
+  const el = document.getElementById('rulesList');
+  if(!el) return;
+  if(allExpenseRules.length===0){
+    el.innerHTML='<div style="text-align:center;color:var(--dim);padding:1rem;">لا توجد قواعد بعد · No rules yet</div>';
+    return;
+  }
+  el.innerHTML = allExpenseRules.map(rule=>`
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.7rem 1rem;margin-bottom:0.5rem;display:flex;align-items:center;gap:0.8rem;flex-wrap:wrap;">
+      <div style="background:var(--gold-dim);border:1px solid var(--gold);border-radius:6px;padding:3px 10px;font-size:0.82rem;font-weight:700;color:var(--gold);">"${rule.expense_keyword}"</div>
+      <div style="color:var(--dim);font-size:0.8rem;">→</div>
+      <div style="flex:1;">
+        <div style="font-weight:700;font-size:0.85rem;">+${rule.quantity_per_expense} ${rule.unit} → <span style="color:var(--gold);">${rule.inventory_name}</span></div>
+        ${rule.supplier_name?`<div style="font-size:0.72rem;color:var(--dim);">🚚 ${rule.supplier_name}</div>`:''}
+      </div>
+      <button onclick="deleteExpenseRule(${rule.id})" style="background:none;border:1px solid var(--border);color:var(--dim);border-radius:6px;padding:3px 8px;cursor:pointer;font-size:0.75rem;">🗑️</button>
+    </div>
+  `).join('');
+}
+
+async function addExpenseRule(){
+  const keyword  = document.getElementById('ruleKeyword').value.trim().toLowerCase();
+  const invName  = document.getElementById('ruleInvName').value.trim();
+  const qty      = +document.getElementById('ruleQty').value||1;
+  const unit     = document.getElementById('ruleUnit').value;
+  const supplier = document.getElementById('ruleSupplier').value.trim();
+  if(!keyword||!invName){ toast('❌ أدخل الكلمة المفتاحية واسم المنتج'); return; }
+  try{
+    const r = await fetch(`${SUPA}/rest/v1/expense_inventory_rules`,{
+      method:'POST',
+      headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify({expense_keyword:keyword,inventory_name:invName,quantity_per_expense:qty,unit,supplier_name:supplier||null})
+    });
+    if(r.ok||r.status===201){
+      document.getElementById('ruleKeyword').value='';
+      document.getElementById('ruleInvName').value='';
+      document.getElementById('ruleQty').value='';
+      document.getElementById('ruleSupplier').value='';
+      toast('✅ Rule saved · تم حفظ القاعدة');
+      loadExpenseRules();
+    } else { toast('❌ Keyword already exists · الكلمة موجودة'); }
+  }catch(e){ toast('❌ Error'); }
+}
+
+async function deleteExpenseRule(id){
+  if(!confirm('Delete this rule?')) return;
+  try{
+    await fetch(`${SUPA}/rest/v1/expense_inventory_rules?id=eq.${id}`,{
+      method:'DELETE',
+      headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Prefer':'return=minimal'}
+    });
+    toast('🗑️ Deleted');
+    loadExpenseRules();
+  }catch(e){ toast('❌ Error'); }
 }
 
 /* ===== SUPPLIERS ===== */

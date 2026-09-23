@@ -1862,10 +1862,71 @@ async function addExpense(){
     if(r.ok || r.status===201){
       document.getElementById('expName').value='';
       document.getElementById('expAmount').value='';
-      toast('✅ تم حفظ المصروف · Expense Saved');
+      toast('✅ Expense Saved · تم حفظ المصروف');
       loadExpenses();
+
+      // تحقق من قواعد الربط تلقائياً
+      await applyExpenseRules(name, amount, date);
     }
-  }catch(e){ toast('❌ خطأ في الحفظ · Save Error'); }
+  }catch(e){ toast('❌ Save Error · خطأ في الحفظ'); }
+}
+
+async function applyExpenseRules(expenseName, amount, date){
+  try{
+    // جلب القواعد المطابقة (غير حساسة للحروف)
+    const r = await fetch(`${SUPA}/rest/v1/expense_inventory_rules?select=*`,{
+      headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`}
+    });
+    const rules = await r.json();
+    if(!Array.isArray(rules)||rules.length===0) return;
+
+    const keyword = expenseName.toLowerCase().trim();
+    const matched = rules.find(rule=>keyword.includes(rule.expense_keyword.toLowerCase()));
+    if(!matched) return;
+
+    // 1 — إضافة كمية للمخزون
+    const invR = await fetch(`${SUPA}/rest/v1/inventory?product_name=eq.${encodeURIComponent(matched.inventory_name)}&select=id,quantity`,{
+      headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`}
+    });
+    const invData = await invR.json();
+
+    if(Array.isArray(invData)&&invData.length>0){
+      const item = invData[0];
+      const newQty = (+item.quantity||0) + (+matched.quantity_per_expense||1);
+      await fetch(`${SUPA}/rest/v1/inventory?id=eq.${item.id}`,{
+        method:'PATCH',
+        headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},
+        body:JSON.stringify({
+          quantity: newQty,
+          amount_paid: (+item.amount_paid||0) + amount,
+          purchase_date: date||new Date().toISOString().split('T')[0]
+        })
+      });
+      toast(`📦 +${matched.quantity_per_expense} ${matched.unit} added to ${matched.inventory_name}`);
+    }
+
+    // 2 — تسجيل فاتورة على المورد إن وُجد
+    if(matched.supplier_name){
+      const supR = await fetch(`${SUPA}/rest/v1/suppliers?name=eq.${encodeURIComponent(matched.supplier_name)}&select=id`,{
+        headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`}
+      });
+      const supData = await supR.json();
+      if(Array.isArray(supData)&&supData.length>0){
+        await fetch(`${SUPA}/rest/v1/supplier_invoices`,{
+          method:'POST',
+          headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},
+          body:JSON.stringify({
+            supplier_id: supData[0].id,
+            description: `${expenseName} — auto from expense`,
+            total_amount: amount,
+            amount_paid: amount,
+            invoice_date: date||new Date().toISOString().split('T')[0]
+          })
+        });
+      }
+    }
+
+  }catch(e){ console.error('Rule apply error:', e); }
 }
 
 async function deleteExpense(id){
