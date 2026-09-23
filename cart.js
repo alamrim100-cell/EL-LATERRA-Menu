@@ -18,10 +18,9 @@ function addToCart(nameAr, price, nameEn=''){
   if(modal) modal.classList.add('open');
 }
 
-// إضافة مباشرة بدون نافذة (للمنتجات بارد/ساخن فقط أو بدون خيار)
 function addToCartDirect(nameAr, price, nameEn='', tempType=''){
   const tempLabel = tempType==='hot' ? '☕ Hot' : tempType==='cold' ? '🧊 Cold' : '';
-  const tempEn    = tempType==='hot' ? 'Hot' : tempType==='cold' ? 'Cold' : '';
+  const tempEn    = tempType==='hot' ? 'Hot'   : tempType==='cold' ? 'Cold'   : '';
   addItemToCart(nameAr, price, nameEn, tempLabel, tempEn);
 }
 

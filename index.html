@@ -493,7 +493,7 @@
             if(unavail){
               addFn = '';
             } else if(temp==='none'){
-              addFn = `addToCart('${nameAr.replace(/'/g,"\\'")}', ${item.price}, '${nameEn.replace(/'/g,"\\'")}')`;
+              addFn = `addToCartDirect('${nameAr.replace(/'/g,"\\'")}', ${item.price}, '${nameEn.replace(/'/g,"\\'")}','none')`;
             } else if(temp==='hot'){
               addFn = `addToCartDirect('${nameAr.replace(/'/g,"\\'")}', ${item.price}, '${nameEn.replace(/'/g,"\\'")}','hot')`;
             } else if(temp==='cold'){
