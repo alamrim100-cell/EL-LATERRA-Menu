@@ -849,21 +849,34 @@ function renderStockItems(){
     return;
   }
   el.innerHTML = allStockItems.map(item=>`
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.7rem 0.9rem;display:flex;align-items:center;gap:0.7rem;">
-      <div style="flex:1;">
-        <div style="font-weight:700;font-size:0.88rem;">${item.product_name}</div>
-        <div style="font-size:0.72rem;color:${+item.quantity<=5?'var(--red)':'var(--dim)'};">
-          ${+item.quantity<=5?'⚠️ ':''}Available: ${item.quantity} ${item.unit||''}
+    <div style="background:var(--card);border:1px solid ${+item.quantity<=3?'var(--red)':'var(--border)'};border-radius:10px;padding:0.7rem 0.9rem;">
+      <div style="display:flex;align-items:center;gap:0.7rem;margin-bottom:0.5rem;">
+        <div style="flex:1;">
+          <div style="font-weight:700;font-size:0.88rem;">${item.product_name}</div>
+          <div style="font-size:0.72rem;color:${+item.quantity===0?'var(--red)':+item.quantity<=5?'var(--gold)':'var(--dim)'};">
+            ${+item.quantity===0?'❌ Out of Stock':+item.quantity<=5?`⚠️ Low: ${item.quantity} ${item.unit||''}`: `✅ ${item.quantity} ${item.unit||''}`}
+          </div>
         </div>
       </div>
-      <div style="display:flex;gap:0.4rem;align-items:center;">
-        <input type="number" id="use_${item.id}" placeholder="0" min="0" step="0.01"
-          style="width:65px;background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:0.35rem 0.5rem;color:var(--cream);font-family:'Tajawal',sans-serif;font-size:0.82rem;outline:none;text-align:center;">
+      <!-- خصم استهلاك عادي -->
+      <div style="display:flex;gap:0.4rem;align-items:center;margin-bottom:0.4rem;">
+        <input type="number" id="use_${item.id}" placeholder="Qty to use" min="0" step="0.01"
+          style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:0.35rem 0.5rem;color:var(--cream);font-family:'Tajawal',sans-serif;font-size:0.82rem;outline:none;text-align:center;">
         <button onclick="useStockItem(${item.id},'${item.product_name}',${item.quantity},'${item.unit||''}')"
-          style="background:var(--red);color:#fff;border:none;border-radius:7px;padding:0.35rem 0.7rem;cursor:pointer;font-size:0.78rem;font-weight:700;white-space:nowrap;">
+          style="background:var(--gold);color:var(--bg);border:none;border-radius:7px;padding:0.35rem 0.7rem;cursor:pointer;font-size:0.78rem;font-weight:700;white-space:nowrap;">
           📤 Use
         </button>
       </div>
+      <!-- خصم منتهي الصلاحية -->
+      ${+item.quantity>0?`
+      <div style="display:flex;gap:0.4rem;align-items:center;">
+        <input type="number" id="exp_${item.id}" placeholder="Expired qty" min="0" step="0.01" max="${item.quantity}"
+          style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:0.35rem 0.5rem;color:var(--cream);font-family:'Tajawal',sans-serif;font-size:0.82rem;outline:none;text-align:center;">
+        <button onclick="expireStockItem(${item.id},'${item.product_name}',${item.quantity},'${item.unit||''}')"
+          style="background:#7b3f00;color:#ffb347;border:1px solid #a0522d;border-radius:7px;padding:0.35rem 0.6rem;cursor:pointer;font-size:0.75rem;font-weight:700;white-space:nowrap;">
+          ⏰ Expired
+        </button>
+      </div>`:''}
     </div>
   `).join('');
 }
@@ -877,10 +890,31 @@ async function useStockItem(id, name, currentQty, unit){
     await fetch(`${SUPA}/rest/v1/inventory?id=eq.${id}`,{
       method:'PATCH',
       headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},
-      body:JSON.stringify({quantity:newQty})
+      body:JSON.stringify({quantity:newQty, notes:`Used ${useQty} ${unit}`})
     });
     toast(`✅ Used ${useQty} ${unit} of ${name}`);
     document.getElementById(`use_${id}`).value='';
+    loadStockItems();
+  }catch(e){ toast('❌ Error'); }
+}
+
+async function expireStockItem(id, name, currentQty, unit){
+  const expQty = +document.getElementById(`exp_${id}`)?.value||0;
+  if(!expQty||expQty<=0){ toast('❌ Enter expired quantity'); return; }
+  if(expQty > +currentQty){ toast(`❌ Only ${currentQty} ${unit} available`); return; }
+  if(!confirm(`Remove ${expQty} ${unit} of ${name} as expired?`)) return;
+  const newQty = +currentQty - expQty;
+  try{
+    await fetch(`${SUPA}/rest/v1/inventory?id=eq.${id}`,{
+      method:'PATCH',
+      headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify({
+        quantity: newQty,
+        notes: `⏰ Expired: ${expQty} ${unit} removed on ${new Date().toLocaleDateString('en-GB')}`
+      })
+    });
+    toast(`⏰ ${expQty} ${unit} of ${name} marked as expired`);
+    document.getElementById(`exp_${id}`).value='';
     loadStockItems();
   }catch(e){ toast('❌ Error'); }
 }
