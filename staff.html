@@ -882,8 +882,7 @@ function renderStockItems(){
 }
 
 async function useStockItem(id, name, currentQty, unit){
-  const useQty = +document.getElementById(`use_${id}`)?.value||0;
-  if(!useQty||useQty<=0){ toast('❌ Enter quantity'); return; }
+  const useQty = +document.getElementById(`use_${id}`)?.value||1;
   if(useQty > +currentQty){ toast(`❌ Only ${currentQty} ${unit} available`); return; }
   const newQty = +currentQty - useQty;
   try{
