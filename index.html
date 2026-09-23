@@ -487,10 +487,20 @@
             const nameEn = item.name_en||nameAr;
             const price  = (+item.price).toFixed(3);
             const imgSrc = item.img||'';
-            const addFn  = isNoTemp
-              ? `addToCart('${nameAr.replace(/'/g,"\\'")}', ${item.price}, '${nameEn.replace(/'/g,"\\'")}')` 
-              : `addToCart('${nameAr.replace(/'/g,"\\'")}', ${item.price}, '${nameEn.replace(/'/g,"\\'")}')`;
-            return `
+            const temp   = item.temp_option || (NO_TEMP.includes(sec)?'none':'both');
+
+            let addFn;
+            if(unavail){
+              addFn = '';
+            } else if(temp==='none'){
+              addFn = `addToCart('${nameAr.replace(/'/g,"\\'")}', ${item.price}, '${nameEn.replace(/'/g,"\\'")}')`;
+            } else if(temp==='hot'){
+              addFn = `addToCartDirect('${nameAr.replace(/'/g,"\\'")}', ${item.price}, '${nameEn.replace(/'/g,"\\'")}','hot')`;
+            } else if(temp==='cold'){
+              addFn = `addToCartDirect('${nameAr.replace(/'/g,"\\'")}', ${item.price}, '${nameEn.replace(/'/g,"\\'")}','cold')`;
+            } else {
+              addFn = `addToCart('${nameAr.replace(/'/g,"\\'")}', ${item.price}, '${nameEn.replace(/'/g,"\\'")}')`;
+            }            return `
             <div class="item${unavail?' item-unavailable':''}">
               <div class="item-main">
                 <div class="item-thumb">

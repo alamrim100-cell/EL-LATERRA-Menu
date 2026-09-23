@@ -1126,6 +1126,15 @@
         </select>
       </div>
       <div class="menu-form-group">
+        <label class="menu-form-lbl">🌡️ Temperature Option · خيار الحرارة</label>
+        <select id="newItemTemp" class="menu-form-input">
+          <option value="both">🔥❄️ Both Hot & Cold · بارد وساخن</option>
+          <option value="hot">🔥 Hot Only · ساخن فقط</option>
+          <option value="cold">❄️ Cold Only · بارد فقط</option>
+          <option value="none">🚫 No Temp Option · بدون خيار</option>
+        </select>
+      </div>
+      <div class="menu-form-group">
         <label class="menu-form-lbl">Image · الصورة (اختياري)</label>
         <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
           <input type="file" id="newItemImgFile" accept="image/*" style="display:none;" onchange="previewNewImg(this)">
@@ -1177,6 +1186,15 @@
           <option value="مشروبات لاتيرا">🥤 مشروبات لاتيرا · Drinks</option>
           <option value="ساندويتش">🥪 ساندويتش · Sandwich</option>
           <option value="الكيك">🍰 الكيك · Cake</option>
+        </select>
+      </div>
+      <div>
+        <div class="menu-form-lbl">🌡️ خيار الحرارة · Temperature</div>
+        <select id="editMenuTemp" class="menu-form-input">
+          <option value="both">🔥❄️ بارد وساخن · Both</option>
+          <option value="hot">🔥 ساخن فقط · Hot Only</option>
+          <option value="cold">❄️ بارد فقط · Cold Only</option>
+          <option value="none">🚫 بدون خيار · None</option>
         </select>
       </div>
       <div>
@@ -3017,6 +3035,7 @@ function openMenuModal(item){
   document.getElementById('editMenuImg').value = item.img||'';
   document.getElementById('editImgUploadStatus').textContent = '';
   if(document.getElementById('editMenuIsNew')) document.getElementById('editMenuIsNew').checked = item.is_new||false;
+  if(document.getElementById('editMenuTemp')) document.getElementById('editMenuTemp').value = item.temp_option||'both';
   // عرض الصورة الحالية
   const prev = document.getElementById('editMenuImgPreview');
   if(item.img){ prev.src = item.img; prev.style.display='block'; }
@@ -3037,12 +3056,13 @@ async function saveMenuEdit(){
   const section = document.getElementById('editMenuSection').value;
   const img = document.getElementById('editMenuImg').value.trim();
   const is_new = document.getElementById('editMenuIsNew')?.checked || false;
+  const temp_option = document.getElementById('editMenuTemp')?.value || 'both';
   if(!name_ar||!price){ toast('❌ أدخل الاسم والسعر'); return; }
   try{
     await fetch(`${SUPA}/rest/v1/menu_items?id=eq.${id}`,{
       method:'PATCH',
       headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},
-      body:JSON.stringify({name_ar,name_en,price,section,img,is_new})
+      body:JSON.stringify({name_ar,name_en,price,section,img,is_new,temp_option})
     });
     toast('✅ تم التعديل · Updated');
     closeMenuModal();
@@ -3071,12 +3091,13 @@ async function addMenuItem(){
   const section = document.getElementById('newItemSection').value;
   const img = document.getElementById('newItemImg').value.trim();
   const is_new = document.getElementById('newItemIsNew')?.checked || false;
+  const temp_option = document.getElementById('newItemTemp')?.value || 'both';
   if(!name_ar||!price){ toast('❌ أدخل الاسم والسعر · Enter name and price'); return; }
   try{
     const r = await fetch(`${SUPA}/rest/v1/menu_items`,{
       method:'POST',
       headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},
-      body:JSON.stringify({name_ar,name_en,price,section,img,available:true,is_new})
+      body:JSON.stringify({name_ar,name_en,price,section,img,available:true,is_new,temp_option})
     });
     if(r.ok||r.status===201){
       document.getElementById('newItemAr').value='';

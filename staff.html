@@ -799,7 +799,8 @@ async function loadMenu(){
         ar: item.name_ar,
         en: item.name_en||item.name_ar,
         price: String(item.price),
-        img: item.img||''
+        img: item.img||'',
+        temp_option: item.temp_option||'both'
       });
     });
 
@@ -1609,16 +1610,25 @@ function noGetFinal(){
 }
 
 function noAddItem(item){
-  // الساندويتش والكيك تُضاف مباشرة بدون خيار بارد/ساخن
   const sec = MENU.find(s=>s.items.some(i=>i.id===item.id))?.section||'';
-  if(NO_TEMP_SECTIONS.includes(sec)){
+  const temp = item.temp_option || (NO_TEMP_SECTIONS.includes(sec)?'none':'both');
+
+  if(temp==='none'){
+    // بدون خيار — أضف مباشرة
     noAddToCart(item,'','');
-    return;
+  } else if(temp==='hot'){
+    // ساخن فقط — أضف مباشرة
+    noAddToCart(item,'☕ Hot','hot');
+  } else if(temp==='cold'){
+    // بارد فقط — أضف مباشرة
+    noAddToCart(item,'🧊 Cold','cold');
+  } else {
+    // كلاهما — أظهر النافذة
+    noPending = item;
+    document.getElementById('noTempName').textContent = item.ar;
+    document.getElementById('noTempEn').textContent = item.en;
+    document.getElementById('noTempModal').classList.add('open');
   }
-  noPending = item;
-  document.getElementById('noTempName').textContent = item.ar;
-  document.getElementById('noTempEn').textContent = item.en;
-  document.getElementById('noTempModal').classList.add('open');
 }
 
 function noSelectTemp(tempAr, tempEn){

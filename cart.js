@@ -8,13 +8,7 @@ let cart = {};
 let pendingItem = null;
 
 function addToCart(nameAr, price, nameEn=''){
-  // المشروبات اللي ما تحتاج خيار (طلبات جاهزة)
-  const noTempItems = ['كرواسون','مرتديلا','حلومي','كريب','تيراميسو','تشيزكيك','لندن كيك','سان سباستيان','قهوة عربية'];
-  if(noTempItems.includes(nameAr)){
-    addItemToCart(nameAr, price, nameEn, '');
-    return;
-  }
-  // أظهر نافذة الاختيار
+  // أظهر نافذة الاختيار بارد/ساخن
   pendingItem = {nameAr, price, nameEn};
   const modal = document.getElementById('tempModal');
   const itemName = document.getElementById('tempItemName');
@@ -22,6 +16,13 @@ function addToCart(nameAr, price, nameEn=''){
   if(itemName) itemName.textContent = nameAr;
   if(itemNameEn) itemNameEn.textContent = nameEn;
   if(modal) modal.classList.add('open');
+}
+
+// إضافة مباشرة بدون نافذة (للمنتجات بارد/ساخن فقط أو بدون خيار)
+function addToCartDirect(nameAr, price, nameEn='', tempType=''){
+  const tempLabel = tempType==='hot' ? '☕ Hot' : tempType==='cold' ? '🧊 Cold' : '';
+  const tempEn    = tempType==='hot' ? 'Hot' : tempType==='cold' ? 'Cold' : '';
+  addItemToCart(nameAr, price, nameEn, tempLabel, tempEn);
 }
 
 function selectTemp(temp, tempEn){
