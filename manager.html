@@ -1763,14 +1763,14 @@ function renderInventory(){
       <td style="font-size:0.75rem;color:var(--dim);">${item.supplier_contact||'-'}</td>
       <td style="font-size:0.72rem;color:var(--dim);">${item.purchase_date||'-'}</td>
       <td style="text-align:center;">
-        <button onclick="toggleStaffVisibility(${item.id},${item.show_in_staff?'true':'false'})"
+        <button class="inv-toggle-staff" data-invid="${item.id}" data-current="${item.show_in_staff?'true':'false'}"
           style="background:${item.show_in_staff?'var(--green)':'var(--border)'};color:${item.show_in_staff?'#fff':'var(--dim)'};border:none;border-radius:20px;padding:3px 10px;cursor:pointer;font-size:0.72rem;font-weight:700;transition:all 0.2s;white-space:nowrap;">
           ${item.show_in_staff?'✅ ظاهر':'⬜ مخفي'}
         </button>
       </td>
       <td>
         <button class="inv-edit-btn-row" data-invid="${item.id}" style="background:var(--gold);color:var(--bg);border:none;border-radius:6px;padding:3px 7px;cursor:pointer;font-size:0.72rem;font-weight:700;">✏️</button>
-        <button style="background:var(--red);color:#fff;border:none;border-radius:6px;padding:3px 7px;cursor:pointer;font-size:0.72rem;font-weight:700;margin-top:2px;" onclick='openWithdrawModal(${JSON.stringify(item).replace(/'/g,"&#39;")})'>📤</button>
+        <button class="inv-withdraw-btn" data-invid="${item.id}" style="background:var(--red);color:#fff;border:none;border-radius:6px;padding:3px 7px;cursor:pointer;font-size:0.72rem;font-weight:700;margin-top:2px;">📤</button>
       </td>
     </tr>`;
   }).join('');
@@ -3159,21 +3159,37 @@ async function loadAll(){
 
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
 
-// Event delegation لأزرار تعديل الفواتير
+// Event delegation لكل أزرار الجداول
 document.addEventListener('click', e=>{
+  // تعديل الفاتورة
   const invRowBtn = e.target.closest('.inv-edit-btn-row');
-  if(!invRowBtn) return;
-  // فاتورة
-  if(invRowBtn.dataset.id){
-    const id = +invRowBtn.dataset.id;
-    const inv = allInvoices.find(i=>i.id===id);
-    if(inv) openInvModal(inv);
+  if(invRowBtn){
+    if(invRowBtn.dataset.id){
+      const id = +invRowBtn.dataset.id;
+      const inv = allInvoices.find(i=>i.id===id);
+      if(inv) openInvModal(inv);
+    }
+    if(invRowBtn.dataset.invid){
+      const id = +invRowBtn.dataset.invid;
+      const item = allInventory.find(i=>i.id===id);
+      if(item) openInvEditModal(item);
+    }
   }
-  // مخزون
-  if(invRowBtn.dataset.invid){
-    const id = +invRowBtn.dataset.invid;
+
+  // تبديل ظهور المخزون للموظف
+  const toggleBtn = e.target.closest('.inv-toggle-staff');
+  if(toggleBtn){
+    const id = +toggleBtn.dataset.invid;
+    const current = toggleBtn.dataset.current === 'true';
+    toggleStaffVisibility(id, current);
+  }
+
+  // سحب كمية
+  const withdrawBtn = e.target.closest('.inv-withdraw-btn');
+  if(withdrawBtn){
+    const id = +withdrawBtn.dataset.invid;
     const item = allInventory.find(i=>i.id===id);
-    if(item) openInvEditModal(item);
+    if(item) openWithdrawModal(item);
   }
 });
 
