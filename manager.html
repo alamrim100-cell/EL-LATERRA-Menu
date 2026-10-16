@@ -475,6 +475,34 @@
         </div>
       </div>
 
+      <!-- مبيعات الكيك -->
+      <div class="analytics-card">
+        <div class="analytics-title">
+          🍰 مبيعات الكيك
+          <span class="analytics-en">Cake Sales</span>
+        </div>
+        <!-- أرقام سريعة -->
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.5rem;margin-bottom:0.9rem;">
+          <div style="background:var(--bg);border-radius:8px;padding:0.5rem;text-align:center;">
+            <div style="font-size:1.3rem;font-weight:900;color:var(--gold);" id="anCakeSold">0</div>
+            <div style="font-size:0.65rem;color:var(--dim);">مباع · Sold</div>
+          </div>
+          <div style="background:var(--bg);border-radius:8px;padding:0.5rem;text-align:center;">
+            <div style="font-size:1.1rem;font-weight:900;color:var(--green);" id="anCakeRev">0</div>
+            <div style="font-size:0.65rem;color:var(--dim);">إيراد · OMR</div>
+          </div>
+          <div style="background:var(--bg);border-radius:8px;padding:0.5rem;text-align:center;">
+            <div style="font-size:1.3rem;font-weight:900;color:var(--cream);" id="anCakeStock">—</div>
+            <div style="font-size:0.65rem;color:var(--dim);">مخزون · Stock</div>
+          </div>
+        </div>
+        <!-- الأعلى مبيعاً -->
+        <div style="font-size:0.75rem;color:var(--dim);margin-bottom:0.5rem;">🏆 الأعلى مبيعاً · Top Sellers</div>
+        <div id="anCakeTopList" style="display:flex;flex-direction:column;gap:0.4rem;">
+          <div style="text-align:center;color:var(--dim);padding:0.5rem;font-size:0.78rem;">⏳</div>
+        </div>
+      </div>
+
     </div>
 
     <!-- فلتر الفترة -->
@@ -860,6 +888,23 @@
       <div class="inv-stat"><div class="inv-stat-num" id="invStatPaid">0</div><div class="inv-stat-lbl">المدفوع · Paid (OMR)</div></div>
       <div class="inv-stat"><div class="inv-stat-num inv-remaining" id="invStatRemaining">0</div><div class="inv-stat-lbl">المتبقي · Remaining (OMR)</div></div>
       <div class="inv-stat"><div class="inv-stat-num" id="invStatProfit" style="color:var(--green);">0</div><div class="inv-stat-lbl">هامش الربح · Profit (OMR)</div></div>
+    </div>
+
+    <!-- إحصائيات الكيك -->
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1rem;margin-bottom:1rem;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.8rem;">
+        <div style="font-weight:900;color:var(--gold);font-size:0.95rem;">🍰 مبيعات الكيك · Cake Sales</div>
+        <div style="font-size:0.72rem;color:var(--dim);" id="cakeSalesDate">اليوم</div>
+      </div>
+      <!-- أرقام سريعة -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:0.5rem;margin-bottom:0.9rem;">
+        <div class="inv-stat"><div class="inv-stat-num" id="cakeTotalSold" style="color:var(--gold);">0</div><div class="inv-stat-lbl">إجمالي المباع · Sold</div></div>
+        <div class="inv-stat"><div class="inv-stat-num" id="cakeTotalRev" style="color:var(--green);">0</div><div class="inv-stat-lbl">الإيراد · Revenue (OMR)</div></div>
+        <div class="inv-stat"><div class="inv-stat-num" id="cakeInStock" style="color:var(--cream);">0</div><div class="inv-stat-lbl">المتبقي · In Stock</div></div>
+      </div>
+      <!-- الأعلى مبيعاً -->
+      <div style="font-size:0.78rem;color:var(--dim);margin-bottom:0.4rem;">🏆 الأعلى مبيعاً · Top Sellers</div>
+      <div id="cakeTopList" style="display:flex;flex-direction:column;gap:0.35rem;"></div>
     </div>
 
     <!-- التبويبات الداخلية -->
@@ -1560,6 +1605,57 @@ function renderAnalytics(){
            title="${h<12?h+'am':h===12?'12pm':(h-12)+'pm'}: ${hourCounts[h]||0} orders"></div>
     </div>
   `).join('');
+
+  // ===== إحصائيات الكيك =====
+  const CAKE_NAMES = ['كريب','تيراميسو','تشيزكيك','لندن كيك','سان سباستيان','كلاسيك كوكيز','مارشميلو كوكيز','كوكيز'];
+  const cakeSoldMap = {};
+  let cakeTotalSold = 0, cakeTotalRev = 0;
+  inv.forEach(order=>{
+    const items = parseItems(order.items);
+    items.forEach(it=>{
+      const itName = it.name||it.nameEn||'';
+      const isCake = CAKE_NAMES.some(k=>itName.includes(k));
+      if(isCake){
+        const qty = +it.qty||1;
+        cakeSoldMap[itName] = (cakeSoldMap[itName]||0) + qty;
+        cakeTotalSold += qty;
+        cakeTotalRev += (+it.price||0)*qty;
+      }
+    });
+  });
+  // المتبقي في المخزون
+  const cakeInvItems = allInventory.filter(i=>CAKE_NAMES.some(k=>(i.product_name||'').includes(k)));
+  const cakeInStock = cakeInvItems.reduce((s,i)=>s+(+i.quantity||0),0);
+
+  document.getElementById('anCakeSold').textContent  = cakeTotalSold;
+  document.getElementById('anCakeRev').textContent   = cakeTotalRev.toFixed(3);
+  document.getElementById('anCakeStock').textContent = cakeInStock;
+
+  const cakeSorted = Object.entries(cakeSoldMap).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const cakeMax = cakeSorted[0]?.[1]||1;
+  const cakeMedals = ['🥇','🥈','🥉','4️⃣','5️⃣'];
+  document.getElementById('anCakeTopList').innerHTML = cakeSorted.length===0
+    ? `<div style="text-align:center;color:var(--dim);padding:0.5rem;font-size:0.78rem;">لا توجد مبيعات · No cake sales</div>`
+    : cakeSorted.map(([name,qty],i)=>{
+        const pct = Math.round(qty/cakeMax*100);
+        const inv_ = allInventory.find(it=>(it.product_name||'').includes(name.slice(0,4)));
+        const stk  = inv_ ? +inv_.quantity||0 : null;
+        const stkColor = stk===null?'var(--dim)':stk<=0?'var(--red)':stk<=5?'#f5a623':'var(--green)';
+        const stkLabel = stk===null?'':` · <span style="color:${stkColor};">📦 ${stk}</span>`;
+        return `
+        <div style="display:flex;align-items:center;gap:0.5rem;">
+          <span style="width:1.3rem;font-size:0.85rem;">${cakeMedals[i]}</span>
+          <div style="flex:1;">
+            <div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:2px;">
+              <span style="font-weight:700;">${name}${stkLabel}</span>
+              <span style="color:var(--gold);font-weight:900;">${qty}×</span>
+            </div>
+            <div style="background:var(--border);border-radius:3px;height:4px;">
+              <div style="background:var(--gold);height:100%;width:${pct}%;border-radius:3px;"></div>
+            </div>
+          </div>
+        </div>`;
+      }).join('');
 }
 
 /* ===== TABS ===== */
@@ -1866,8 +1962,88 @@ async function loadInventory(){
       headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`}
     });
     const d = await r.json();
-    if(Array.isArray(d)){ allInventory=d; renderInventory(); }
+    if(Array.isArray(d)){ allInventory=d; renderInventory(); loadCakeSalesStats(); }
   }catch(e){ console.error(e); }
+}
+
+/* ===== إحصائيات مبيعات الكيك ===== */
+const CAKE_ITEMS = ['كريب','تيراميسو','تشيزكيك','لندن كيك','سان سباستيان','كلاسيك كوكيز','مارشميلو كوكيز','كوكيز','cheesecake','tiramisu','crepe','london cake','san sebastian'];
+
+async function loadCakeSalesStats(){
+  try{
+    // جلب آخر 30 يوم من الفواتير
+    const since = new Date();
+    since.setDate(since.getDate()-30);
+    const sinceStr = since.toISOString();
+    const r = await fetch(`${SUPA}/rest/v1/invoices?select=items,created_at&created_at=gte.${sinceStr}&order=created_at.desc&limit=2000`,{
+      headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`}
+    });
+    const data = await r.json();
+    if(!Array.isArray(data)) return;
+
+    // احسب المبيعات لكل صنف كيك
+    const soldMap = {}; // name -> qty sold
+    let totalSold = 0;
+    let totalRev = 0;
+
+    data.forEach(inv=>{
+      let items = [];
+      try{ items = typeof inv.items==='string' ? JSON.parse(inv.items) : (inv.items||[]); }catch(e){}
+      items.forEach(it=>{
+        const nameLower = (it.name||it.nameEn||'').toLowerCase();
+        const isCake = CAKE_ITEMS.some(k=>nameLower.includes(k.toLowerCase()));
+        if(isCake){
+          const displayName = it.name || it.nameEn || 'كيك';
+          const qty = +it.qty||1;
+          soldMap[displayName] = (soldMap[displayName]||0) + qty;
+          totalSold += qty;
+          totalRev += (+it.price||0) * qty;
+        }
+      });
+    });
+
+    // المتبقي في المخزون (الأصناف التي تحتوي على كيك في اسمها)
+    const cakeInv = allInventory.filter(i=>
+      CAKE_ITEMS.some(k=>(i.product_name||'').toLowerCase().includes(k.toLowerCase()))
+    );
+    const inStock = cakeInv.reduce((s,i)=>s+(+i.quantity||0),0);
+
+    // أعلى 5 مبيعاً
+    const sorted = Object.entries(soldMap).sort((a,b)=>b[1]-a[1]).slice(0,5);
+    const maxSold = sorted[0]?.[1]||1;
+
+    document.getElementById('cakeTotalSold').textContent = totalSold;
+    document.getElementById('cakeTotalRev').textContent  = totalRev.toFixed(3);
+    document.getElementById('cakeInStock').textContent   = inStock;
+    document.getElementById('cakeSalesDate').textContent = 'آخر 30 يوم · Last 30 days';
+
+    const list = document.getElementById('cakeTopList');
+    if(sorted.length===0){
+      list.innerHTML = `<div style="font-size:0.78rem;color:var(--dim);text-align:center;padding:0.5rem;">لا توجد مبيعات · No sales yet</div>`;
+      return;
+    }
+    list.innerHTML = sorted.map(([name,qty],i)=>{
+      const pct = Math.round(qty/maxSold*100);
+      const medals = ['🥇','🥈','🥉','4️⃣','5️⃣'];
+      // إيجاد المتبقي في المخزون لهذا الصنف
+      const invItem = allInventory.find(it=>(it.product_name||'').toLowerCase().includes(name.toLowerCase().slice(0,5)));
+      const remaining = invItem ? `<span style="color:${+invItem.quantity<=0?'var(--red)':+invItem.quantity<=5?'#f5a623':'var(--green)'};">📦 ${invItem.quantity} ${invItem.unit||'حبة'}</span>` : '';
+      return `
+        <div style="display:flex;align-items:center;gap:0.5rem;">
+          <span style="font-size:0.85rem;width:1.4rem;">${medals[i]||'•'}</span>
+          <div style="flex:1;">
+            <div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:2px;">
+              <span style="font-weight:700;color:var(--cream);">${name}</span>
+              <span style="color:var(--gold);font-weight:900;">${qty} حبة</span>
+            </div>
+            <div style="background:var(--border);border-radius:4px;height:5px;overflow:hidden;">
+              <div style="background:var(--gold);height:100%;width:${pct}%;border-radius:4px;transition:width 0.4s;"></div>
+            </div>
+          </div>
+          <div style="font-size:0.72rem;text-align:right;min-width:55px;">${remaining}</div>
+        </div>`;
+    }).join('');
+  }catch(e){ console.error('cake stats error',e); }
 }
 
 /* ===== تبويبات المخزون الداخلية ===== */
