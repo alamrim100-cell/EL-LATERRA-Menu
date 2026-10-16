@@ -205,6 +205,19 @@
   .mi-custom-modal-btns button{flex:1;padding:0.6rem;border:none;border-radius:8px;font-family:'Tajawal',sans-serif;font-weight:900;font-size:0.85rem;cursor:pointer;}
   .mi-custom-confirm{background:var(--gold);color:var(--bg);}
   .mi-custom-cancel{background:var(--card);border:1px solid var(--border)!important;color:var(--dim);}
+  /* modal تعديل الخانات */
+  #miEditItemsModal{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:9998;display:none;align-items:flex-start;justify-content:center;padding:1.5rem 0.8rem;overflow-y:auto;}
+  #miEditItemsModal.open{display:flex;}
+  .mi-edit-modal-box{background:var(--card);border:1px solid var(--gold);border-radius:16px;padding:1.2rem;width:100%;max-width:480px;direction:rtl;}
+  .mi-edit-modal-box h3{color:var(--gold);font-size:0.95rem;margin:0 0 1rem;display:flex;justify-content:space-between;align-items:center;}
+  .mi-edit-row{display:grid;grid-template-columns:42px 1fr 1fr 80px 36px;gap:0.4rem;align-items:center;margin-bottom:0.5rem;}
+  .mi-edit-row input{background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:0.4rem 0.5rem;color:var(--cream);font-family:'Tajawal',sans-serif;font-size:0.78rem;outline:none;width:100%;box-sizing:border-box;}
+  .mi-edit-row input:focus{border-color:var(--gold);}
+  .mi-edit-del{background:none;border:1px solid var(--red);color:var(--red);border-radius:6px;width:32px;height:32px;cursor:pointer;font-size:0.9rem;flex-shrink:0;}
+  .mi-edit-header{display:grid;grid-template-columns:42px 1fr 1fr 80px 36px;gap:0.4rem;font-size:0.65rem;color:var(--dim);margin-bottom:0.3rem;text-align:center;}
+  .mi-edit-add-row{display:flex;gap:0.4rem;margin-top:0.7rem;padding-top:0.7rem;border-top:1px solid var(--border);}
+  .mi-edit-add-row input{background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:0.4rem 0.5rem;color:var(--cream);font-family:'Tajawal',sans-serif;font-size:0.78rem;outline:none;flex:1;box-sizing:border-box;}
+  .mi-edit-save{width:100%;margin-top:0.8rem;background:var(--gold);color:var(--bg);border:none;border-radius:9px;padding:0.65rem;font-family:'Tajawal',sans-serif;font-weight:900;font-size:0.88rem;cursor:pointer;}
 
   /* ===== الحضور ===== */
   .att-filters{display:flex;gap:0.6rem;flex-wrap:wrap;margin-bottom:1rem;align-items:center;}
@@ -818,7 +831,10 @@
 
         <!-- خدمات خاصة -->
         <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:0.8rem;margin-bottom:0.7rem;">
-          <div class="mi-section-title" style="position:relative;">🛍️ خدمات ومنتجات خاصة <span style="font-size:0.68rem;color:var(--dim);font-weight:400;">· Special Items</span></div>
+          <div class="mi-section-title" style="position:relative;display:flex;justify-content:space-between;align-items:center;">
+            <span>🛍️ خدمات ومنتجات خاصة <span style="font-size:0.68rem;color:var(--dim);font-weight:400;">· Special Items</span></span>
+            <button onclick="miOpenEditItemsModal()" title="تعديل الخانات" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:0.22rem 0.5rem;font-size:0.72rem;color:var(--dim);cursor:pointer;margin-right:4px;">⚙️ تعديل</button>
+          </div>
           <div class="mi-custom-grid" id="miCustomGrid">
             <!-- مُعبَّأ من JS -->
           </div>
@@ -847,6 +863,29 @@
             <button class="mi-custom-confirm" onclick="miConfirmCustom()">✅ إضافة للفاتورة</button>
             <button class="mi-custom-cancel" onclick="miCloseCustomModal()">✖ إلغاء</button>
           </div>
+        </div>
+      </div>
+
+      <!-- modal تعديل الخانات الخاصة -->
+      <div id="miEditItemsModal">
+        <div class="mi-edit-modal-box">
+          <h3>
+            <span>⚙️ تعديل خانات الخدمات الخاصة</span>
+            <button onclick="miCloseEditItemsModal()" style="background:none;border:none;color:var(--dim);font-size:1.1rem;cursor:pointer;">✖</button>
+          </h3>
+          <div class="mi-edit-header">
+            <span>أيقونة</span><span>الاسم العربي</span><span>الاسم الإنجليزي</span><span>سعر افتراضي</span><span></span>
+          </div>
+          <div id="miEditRowsContainer"><!-- تُعبَّأ من JS --></div>
+          <!-- إضافة خانة جديدة -->
+          <div class="mi-edit-add-row">
+            <input type="text" id="miNewIcon"  placeholder="🆕" maxlength="4" style="width:42px;flex:none;text-align:center;">
+            <input type="text" id="miNewLabel" placeholder="اسم عربي">
+            <input type="text" id="miNewSub"   placeholder="English name">
+            <input type="number" id="miNewPrice" placeholder="0.000" min="0" step="0.001" style="width:75px;flex:none;">
+            <button onclick="miAddEditRow()" style="background:var(--gold);color:var(--bg);border:none;border-radius:7px;padding:0.4rem 0.7rem;font-weight:900;font-size:0.82rem;cursor:pointer;white-space:nowrap;">➕</button>
+          </div>
+          <button class="mi-edit-save" onclick="miSaveEditedItems()">💾 حفظ التعديلات · Save</button>
         </div>
       </div>
 
@@ -2401,6 +2440,7 @@ async function initManualInvoice(){
     }catch(e){ console.error(e); }
   }
   renderMiMenu();
+  miLoadSpecialItems();
   renderMiCustomGrid();
   miCart = {};
   miUpdateCart();
@@ -2574,10 +2614,108 @@ function miAddFreeItem(){
   toast(`✅ تمت الإضافة: ${label}`);
 }
 
+// ===== تعديل الخانات الخاصة =====
+const MI_SPECIAL_STORAGE_KEY = 'mi_special_items_v1';
+
+// تحميل من localStorage أو استخدام الافتراضي
+function miLoadSpecialItems(){
+  try{
+    const saved = localStorage.getItem(MI_SPECIAL_STORAGE_KEY);
+    if(saved){
+      const parsed = JSON.parse(saved);
+      if(Array.isArray(parsed) && parsed.length > 0){
+        MI_SPECIAL_ITEMS.length = 0;
+        parsed.forEach(it => MI_SPECIAL_ITEMS.push(it));
+      }
+    }
+  }catch(e){ console.warn('miLoadSpecialItems:', e); }
+}
+
+function miSaveSpecialItems(){
+  try{ localStorage.setItem(MI_SPECIAL_STORAGE_KEY, JSON.stringify(MI_SPECIAL_ITEMS)); }
+  catch(e){ console.warn('miSaveSpecialItems:', e); }
+}
+
+function miOpenEditItemsModal(){
+  const c = document.getElementById('miEditRowsContainer');
+  c.innerHTML = MI_SPECIAL_ITEMS.map((it,idx)=>`
+    <div class="mi-edit-row" id="miEditRow_${idx}">
+      <input type="text" value="${it.icon||''}" maxlength="4" placeholder="🆕" style="text-align:center;" data-field="icon" data-idx="${idx}">
+      <input type="text" value="${it.label||''}" placeholder="اسم عربي" data-field="label" data-idx="${idx}">
+      <input type="text" value="${it.sub||''}" placeholder="English" data-field="sub" data-idx="${idx}">
+      <input type="number" value="${it.defaultPrice||0}" min="0" step="0.001" placeholder="0.000" data-field="defaultPrice" data-idx="${idx}">
+      <button class="mi-edit-del" onclick="miDeleteEditRow(${idx})" title="حذف">🗑</button>
+    </div>
+  `).join('');
+  document.getElementById('miEditItemsModal').classList.add('open');
+}
+
+function miCloseEditItemsModal(){
+  document.getElementById('miEditItemsModal').classList.remove('open');
+}
+
+function miDeleteEditRow(idx){
+  const row = document.getElementById(`miEditRow_${idx}`);
+  if(row) row.remove();
+}
+
+function miAddEditRow(){
+  const icon  = document.getElementById('miNewIcon').value.trim()||'📦';
+  const label = document.getElementById('miNewLabel').value.trim();
+  const sub   = document.getElementById('miNewSub').value.trim();
+  const price = parseFloat(document.getElementById('miNewPrice').value)||0;
+  if(!label){ toast('❌ أدخل الاسم العربي'); return; }
+  const c = document.getElementById('miEditRowsContainer');
+  const idx = `new_${Date.now()}`;
+  const div = document.createElement('div');
+  div.className = 'mi-edit-row';
+  div.id = `miEditRow_${idx}`;
+  div.innerHTML = `
+    <input type="text" value="${icon}" maxlength="4" style="text-align:center;" data-field="icon" data-idx="${idx}">
+    <input type="text" value="${label}" placeholder="اسم عربي" data-field="label" data-idx="${idx}">
+    <input type="text" value="${sub}" placeholder="English" data-field="sub" data-idx="${idx}">
+    <input type="number" value="${price}" min="0" step="0.001" data-field="defaultPrice" data-idx="${idx}">
+    <button class="mi-edit-del" onclick="this.closest('.mi-edit-row').remove()" title="حذف">🗑</button>
+  `;
+  c.appendChild(div);
+  // مسح حقول الإضافة
+  document.getElementById('miNewIcon').value='';
+  document.getElementById('miNewLabel').value='';
+  document.getElementById('miNewSub').value='';
+  document.getElementById('miNewPrice').value='';
+}
+
+function miSaveEditedItems(){
+  const rows = document.querySelectorAll('#miEditRowsContainer .mi-edit-row');
+  const newItems = [];
+  rows.forEach((row, i)=>{
+    const inputs = row.querySelectorAll('input');
+    const icon  = inputs[0]?.value.trim() || '📦';
+    const label = inputs[1]?.value.trim();
+    const sub   = inputs[2]?.value.trim() || '';
+    const price = parseFloat(inputs[3]?.value)||0;
+    if(label){
+      newItems.push({
+        id: `spc_custom_${i}_${Date.now()}`,
+        icon, label, sub, defaultPrice: price
+      });
+    }
+  });
+  if(newItems.length===0){ toast('❌ أضف خانة واحدة على الأقل'); return; }
+  MI_SPECIAL_ITEMS.length = 0;
+  newItems.forEach(it => MI_SPECIAL_ITEMS.push(it));
+  miSaveSpecialItems();
+  renderMiCustomGrid();
+  miCloseEditItemsModal();
+  toast('✅ تم حفظ التعديلات');
+}
+
 // إغلاق modal بالضغط خارجه
 document.addEventListener('click', e=>{
   const modal = document.getElementById('miCustomModal');
   if(modal && modal.classList.contains('open') && e.target === modal) miCloseCustomModal();
+  const editModal = document.getElementById('miEditItemsModal');
+  if(editModal && editModal.classList.contains('open') && e.target === editModal) miCloseEditItemsModal();
 });
 
 async function saveManualInvoice(){
