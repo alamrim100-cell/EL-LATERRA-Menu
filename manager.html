@@ -186,6 +186,26 @@
   .mi-disc-type{flex:1;padding:0.3rem;border:1px solid var(--border);background:transparent;color:var(--dim);border-radius:6px;font-family:'Tajawal',sans-serif;font-size:0.72rem;cursor:pointer;}
   .mi-disc-type.active{border-color:var(--gold);background:var(--gold-dim);color:var(--cream);font-weight:700;}
 
+  /* ===== خدمات خاصة ===== */
+  .mi-custom-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.45rem;margin-top:0.4rem;}
+  .mi-custom-btn{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:0.55rem 0.4rem;cursor:pointer;text-align:center;transition:all 0.15s;font-family:'Tajawal',sans-serif;}
+  .mi-custom-btn:hover{border-color:var(--gold);background:var(--gold-dim);}
+  .mi-custom-btn .icon{font-size:1.3rem;display:block;margin-bottom:2px;}
+  .mi-custom-btn .lbl{font-size:0.72rem;color:var(--cream);font-weight:700;display:block;line-height:1.3;}
+  .mi-custom-btn .sub{font-size:0.62rem;color:var(--dim);display:block;}
+  /* modal السعر */
+  #miCustomModal{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;display:none;align-items:center;justify-content:center;}
+  #miCustomModal.open{display:flex;}
+  .mi-custom-modal-box{background:var(--card);border:1px solid var(--gold);border-radius:16px;padding:1.4rem;width:90%;max-width:340px;direction:rtl;}
+  .mi-custom-modal-box h3{color:var(--gold);font-size:1rem;margin:0 0 1rem;text-align:center;}
+  .mi-custom-modal-box label{font-size:0.78rem;color:var(--dim);display:block;margin-bottom:0.3rem;}
+  .mi-custom-modal-box input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:0.55rem 0.8rem;color:var(--cream);font-family:'Tajawal',sans-serif;font-size:0.9rem;outline:none;box-sizing:border-box;}
+  .mi-custom-modal-box input:focus{border-color:var(--gold);}
+  .mi-custom-modal-btns{display:flex;gap:0.5rem;margin-top:1rem;}
+  .mi-custom-modal-btns button{flex:1;padding:0.6rem;border:none;border-radius:8px;font-family:'Tajawal',sans-serif;font-weight:900;font-size:0.85rem;cursor:pointer;}
+  .mi-custom-confirm{background:var(--gold);color:var(--bg);}
+  .mi-custom-cancel{background:var(--card);border:1px solid var(--border)!important;color:var(--dim);}
+
   /* ===== الحضور ===== */
   .att-filters{display:flex;gap:0.6rem;flex-wrap:wrap;margin-bottom:1rem;align-items:center;}
   .emp-filter{background:var(--card);border:1px solid var(--border);color:var(--cream);border-radius:8px;padding:0.4rem 0.7rem;font-family:'Tajawal',sans-serif;font-size:0.8rem;outline:none;}
@@ -795,8 +815,38 @@
       <!-- المينيو -->
       <div>
         <div style="font-size:0.78rem;color:var(--dim);margin-bottom:0.5rem;">اختر المنتجات · Select Items</div>
+
+        <!-- خدمات خاصة -->
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:0.8rem;margin-bottom:0.7rem;">
+          <div class="mi-section-title" style="position:relative;">🛍️ خدمات ومنتجات خاصة <span style="font-size:0.68rem;color:var(--dim);font-weight:400;">· Special Items</span></div>
+          <div class="mi-custom-grid" id="miCustomGrid">
+            <!-- مُعبَّأ من JS -->
+          </div>
+          <!-- منتج مخصص حر -->
+          <div style="margin-top:0.6rem;display:flex;gap:0.4rem;align-items:center;">
+            <input type="text" id="miCustomFreeLabel" class="mi-input" placeholder="اسم المنتج · Item name" style="flex:2;">
+            <input type="number" id="miCustomFreePrice" class="mi-input" placeholder="السعر" min="0" step="0.001" style="flex:1;">
+            <button onclick="miAddFreeItem()" style="background:var(--gold);color:var(--bg);border:none;border-radius:7px;padding:0.45rem 0.7rem;font-weight:900;font-size:0.8rem;cursor:pointer;white-space:nowrap;">➕ أضف</button>
+          </div>
+        </div>
+
         <div class="mi-menu" id="miMenuContent">
           <div style="text-align:center;color:var(--dim);padding:1rem;">⏳</div>
+        </div>
+      </div>
+
+      <!-- modal السعر للخدمات الخاصة -->
+      <div id="miCustomModal">
+        <div class="mi-custom-modal-box">
+          <h3 id="miCustomModalTitle">🛍️ تحديد السعر</h3>
+          <label>الاسم · Name</label>
+          <input type="text" id="miCustomModalName" style="margin-bottom:0.8rem;" placeholder="اسم المنتج">
+          <label>السعر بالريال العُماني · Price (OMR)</label>
+          <input type="number" id="miCustomModalPrice" min="0" step="0.001" placeholder="0.000">
+          <div class="mi-custom-modal-btns">
+            <button class="mi-custom-confirm" onclick="miConfirmCustom()">✅ إضافة للفاتورة</button>
+            <button class="mi-custom-cancel" onclick="miCloseCustomModal()">✖ إلغاء</button>
+          </div>
         </div>
       </div>
 
@@ -2351,6 +2401,7 @@ async function initManualInvoice(){
     }catch(e){ console.error(e); }
   }
   renderMiMenu();
+  renderMiCustomGrid();
   miCart = {};
   miUpdateCart();
 }
@@ -2456,6 +2507,78 @@ function miSetDiscType(type){
   document.getElementById('miDiscUnit').textContent = type==='percent'?'%':'OMR';
   miUpdateCart();
 }
+
+/* ===== خدمات ومنتجات خاصة ===== */
+const MI_SPECIAL_ITEMS = [
+  { id:'spc_v60filter',   icon:'🫙', label:'فلتر V60',        sub:'V60 Filter',        defaultPrice: 1.500 },
+  { id:'spc_v60paper',    icon:'📄', label:'فلاتر ورقية',     sub:'Paper Filters',     defaultPrice: 2.000 },
+  { id:'spc_cartrent',    icon:'🚗', label:'تأجير العربة',    sub:'Cart Rental',       defaultPrice: 0     },
+  { id:'spc_coffeepack',  icon:'☕', label:'باقة قهوة',       sub:'Coffee Package',    defaultPrice: 0     },
+  { id:'spc_equiprent',   icon:'⚙️', label:'تأجير معدات',    sub:'Equipment Rental',  defaultPrice: 0     },
+  { id:'spc_training',    icon:'🎓', label:'تدريب بريستا',    sub:'Barista Training',  defaultPrice: 0     },
+  { id:'spc_driptool',    icon:'🫗', label:'أدوات تقطير',    sub:'Drip Tools',        defaultPrice: 0     },
+  { id:'spc_giftcard',    icon:'🎁', label:'بطاقة هدية',     sub:'Gift Card',         defaultPrice: 0     },
+];
+
+let miCustomPendingItem = null;
+
+function renderMiCustomGrid(){
+  const grid = document.getElementById('miCustomGrid');
+  if(!grid) return;
+  grid.innerHTML = MI_SPECIAL_ITEMS.map(it=>`
+    <button class="mi-custom-btn" onclick='miOpenCustomModal(${JSON.stringify(it).replace(/'/g,"&#39;")})'>
+      <span class="icon">${it.icon}</span>
+      <span class="lbl">${it.label}</span>
+      <span class="sub">${it.sub}</span>
+    </button>
+  `).join('');
+}
+
+function miOpenCustomModal(item){
+  miCustomPendingItem = item;
+  document.getElementById('miCustomModalTitle').textContent = `${item.icon} ${item.label}`;
+  document.getElementById('miCustomModalName').value = item.label;
+  document.getElementById('miCustomModalPrice').value = item.defaultPrice > 0 ? item.defaultPrice.toFixed(3) : '';
+  document.getElementById('miCustomModal').classList.add('open');
+  setTimeout(()=>document.getElementById('miCustomModalPrice').focus(),100);
+}
+
+function miCloseCustomModal(){
+  document.getElementById('miCustomModal').classList.remove('open');
+  miCustomPendingItem = null;
+}
+
+function miConfirmCustom(){
+  const name  = document.getElementById('miCustomModalName').value.trim();
+  const price = parseFloat(document.getElementById('miCustomModalPrice').value);
+  if(!name){ alert('أدخل اسم المنتج'); return; }
+  if(isNaN(price)||price<0){ alert('أدخل سعراً صحيحاً'); return; }
+  const key = `spc_custom_${Date.now()}`;
+  miCart[key] = { nameEn: name, nameAr: name, price: price, qty: 1 };
+  miUpdateCart();
+  miCloseCustomModal();
+  toast(`✅ تمت الإضافة: ${name}`);
+}
+
+// إضافة منتج حر من الحقول المفتوحة
+function miAddFreeItem(){
+  const label = document.getElementById('miCustomFreeLabel').value.trim();
+  const price = parseFloat(document.getElementById('miCustomFreePrice').value);
+  if(!label){ toast('❌ أدخل اسم المنتج'); return; }
+  if(isNaN(price)||price<0){ toast('❌ أدخل سعراً صحيحاً'); return; }
+  const key = `free_${Date.now()}`;
+  miCart[key] = { nameEn: label, nameAr: label, price: price, qty: 1 };
+  miUpdateCart();
+  document.getElementById('miCustomFreeLabel').value='';
+  document.getElementById('miCustomFreePrice').value='';
+  toast(`✅ تمت الإضافة: ${label}`);
+}
+
+// إغلاق modal بالضغط خارجه
+document.addEventListener('click', e=>{
+  const modal = document.getElementById('miCustomModal');
+  if(modal && modal.classList.contains('open') && e.target === modal) miCloseCustomModal();
+});
 
 async function saveManualInvoice(){
   if(Object.keys(miCart).length===0){ toast('❌ أضف منتجاً · Add items'); return; }
