@@ -211,6 +211,49 @@
   .inv-add-btn{background:var(--gold);color:var(--bg);border:none;border-radius:10px;padding:0.65rem;font-family:'Tajawal',sans-serif;font-weight:900;font-size:0.88rem;cursor:pointer;grid-column:1/-1;}
   .inv-add-btn:hover{opacity:0.85;}
 
+  /* تبويبات المخزون الداخلية */
+  .inv-inner-tabs{display:flex;gap:0.4rem;margin-bottom:1.2rem;flex-wrap:wrap;}
+  .inv-inner-tab{background:var(--card);border:1.5px solid var(--border);border-radius:22px;padding:0.45rem 1rem;font-family:'Tajawal',sans-serif;font-size:0.82rem;font-weight:700;color:var(--dim);cursor:pointer;transition:all 0.2s;white-space:nowrap;}
+  .inv-inner-tab.active{background:var(--gold);color:var(--bg);border-color:var(--gold);}
+  .inv-inner-tab:hover:not(.active){border-color:var(--gold);color:var(--gold);}
+
+  /* بطاقات المخزون */
+  .inv-cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:0.9rem;}
+  @media(max-width:540px){.inv-cards-grid{grid-template-columns:1fr;}}
+  .inv-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1rem;display:flex;flex-direction:column;gap:0.55rem;transition:border-color 0.2s;}
+  .inv-card:hover{border-color:var(--gold);}
+  .inv-card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:0.5rem;}
+  .inv-card-name{font-weight:900;font-size:0.95rem;color:var(--cream);line-height:1.3;}
+  .inv-card-supplier{font-size:0.7rem;color:var(--dim);margin-top:1px;}
+  .inv-card-qty{font-size:1.5rem;font-weight:900;white-space:nowrap;line-height:1;}
+  .inv-card-unit{font-size:0.65rem;color:var(--dim);text-align:center;}
+  .badge-ok{color:var(--green);}
+  .badge-low{color:#f0a500;}
+  .badge-out{color:var(--red);}
+  .inv-card-prices{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.3rem;background:var(--bg);border-radius:8px;padding:0.5rem;}
+  .inv-price-cell{text-align:center;}
+  .inv-price-val{font-size:0.8rem;font-weight:900;color:var(--gold);}
+  .inv-price-lbl{font-size:0.6rem;color:var(--dim);}
+  .inv-card-payment{display:flex;align-items:center;gap:0.5rem;font-size:0.72rem;}
+  .inv-card-pay-bar{flex:1;height:5px;background:var(--border);border-radius:3px;overflow:hidden;}
+  .inv-card-pay-fill{height:100%;background:var(--green);border-radius:3px;transition:width 0.4s;}
+  .inv-card-actions{display:flex;gap:0.4rem;margin-top:0.2rem;}
+  .inv-card-btn{flex:1;padding:0.45rem 0.5rem;border:none;border-radius:8px;font-family:'Tajawal',sans-serif;font-weight:900;font-size:0.75rem;cursor:pointer;text-align:center;transition:opacity 0.2s;}
+  .inv-card-btn:hover{opacity:0.8;}
+  .btn-edit{background:var(--gold);color:var(--bg);}
+  .btn-withdraw{background:var(--red);color:#fff;}
+  .btn-staff-on{background:var(--green);color:#fff;}
+  .btn-staff-off{background:var(--border);color:var(--dim);}
+
+  /* فلتر بحث المخزون */
+  .inv-search-bar{display:flex;gap:0.5rem;margin-bottom:1rem;align-items:center;flex-wrap:wrap;}
+  .inv-search-input{flex:1;min-width:160px;background:var(--card);border:1px solid var(--border);border-radius:22px;padding:0.5rem 1rem;color:var(--cream);font-family:'Tajawal',sans-serif;font-size:0.85rem;outline:none;}
+  .inv-search-input:focus{border-color:var(--gold);}
+  .inv-filter-btns{display:flex;gap:0.3rem;flex-wrap:wrap;}
+  .inv-filter-btn{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:0.35rem 0.75rem;font-family:'Tajawal',sans-serif;font-size:0.75rem;font-weight:700;color:var(--dim);cursor:pointer;transition:all 0.2s;}
+  .inv-filter-btn.active{background:var(--gold);color:var(--bg);border-color:var(--gold);}
+  .inv-filter-btn:hover:not(.active){border-color:var(--gold);color:var(--gold);}
+
   /* قائمة الموردين */
   .supplier-wrap{position:relative;}
   .supplier-dropdown{position:absolute;top:100%;right:0;left:0;background:var(--card);border:1px solid var(--gold);border-radius:8px;z-index:50;max-height:160px;overflow-y:auto;display:none;box-shadow:0 4px 15px rgba(0,0,0,0.3);}
@@ -542,11 +585,11 @@
 <!-- ===== INVOICES ===== -->
 <div class="panel" id="panel-invoices">
   <div class="filters" style="margin-top:1rem;">
-    <button class="filter-btn active" onclick="setInvFilter('today')">اليوم</button>
-    <button class="filter-btn" onclick="setInvFilter('week')">الأسبوع</button>
-    <button class="filter-btn" onclick="setInvFilter('month')">الشهر</button>
-    <button class="filter-btn" onclick="setInvFilter('all')">الكل</button>
-    <input type="date" class="filter-input" id="invDateFilter" onchange="setInvFilter('custom')">
+    <button class="filter-btn active" onclick="setInvoiceFilter('today')">اليوم</button>
+    <button class="filter-btn" onclick="setInvoiceFilter('week')">الأسبوع</button>
+    <button class="filter-btn" onclick="setInvoiceFilter('month')">الشهر</button>
+    <button class="filter-btn" onclick="setInvoiceFilter('all')">الكل</button>
+    <input type="date" class="filter-input" id="invDateFilter" onchange="setInvoiceFilter('custom')">
   </div>
   <!-- فلتر طريقة الدفع -->
   <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.8rem;align-items:center;">
@@ -810,170 +853,175 @@
 <div class="panel" id="panel-inventory">
   <div style="margin-top:1rem;">
 
-    <!-- إحصائيات -->
+    <!-- إحصائيات عامة -->
     <div class="inv-stats">
       <div class="inv-stat"><div class="inv-stat-num" id="invStatItems">0</div><div class="inv-stat-lbl">عدد الأصناف · Items</div></div>
-      <div class="inv-stat"><div class="inv-stat-num" id="invStatTotal">0</div><div class="inv-stat-lbl">إجمالي القيمة · Total Value (OMR)</div></div>
+      <div class="inv-stat"><div class="inv-stat-num" id="invStatTotal">0</div><div class="inv-stat-lbl">إجمالي القيمة · Total (OMR)</div></div>
       <div class="inv-stat"><div class="inv-stat-num" id="invStatPaid">0</div><div class="inv-stat-lbl">المدفوع · Paid (OMR)</div></div>
       <div class="inv-stat"><div class="inv-stat-num inv-remaining" id="invStatRemaining">0</div><div class="inv-stat-lbl">المتبقي · Remaining (OMR)</div></div>
-      <div class="inv-stat"><div class="inv-stat-num" id="invStatProfit" style="color:var(--green);">0</div><div class="inv-stat-lbl">هامش الربح · Profit Margin (OMR)</div></div>
+      <div class="inv-stat"><div class="inv-stat-num" id="invStatProfit" style="color:var(--green);">0</div><div class="inv-stat-lbl">هامش الربح · Profit (OMR)</div></div>
     </div>
 
-    <!-- فورم الإضافة -->
-    <div class="inv-form">
-      <div style="font-weight:900;color:var(--gold);font-size:0.92rem;margin-bottom:0.8rem;">➕ إضافة صنف · Add Item</div>
-      <div class="inv-form-grid">
-        <div>
-          <label class="inv-form-lbl">اسم المنتج · Product Name</label>
-          <input type="text" id="invName" class="inv-form-input" placeholder="مثال: حليب، قهوة، سكر...">
+    <!-- التبويبات الداخلية -->
+    <div class="inv-inner-tabs">
+      <button class="inv-inner-tab active" id="itab-items" onclick="switchInvTab('items')">📦 المخزون <span style="font-weight:400;">· Stock</span></button>
+      <button class="inv-inner-tab" id="itab-add" onclick="switchInvTab('add')">➕ إضافة صنف <span style="font-weight:400;">· Add</span></button>
+      <button class="inv-inner-tab" id="itab-suppliers" onclick="switchInvTab('suppliers')">🚚 الموردين <span style="font-weight:400;">· Suppliers</span></button>
+      <button class="inv-inner-tab" id="itab-rules" onclick="switchInvTab('rules')">⚙️ القواعد <span style="font-weight:400;">· Rules</span></button>
+    </div>
+
+    <!-- تبويب: قائمة المخزون -->
+    <div id="inv-tab-items" style="display:block;">
+      <!-- بحث + فلتر -->
+      <div class="inv-search-bar">
+        <input type="text" class="inv-search-input" id="invSearchInput" placeholder="🔍 بحث عن منتج... · Search product" oninput="filterInvCards()">
+        <div class="inv-filter-btns">
+          <button class="inv-filter-btn active" data-invfilter="all" onclick="setInvFilter('all',this)">الكل · All</button>
+          <button class="inv-filter-btn" data-invfilter="low" onclick="setInvFilter('low',this)">⚠️ منخفض</button>
+          <button class="inv-filter-btn" data-invfilter="out" onclick="setInvFilter('out',this)">❌ نفذ</button>
+          <button class="inv-filter-btn" data-invfilter="ok" onclick="setInvFilter('ok',this)">✅ كافي</button>
+          <button class="inv-filter-btn" data-invfilter="staff" onclick="setInvFilter('staff',this)">👥 للموظف</button>
         </div>
-        <div>
-          <label class="inv-form-lbl">العدد / الكمية · Quantity</label>
-          <input type="number" id="invQty" class="inv-form-input" placeholder="0" min="0" step="0.01">
+      </div>
+      <!-- شبكة البطاقات -->
+      <div class="inv-cards-grid" id="invCardsGrid">
+        <div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--dim);">⏳ جاري التحميل...</div>
+      </div>
+    </div>
+
+    <!-- تبويب: إضافة صنف -->
+    <div id="inv-tab-add" style="display:none;">
+      <div class="inv-form">
+        <div style="font-weight:900;color:var(--gold);font-size:0.92rem;margin-bottom:0.8rem;">➕ إضافة صنف جديد · Add Item</div>
+        <div class="inv-form-grid">
+          <div>
+            <label class="inv-form-lbl">اسم المنتج · Product Name</label>
+            <input type="text" id="invName" class="inv-form-input" placeholder="مثال: حليب، قهوة، سكر...">
+          </div>
+          <div>
+            <label class="inv-form-lbl">العدد / الكمية · Quantity</label>
+            <input type="number" id="invQty" class="inv-form-input" placeholder="0" min="0" step="0.01">
+          </div>
+          <div>
+            <label class="inv-form-lbl">الوحدة · Unit</label>
+            <select id="invUnit" class="inv-form-input">
+              <option value="قطعة">قطعة · Piece</option>
+              <option value="كيلو">كيلو · KG</option>
+              <option value="لتر">لتر · Liter</option>
+              <option value="علبة">علبة · Box</option>
+              <option value="كرتون">كرتون · Carton</option>
+              <option value="باكيت">باكيت · Packet</option>
+              <option value="أخرى">أخرى · Other</option>
+            </select>
+          </div>
+          <div>
+            <label class="inv-form-lbl">سعر الوحدة · Unit Price (OMR)</label>
+            <input type="number" id="invUnitPrice" class="inv-form-input" placeholder="0.000" step="0.001" min="0" oninput="calcInvTotal()">
+          </div>
+          <div>
+            <label class="inv-form-lbl">المورد · Supplier</label>
+            <div class="supplier-wrap">
+              <input type="text" id="invSupplier" class="inv-form-input" placeholder="اكتب أو اختر مورد..."
+                autocomplete="off"
+                oninput="filterSupplierList('invSupplier','invSupplierDrop')"
+                onfocus="openSupplierDrop('invSupplierDrop')"
+                onblur="setTimeout(()=>closeSupplierDrop('invSupplierDrop'),200)">
+              <div class="supplier-dropdown" id="invSupplierDrop"></div>
+            </div>
+          </div>
+          <div>
+            <label class="inv-form-lbl">تاريخ الشراء · Purchase Date</label>
+            <input type="date" id="invDate" class="inv-form-input">
+          </div>
+          <div>
+            <label class="inv-form-lbl">المبلغ الكلي · Total Amount (OMR)</label>
+            <input type="number" id="invTotal" class="inv-form-input" placeholder="0.000" step="0.001" min="0" readonly style="opacity:0.7;">
+          </div>
+          <div>
+            <label class="inv-form-lbl">المبلغ المدفوع · Amount Paid (OMR)</label>
+            <input type="number" id="invPaid" class="inv-form-input" placeholder="0.000" step="0.001" min="0" oninput="calcInvTotal()">
+          </div>
+          <div>
+            <label class="inv-form-lbl">سعر الشراء · Cost Price (OMR)</label>
+            <input type="number" id="invCostPrice" class="inv-form-input" placeholder="0.000" step="0.001" min="0">
+          </div>
+          <div>
+            <label class="inv-form-lbl">سعر البيع · Selling Price (OMR)</label>
+            <input type="number" id="invSellingPrice" class="inv-form-input" placeholder="0.000" step="0.001" min="0">
+          </div>
+          <div style="grid-column:1/-1;">
+            <label class="inv-form-lbl">ملاحظات · Notes</label>
+            <input type="text" id="invNotes" class="inv-form-input" placeholder="اختياري · Optional">
+          </div>
+          <button class="inv-add-btn" onclick="addInventoryItem()">✅ إضافة · Add</button>
         </div>
-        <div>
-          <label class="inv-form-lbl">الوحدة · Unit</label>
-          <select id="invUnit" class="inv-form-input">
-            <option value="قطعة">قطعة · Piece</option>
-            <option value="كيلو">كيلو · KG</option>
-            <option value="لتر">لتر · Liter</option>
-            <option value="علبة">علبة · Box</option>
-            <option value="كرتون">كرتون · Carton</option>
-            <option value="باكيت">باكيت · Packet</option>
-            <option value="أخرى">أخرى · Other</option>
-          </select>
-        </div>
-        <div>
-          <label class="inv-form-lbl">سعر الوحدة · Unit Price (OMR)</label>
-          <input type="number" id="invUnitPrice" class="inv-form-input" placeholder="0.000" step="0.001" min="0" oninput="calcInvTotal()">
-        </div>
-        <div>
-          <label class="inv-form-lbl">رقم / اسم المورد · Supplier</label>
-          <div class="supplier-wrap">
-            <input type="text" id="invSupplier" class="inv-form-input" placeholder="اكتب أو اختر مورد..."
-              autocomplete="off"
-              oninput="filterSupplierList('invSupplier','invSupplierDrop')"
-              onfocus="openSupplierDrop('invSupplierDrop')"
-              onblur="setTimeout(()=>closeSupplierDrop('invSupplierDrop'),200)">
-            <div class="supplier-dropdown" id="invSupplierDrop"></div>
+      </div>
+    </div>
+
+    <!-- تبويب: الموردين -->
+    <div id="inv-tab-suppliers" style="display:none;">
+      <!-- فورم إضافة مورد -->
+      <div style="background:var(--card);border:1px solid var(--gold);border-radius:12px;padding:1rem;margin-bottom:1rem;">
+        <div style="font-weight:900;color:var(--gold);font-size:0.88rem;margin-bottom:0.7rem;">➕ إضافة مورد · Add Supplier</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;">
+          <div>
+            <label class="inv-form-lbl">اسم المورد · Supplier Name</label>
+            <input type="text" id="newSupplierName" class="inv-form-input" placeholder="اسم المورد أو الشركة">
+          </div>
+          <div>
+            <label class="inv-form-lbl">رقم الهاتف · Phone</label>
+            <input type="text" id="newSupplierPhone" class="inv-form-input" placeholder="+968 XXXX XXXX">
+          </div>
+          <div style="grid-column:1/-1;">
+            <label class="inv-form-lbl">ملاحظات · Notes (اختياري)</label>
+            <input type="text" id="newSupplierNotes" class="inv-form-input" placeholder="مثال: يوصل كل أسبوع...">
           </div>
         </div>
-        <div>
-          <label class="inv-form-lbl">تاريخ الشراء · Purchase Date</label>
-          <input type="date" id="invDate" class="inv-form-input">
-        </div>
-        <div>
-          <label class="inv-form-lbl">المبلغ الكلي · Total Amount (OMR)</label>
-          <input type="number" id="invTotal" class="inv-form-input" placeholder="0.000" step="0.001" min="0" readonly style="opacity:0.7;">
-        </div>
-        <div>
-          <label class="inv-form-lbl">المبلغ المدفوع · Amount Paid (OMR)</label>
-          <input type="number" id="invPaid" class="inv-form-input" placeholder="0.000" step="0.001" min="0" oninput="calcInvTotal()">
-        </div>
-        <div>
-          <label class="inv-form-lbl">سعر الشراء · Cost Price (OMR)</label>
-          <input type="number" id="invCostPrice" class="inv-form-input" placeholder="0.000" step="0.001" min="0">
-        </div>
-        <div>
-          <label class="inv-form-lbl">سعر البيع · Selling Price (OMR)</label>
-          <input type="number" id="invSellingPrice" class="inv-form-input" placeholder="0.000" step="0.001" min="0">
-        </div>
-        <div style="grid-column:1/-1;">
-          <label class="inv-form-lbl">ملاحظات · Notes</label>
-          <input type="text" id="invNotes" class="inv-form-input" placeholder="اختياري · Optional">
-        </div>
-        <button class="inv-add-btn" onclick="addInventoryItem()">✅ إضافة · Add</button>
+        <button class="inv-add-btn" style="margin-top:0.6rem;" onclick="addSupplier()">✅ حفظ المورد · Save Supplier</button>
       </div>
+      <!-- قائمة الموردين -->
+      <div id="supplierList"><div style="text-align:center;color:var(--dim);padding:1rem;">⏳</div></div>
     </div>
 
-    <!-- جدول المخزون -->
-    <div class="sec-title">📦 قائمة المخزون <span class="sec-en">· Inventory List</span></div>
-    <div class="table-wrap" style="margin-bottom:1.5rem;">
-      <table class="inv-table">
-        <thead><tr>
-          <th>المنتج · Product</th>
-          <th>الكمية · Qty</th>
-          <th>سعر الشراء · Cost</th>
-          <th>سعر البيع · Price</th>
-          <th>الربح · Profit</th>
-          <th>المجموع · Total</th>
-          <th>المدفوع · Paid</th>
-          <th>المتبقي · Remaining</th>
-          <th>المورد · Supplier</th>
-          <th>التاريخ · Date</th>
-          <th>للموظف · Staff</th>
-          <th>إجراء</th>
-        </tr></thead>
-        <tbody id="invTableBodyStock">
-          <tr><td colspan="11" style="text-align:center;padding:1.5rem;color:var(--dim);">⏳ جاري التحميل...</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- إدارة الموردين -->
-    <div class="sec-title" style="margin-top:1.5rem;">🚚 إدارة الموردين <span class="sec-en">· Suppliers</span></div>
-
-    <!-- فورم إضافة مورد -->
-    <div style="background:var(--card);border:1px solid var(--gold);border-radius:12px;padding:1rem;margin-bottom:1rem;">
-      <div style="font-weight:900;color:var(--gold);font-size:0.88rem;margin-bottom:0.7rem;">➕ إضافة مورد · Add Supplier</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;">
-        <div>
-          <label class="inv-form-lbl">اسم المورد · Supplier Name</label>
-          <input type="text" id="newSupplierName" class="inv-form-input" placeholder="اسم المورد أو الشركة">
-        </div>
-        <div>
-          <label class="inv-form-lbl">رقم الهاتف · Phone</label>
-          <input type="text" id="newSupplierPhone" class="inv-form-input" placeholder="+968 XXXX XXXX">
-        </div>
-        <div style="grid-column:1/-1;">
-          <label class="inv-form-lbl">ملاحظات · Notes (اختياري)</label>
-          <input type="text" id="newSupplierNotes" class="inv-form-input" placeholder="مثال: يوصل كل أسبوع...">
-        </div>
+    <!-- تبويب: القواعد -->
+    <div id="inv-tab-rules" style="display:none;">
+      <div style="font-size:0.78rem;color:var(--dim);margin-bottom:0.8rem;background:var(--card);border-radius:10px;padding:0.7rem 1rem;border:1px solid var(--border);">
+        💡 عند كتابة الموظف اسم مصروف يطابق الكلمة المفتاحية — تُضاف الكمية تلقائياً للمخزون
       </div>
-      <button class="inv-add-btn" style="margin-top:0.6rem;" onclick="addSupplier()">✅ حفظ المورد · Save Supplier</button>
-    </div>
-
-    <!-- قائمة الموردين -->
-    <div id="supplierList"><div style="text-align:center;color:var(--dim);padding:1rem;">⏳</div></div>
-
-    <!-- قواعد ربط المصروفات بالمخزون -->
-    <div class="sec-title" style="margin-top:1.5rem;">⚙️ قواعد ربط المصروفات <span class="sec-en">· Expense Auto-Rules</span></div>
-    <div style="font-size:0.78rem;color:var(--dim);margin-bottom:0.8rem;">عند كتابة الموظف اسم مصروف يطابق الكلمة المفتاحية — تُضاف الكمية تلقائياً للمخزون</div>
-
-    <div style="background:var(--card);border:1px solid var(--gold);border-radius:12px;padding:1rem;margin-bottom:1rem;">
-      <div style="font-weight:900;color:var(--gold);font-size:0.88rem;margin-bottom:0.7rem;">➕ إضافة قاعدة · Add Rule</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;">
-        <div>
-          <label class="inv-form-lbl">الكلمة المفتاحية · Keyword (English)</label>
-          <input type="text" id="ruleKeyword" class="inv-form-input" placeholder="milk, cream, coffee...">
+      <div style="background:var(--card);border:1px solid var(--gold);border-radius:12px;padding:1rem;margin-bottom:1rem;">
+        <div style="font-weight:900;color:var(--gold);font-size:0.88rem;margin-bottom:0.7rem;">➕ إضافة قاعدة · Add Rule</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;">
+          <div>
+            <label class="inv-form-lbl">الكلمة المفتاحية · Keyword (English)</label>
+            <input type="text" id="ruleKeyword" class="inv-form-input" placeholder="milk, cream, coffee...">
+          </div>
+          <div>
+            <label class="inv-form-lbl">اسم المنتج في المخزون · Inventory Name</label>
+            <input type="text" id="ruleInvName" class="inv-form-input" placeholder="حليب، قهوة اسبريسو...">
+          </div>
+          <div>
+            <label class="inv-form-lbl">الكمية لكل مصروف · Qty per Expense</label>
+            <input type="number" id="ruleQty" class="inv-form-input" placeholder="4" step="0.01" min="0">
+          </div>
+          <div>
+            <label class="inv-form-lbl">الوحدة · Unit</label>
+            <select id="ruleUnit" class="inv-form-input">
+              <option value="لتر">لتر · Liter</option>
+              <option value="كيلو">كيلو · KG</option>
+              <option value="قطعة">قطعة · Piece</option>
+              <option value="علبة">علبة · Box</option>
+              <option value="كرتون">كرتون · Carton</option>
+            </select>
+          </div>
+          <div style="grid-column:1/-1;">
+            <label class="inv-form-lbl">المورد (اختياري) · Supplier (optional)</label>
+            <input type="text" id="ruleSupplier" class="inv-form-input" placeholder="اسم المورد إن وُجد">
+          </div>
         </div>
-        <div>
-          <label class="inv-form-lbl">اسم المنتج في المخزون · Inventory Name</label>
-          <input type="text" id="ruleInvName" class="inv-form-input" placeholder="حليب، قهوة اسبريسو...">
-        </div>
-        <div>
-          <label class="inv-form-lbl">الكمية لكل مصروف · Qty per Expense</label>
-          <input type="number" id="ruleQty" class="inv-form-input" placeholder="4" step="0.01" min="0">
-        </div>
-        <div>
-          <label class="inv-form-lbl">الوحدة · Unit</label>
-          <select id="ruleUnit" class="inv-form-input">
-            <option value="لتر">لتر · Liter</option>
-            <option value="كيلو">كيلو · KG</option>
-            <option value="قطعة">قطعة · Piece</option>
-            <option value="علبة">علبة · Box</option>
-            <option value="كرتون">كرتون · Carton</option>
-          </select>
-        </div>
-        <div style="grid-column:1/-1;">
-          <label class="inv-form-lbl">المورد (اختياري) · Supplier (optional)</label>
-          <input type="text" id="ruleSupplier" class="inv-form-input" placeholder="اسم المورد إن وُجد">
-        </div>
+        <button class="inv-add-btn" style="margin-top:0.6rem;" onclick="addExpenseRule()">✅ حفظ القاعدة · Save Rule</button>
       </div>
-      <button class="inv-add-btn" style="margin-top:0.6rem;" onclick="addExpenseRule()">✅ حفظ القاعدة · Save Rule</button>
+      <div id="rulesList"><div style="text-align:center;color:var(--dim);padding:1rem;">⏳</div></div>
     </div>
-
-    <div id="rulesList"><div style="text-align:center;color:var(--dim);padding:1rem;">⏳</div></div>
 
   </div>
 </div>
@@ -1822,11 +1870,35 @@ async function loadInventory(){
   }catch(e){ console.error(e); }
 }
 
+/* ===== تبويبات المخزون الداخلية ===== */
+let currentInvFilter = 'all';
+
+function switchInvTab(tab){
+  ['items','add','suppliers','rules'].forEach(t=>{
+    const tabBtn = document.getElementById(`itab-${t}`);
+    const panel  = document.getElementById(`inv-tab-${t}`);
+    if(tabBtn) tabBtn.classList.toggle('active', t===tab);
+    if(panel)  panel.style.display = t===tab ? 'block' : 'none';
+  });
+  if(tab==='suppliers') renderSupplierList();
+  if(tab==='rules')     renderExpenseRules();
+}
+
+function setInvFilter(filter, btn){
+  currentInvFilter = filter;
+  document.querySelectorAll('.inv-filter-btn').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  renderInventory();
+}
+
+function filterInvCards(){
+  renderInventory();
+}
+
 function renderInventory(){
   const totalVal  = allInventory.reduce((s,i)=>s+((+i.quantity||0)*(+i.unit_price||0)),0);
   const totalPaid = allInventory.reduce((s,i)=>s+(+i.amount_paid||0),0);
   const remaining = Math.max(0, totalVal-totalPaid);
-  // حساب إجمالي الربح
   const totalProfit = allInventory.reduce((s,i)=>{
     const cost = +i.cost_price||0;
     const sell = +i.selling_price||0;
@@ -1840,48 +1912,85 @@ function renderInventory(){
   document.getElementById('invStatRemaining').textContent = remaining.toFixed(3);
   document.getElementById('invStatProfit').textContent    = totalProfit.toFixed(3);
 
-  const tbody = document.getElementById('invTableBodyStock');
-  if(allInventory.length===0){
-    tbody.innerHTML=`<tr><td colspan="11" style="text-align:center;padding:1.5rem;color:var(--dim);">لا توجد أصناف بعد · No items yet</td></tr>`;
+  const grid = document.getElementById('invCardsGrid');
+  if(!grid) return;
+
+  const searchQ = (document.getElementById('invSearchInput')?.value||'').toLowerCase();
+
+  // فلترة
+  let items = allInventory.filter(item=>{
+    const name = (item.product_name||'').toLowerCase();
+    if(searchQ && !name.includes(searchQ)) return false;
+    const qty = +item.quantity||0;
+    if(currentInvFilter==='out')   return qty<=0;
+    if(currentInvFilter==='low')   return qty>0 && qty<=5;
+    if(currentInvFilter==='ok')    return qty>5;
+    if(currentInvFilter==='staff') return item.show_in_staff;
+    return true; // 'all'
+  });
+
+  if(items.length===0){
+    grid.innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--dim);">لا توجد أصناف · No items found</div>`;
     return;
   }
-  tbody.innerHTML = allInventory.map(item=>{
-    const total     = (+item.quantity||0)*(+item.unit_price||0);
-    const paid      = +item.amount_paid||0;
-    const rem       = Math.max(0, total-paid);
-    const paidPct   = total>0 ? Math.min(100,(paid/total*100)) : 0;
-    const cost      = +item.cost_price||0;
-    const sell      = +item.selling_price||0;
-    const profit    = cost>0&&sell>0 ? (sell-cost)*(+item.quantity||0) : null;
-    const margin    = cost>0&&sell>0 ? ((sell-cost)/cost*100) : null;
-    return `<tr>
-      <td style="font-weight:700;">${item.product_name}</td>
-      <td style="text-align:center;">${item.quantity} <span style="font-size:0.7rem;color:var(--dim);">${item.unit||''}</span></td>
-      <td style="direction:ltr;color:var(--dim);font-size:0.8rem;">${cost>0?`OMR ${cost.toFixed(3)}`:'-'}</td>
-      <td style="direction:ltr;color:var(--cream);font-size:0.8rem;">${sell>0?`OMR ${sell.toFixed(3)}`:'-'}</td>
-      <td style="direction:ltr;">
-        ${profit!==null?`<div style="color:${profit>=0?'var(--green)':'var(--red)'};font-weight:700;font-size:0.8rem;">OMR ${profit.toFixed(3)}</div><div style="font-size:0.68rem;color:var(--dim);">${margin!==null?margin.toFixed(1)+'%':''}</div>`:'-'}
-      </td>
-      <td style="font-weight:900;color:var(--gold);direction:ltr;">OMR ${total.toFixed(3)}</td>
-      <td>
-        <div style="color:var(--green);font-weight:700;direction:ltr;font-size:0.8rem;">OMR ${paid.toFixed(3)}</div>
-        <div class="inv-paid-bar"><div class="inv-paid-fill" style="width:${paidPct.toFixed(0)}%"></div></div>
-        <div style="font-size:0.65rem;color:var(--dim);">${paidPct.toFixed(0)}%</div>
-      </td>
-      <td style="direction:ltr;${rem>0?'color:var(--red);font-weight:700;':'color:var(--green);font-weight:700;'}">${rem>0?`OMR ${rem.toFixed(3)}`:'✅ مسدد'}</td>
-      <td style="font-size:0.75rem;color:var(--dim);">${item.supplier_contact||'-'}</td>
-      <td style="font-size:0.72rem;color:var(--dim);">${item.purchase_date||'-'}</td>
-      <td style="text-align:center;">
-        <button class="inv-toggle-staff" data-invid="${item.id}" data-current="${item.show_in_staff?'true':'false'}"
-          style="background:${item.show_in_staff?'var(--green)':'var(--border)'};color:${item.show_in_staff?'#fff':'var(--dim)'};border:none;border-radius:20px;padding:3px 10px;cursor:pointer;font-size:0.72rem;font-weight:700;transition:all 0.2s;white-space:nowrap;">
-          ${item.show_in_staff?'✅ ظاهر':'⬜ مخفي'}
+
+  grid.innerHTML = items.map(item=>{
+    const qty      = +item.quantity||0;
+    const total    = qty*(+item.unit_price||0);
+    const paid     = +item.amount_paid||0;
+    const rem      = Math.max(0, total-paid);
+    const paidPct  = total>0 ? Math.min(100,(paid/total*100)) : 0;
+    const cost     = +item.cost_price||0;
+    const sell     = +item.selling_price||0;
+    const profit   = cost>0&&sell>0 ? sell-cost : null;
+    const margin   = cost>0&&sell>0 ? ((sell-cost)/cost*100) : null;
+
+    // حالة الكمية
+    let qtyClass = 'badge-ok', qtyIcon = '✅';
+    if(qty<=0){ qtyClass='badge-out'; qtyIcon='❌'; }
+    else if(qty<=5){ qtyClass='badge-low'; qtyIcon='⚠️'; }
+
+    return `<div class="inv-card">
+      <div class="inv-card-top">
+        <div>
+          <div class="inv-card-name">${item.product_name}</div>
+          <div class="inv-card-supplier">${item.supplier_contact?'🚚 '+item.supplier_contact:''}</div>
+        </div>
+        <div style="text-align:center;flex-shrink:0;">
+          <div class="inv-card-qty ${qtyClass}">${qtyIcon} ${qty}</div>
+          <div class="inv-card-unit">${item.unit||''}</div>
+        </div>
+      </div>
+
+      <div class="inv-card-prices">
+        <div class="inv-price-cell">
+          <div class="inv-price-val">${cost>0?cost.toFixed(3):'-'}</div>
+          <div class="inv-price-lbl">سعر الشراء</div>
+        </div>
+        <div class="inv-price-cell">
+          <div class="inv-price-val">${sell>0?sell.toFixed(3):'-'}</div>
+          <div class="inv-price-lbl">سعر البيع</div>
+        </div>
+        <div class="inv-price-cell">
+          <div class="inv-price-val" style="color:${profit!==null?(profit>=0?'var(--green)':'var(--red)'):'var(--dim)'};">${profit!==null?profit.toFixed(3):'-'}</div>
+          <div class="inv-price-lbl">${margin!==null?margin.toFixed(0)+'% ربح':'الربح'}</div>
+        </div>
+      </div>
+
+      <div class="inv-card-payment">
+        <span style="color:var(--green);font-weight:700;white-space:nowrap;">${paid.toFixed(3)}</span>
+        <div class="inv-card-pay-bar"><div class="inv-card-pay-fill" style="width:${paidPct.toFixed(0)}%"></div></div>
+        <span style="color:${rem>0?'var(--red)':'var(--green)'};font-weight:700;white-space:nowrap;">${rem>0?rem.toFixed(3)+' متبقي':'✅'}</span>
+      </div>
+
+      <div class="inv-card-actions">
+        <button class="inv-card-btn btn-edit inv-edit-btn-row" data-invid="${item.id}">✏️ تعديل</button>
+        <button class="inv-card-btn btn-withdraw inv-withdraw-btn" data-invid="${item.id}">📤 سحب</button>
+        <button class="inv-card-btn inv-toggle-staff ${item.show_in_staff?'btn-staff-on':'btn-staff-off'}" data-invid="${item.id}" data-current="${item.show_in_staff?'true':'false'}">
+          ${item.show_in_staff?'👥 ظاهر':'👁 مخفي'}
         </button>
-      </td>
-      <td>
-        <button class="inv-edit-btn-row" data-invid="${item.id}" style="background:var(--gold);color:var(--bg);border:none;border-radius:6px;padding:3px 7px;cursor:pointer;font-size:0.72rem;font-weight:700;">✏️</button>
-        <button class="inv-withdraw-btn" data-invid="${item.id}" style="background:var(--red);color:#fff;border:none;border-radius:6px;padding:3px 7px;cursor:pointer;font-size:0.72rem;font-weight:700;margin-top:2px;">📤</button>
-      </td>
-    </tr>`;
+      </div>
+    </div>`;
   }).join('');
 }
 
@@ -2450,7 +2559,7 @@ function setPayFilter(pay){
   renderInvoices(filterData(allInvoices,invFilter,'inv'));
 }
 
-function setInvFilter(f){
+function setInvoiceFilter(f){
   invFilter=f;
   document.querySelectorAll('#panel-invoices .filter-btn').forEach((b,i)=>{
     b.classList.toggle('active',['today','week','month','all'][i]===f);
