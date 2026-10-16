@@ -6,6 +6,7 @@
 <title>لوحة المدير — إيل لاتيرا</title>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&family=Cormorant+Garamond:ital,wght@1,500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
   :root{
     --bg:#1a0f0a;--card:#2d1a10;--border:#4a2e1a;
@@ -1422,7 +1423,8 @@
       </div>
     </div>
     <div class="modal-actions">
-      <button class="modal-btn modal-btn-print" onclick="reprintInvoice()">🖨️ إعادة طباعة</button>
+      <button class="modal-btn modal-btn-print" onclick="shareInvoiceImage()" style="background:var(--green);color:#fff;">📸 صورة واتس</button>
+      <button class="modal-btn modal-btn-print" onclick="reprintInvoice()">💬 نص واتس</button>
       <button class="modal-btn modal-btn-save" onclick="saveInvoiceEdit()">💾 حفظ</button>
       <button class="modal-btn modal-btn-del" onclick="deleteInvoice()">🗑️ حذف</button>
     </div>
@@ -3259,6 +3261,110 @@ async function deleteInvoice(){
     await loadAll();
     renderInvoices(filterData(allInvoices,invFilter,'inv'));
   }catch(e){ toast('❌ خطأ · Error'); }
+}
+
+async function shareInvoiceImage(){
+  if(!currentEditInv) return;
+  const inv = currentEditInv;
+  const items = parseItems(inv.items);
+  const total = +inv.total||0;
+  const subtotal = items.reduce((s,i)=>s+((+i.price||0)*(+i.qty||1)),0);
+  const disc = Math.max(0, subtotal - total);
+  const invDate = inv.created_at ? new Date(inv.created_at).toLocaleDateString('ar-OM',{year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) : '—';
+
+  // Build styled invoice element
+  const wrap = document.createElement('div');
+  wrap.id = '__invImgWrap';
+  wrap.style.cssText = `
+    position:fixed; left:-9999px; top:0;
+    width:360px; background:#1a1208; color:#f0e6d0;
+    font-family:'Tajawal',sans-serif; padding:28px 24px;
+    border-radius:16px; direction:rtl;
+  `;
+  wrap.innerHTML = `
+    <div style="text-align:center;margin-bottom:18px;">
+      <div style="font-size:1.5rem;font-weight:900;color:#c9a84c;letter-spacing:2px;">☕ إيل لاتيرا</div>
+      <div style="font-size:0.7rem;color:#8a7a60;margin-top:2px;">El Laterra Café · CR: 1540794</div>
+      <div style="height:1px;background:linear-gradient(90deg,transparent,#c9a84c,transparent);margin:12px 0;"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:0.78rem;color:#8a7a60;margin-bottom:6px;">
+      <span>📋 ${inv.invoice_number||'—'}</span>
+      <span>${invDate}</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:0.78rem;color:#8a7a60;margin-bottom:14px;">
+      <span>🪑 طاولة ${inv.table_number||'—'}</span>
+      <span>💳 ${inv.payment_method||'—'}</span>
+    </div>
+    <div style="height:1px;background:#2e2414;margin-bottom:12px;"></div>
+    <div style="margin-bottom:12px;">
+      ${items.map(it=>`
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #2e2414;">
+          <div>
+            <div style="font-size:0.82rem;color:#f0e6d0;">${it.name||it.nameEn||'—'}</div>
+            <div style="font-size:0.68rem;color:#8a7a60;">×${it.qty||1} × ر.ع ${(+it.price||0).toFixed(3)}</div>
+          </div>
+          <div style="font-size:0.85rem;font-weight:700;color:#c9a84c;">ر.ع ${((+it.price||0)*(+it.qty||1)).toFixed(3)}</div>
+        </div>
+      `).join('')}
+    </div>
+    ${disc>0.001?`
+    <div style="display:flex;justify-content:space-between;font-size:0.78rem;color:#c0392b;margin-bottom:6px;">
+      <span>🏷️ خصم</span><span>- ر.ع ${disc.toFixed(3)}</span>
+    </div>`:''}
+    <div style="height:1px;background:#c9a84c;opacity:0.4;margin-bottom:10px;"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <span style="font-size:0.85rem;color:#8a7a60;">الإجمالي · Total</span>
+      <span style="font-size:1.2rem;font-weight:900;color:#c9a84c;">ر.ع ${total.toFixed(3)}</span>
+    </div>
+    <div style="height:1px;background:linear-gradient(90deg,transparent,#c9a84c,transparent);margin:16px 0;"></div>
+    <div style="text-align:center;font-size:0.72rem;color:#8a7a60;line-height:1.7;">
+      شكراً لزيارتكم 🙏<br>laterra.cafe
+    </div>
+  `;
+  document.body.appendChild(wrap);
+
+  toast('⏳ جاري توليد الصورة...');
+  try {
+    const canvas = await html2canvas(wrap, {
+      backgroundColor:'#1a1208',
+      scale:2,
+      useCORS:true,
+      logging:false
+    });
+    document.body.removeChild(wrap);
+
+    canvas.toBlob(async (blob)=>{
+      if(!blob){ toast('❌ فشل توليد الصورة'); return; }
+      const file = new File([blob], `invoice-${inv.invoice_number||'receipt'}.png`, {type:'image/png'});
+
+      // Try Web Share API (mobile)
+      if(navigator.canShare && navigator.canShare({files:[file]})){
+        try{
+          await navigator.share({
+            files:[file],
+            title:`فاتورة ${inv.invoice_number||''}`,
+            text:`☕ إيل لاتيرا — فاتورة ${inv.invoice_number||''}`
+          });
+          toast('✅ تمت المشاركة');
+          return;
+        }catch(shareErr){
+          if(shareErr.name!=='AbortError') console.warn('Share failed:',shareErr);
+        }
+      }
+      // Fallback: download image
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `invoice-${inv.invoice_number||'receipt'}.png`;
+      a.click();
+      setTimeout(()=>URL.revokeObjectURL(url),3000);
+      toast('📥 تم تحميل الصورة · Image downloaded');
+    },'image/png');
+  } catch(err){
+    if(document.getElementById('__invImgWrap')) document.body.removeChild(wrap);
+    console.error(err);
+    toast('❌ خطأ في توليد الصورة');
+  }
 }
 
 function reprintInvoice(){
