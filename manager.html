@@ -1369,7 +1369,7 @@
     </div>
     <div class="modal-actions">
       <button class="modal-btn modal-btn-print" onclick="reprintInvoice()">🖨️ إعادة طباعة</button>
-      <button class="modal-btn modal-btn-save" onclick="saveInvEdit()">💾 حفظ</button>
+      <button class="modal-btn modal-btn-save" onclick="saveInvoiceEdit()">💾 حفظ</button>
       <button class="modal-btn modal-btn-del" onclick="deleteInvoice()">🗑️ حذف</button>
     </div>
   </div>
@@ -3023,7 +3023,7 @@ function closeInvModal(){
   currentEditInv=null;
 }
 
-async function saveInvEdit(){
+async function saveInvoiceEdit(){
   const id = document.getElementById('editInvId').value;
   const table = document.getElementById('editTable').value.trim();
   const total = +document.getElementById('editTotal').value;
