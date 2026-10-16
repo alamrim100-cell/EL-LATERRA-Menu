@@ -1616,14 +1616,15 @@ function renderAnalytics(){
   `).join('');
 
   // ===== إحصائيات الكيك =====
-  const CAKE_NAMES = ['كريب','تيراميسو','تشيزكيك','لندن كيك','سان سباستيان','كلاسيك كوكيز','مارشميلو كوكيز','كوكيز'];
+  // كلمات مفتاحية — تتطابق مع أي اسم يحتوي عليها
+  const CAKE_KEYWORDS = ['كيك','كوكيز','تيراميسو','تشيز','كريب','سان سباستيان','لندن','cake','cookie','tiramisu','cheesecake','crepe','velvet'];
   const cakeSoldMap = {};
   let cakeTotalSold = 0, cakeTotalRev = 0;
   inv.forEach(order=>{
     const items = parseItems(order.items);
     items.forEach(it=>{
-      const itName = it.name||it.nameEn||'';
-      const isCake = CAKE_NAMES.some(k=>itName.includes(k));
+      const itName = (it.name||it.nameEn||'').toLowerCase();
+      const isCake = CAKE_KEYWORDS.some(k=>itName.includes(k.toLowerCase()));
       if(isCake){
         const qty = +it.qty||1;
         cakeSoldMap[itName] = (cakeSoldMap[itName]||0) + qty;
@@ -1633,7 +1634,7 @@ function renderAnalytics(){
     });
   });
   // المتبقي في المخزون
-  const cakeInvItems = allInventory.filter(i=>CAKE_NAMES.some(k=>(i.product_name||'').includes(k)));
+  const cakeInvItems = allInventory.filter(i=>CAKE_KEYWORDS.some(k=>(i.product_name||'').toLowerCase().includes(k.toLowerCase())));
   const cakeInStock = cakeInvItems.reduce((s,i)=>s+(+i.quantity||0),0);
 
   document.getElementById('anCakeSold').textContent  = cakeTotalSold;
@@ -1976,7 +1977,8 @@ async function loadInventory(){
 }
 
 /* ===== إحصائيات مبيعات الكيك ===== */
-const CAKE_ITEMS = ['كريب','تيراميسو','تشيزكيك','لندن كيك','سان سباستيان','كلاسيك كوكيز','مارشميلو كوكيز','كوكيز','cheesecake','tiramisu','crepe','london cake','san sebastian'];
+// كلمات مفتاحية للكيك — تشمل كل الأنواع
+const CAKE_ITEMS = ['كيك','كوكيز','تيراميسو','تشيز','كريب','سان سباستيان','لندن','cake','cookie','tiramisu','cheesecake','crepe','velvet'];
 
 async function loadCakeSalesStats(){
   try{
