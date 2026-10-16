@@ -2083,17 +2083,48 @@ async function saveInvEdit(){
   const supplier = document.getElementById('editInvSupplier').value.trim();
   const date     = document.getElementById('editInvDate').value;
   const notes    = document.getElementById('editInvNotes').value.trim();
+
+  if(!id){ toast('❌ خطأ: لا يوجد ID'); return; }
+  if(!name){ toast('❌ أدخل اسم المنتج'); return; }
+
   if(supplier) await saveSupplierIfNew(supplier, '');
+
   try{
-    await fetch(`${SUPA}/rest/v1/inventory?id=eq.${id}`,{
+    const r = await fetch(`${SUPA}/rest/v1/inventory?id=eq.${id}`,{
       method:'PATCH',
-      headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},
-      body:JSON.stringify({product_name:name,quantity:qty,unit,unit_price:price,amount_paid:paid,cost_price:cost,selling_price:selling,supplier_contact:supplier,purchase_date:date,notes})
+      headers:{
+        'apikey':KEY,
+        'Authorization':`Bearer ${KEY}`,
+        'Content-Type':'application/json',
+        'Prefer':'return=representation'
+      },
+      body:JSON.stringify({
+        product_name: name,
+        quantity: qty,
+        unit: unit,
+        unit_price: price||0,
+        amount_paid: paid,
+        cost_price: cost,
+        selling_price: selling,
+        supplier_contact: supplier||null,
+        purchase_date: date||null,
+        notes: notes||null
+      })
     });
-    toast('✅ تم التعديل · Updated');
-    closeInvStockModal();
-    loadInventory();
-  }catch(e){ toast('❌ خطأ · Error'); }
+
+    if(r.ok || r.status===200 || r.status===201){
+      toast('✅ تم التعديل · Updated');
+      closeInvStockModal();
+      loadInventory();
+    } else {
+      const errText = await r.text();
+      console.error('saveInvEdit error:', r.status, errText);
+      toast(`❌ خطأ ${r.status} — ${errText.slice(0,80)}`);
+    }
+  }catch(e){
+    console.error('saveInvEdit exception:', e);
+    toast('❌ خطأ في الاتصال · Connection error');
+  }
 }
 
 async function deleteInvItem(){
