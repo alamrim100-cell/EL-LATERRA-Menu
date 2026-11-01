@@ -1816,7 +1816,7 @@ function switchTab(tab){
   }
   if(tab==='history') renderHistory();
   if(tab==='manualinv'){ initManualInvoice(); }
-  if(tab==='attendance'){ loadAttendance(); loadEmployees(); }
+  if(tab==='attendance'){ loadEmployees().then(()=>loadAttendance()); }
   if(tab==='inventory'){ loadSuppliers(); loadInventory(); loadExpenseRules(); }
   if(tab==='menu'){ loadMenuItems(); }
 }
@@ -2830,10 +2830,12 @@ async function loadEmployees(){
       allEmployees = d;
       // تحديث فلتر الموظفين
       const sel = document.getElementById('attEmpFilter');
-      const cur = sel.value;
-      sel.innerHTML = '<option value="all">كل الموظفين · All Staff</option>' +
-        d.map(e=>`<option value="${e.id}">${e.name_en||e.name}</option>`).join('');
-      sel.value = cur;
+      if(sel){
+        const cur = sel.value;
+        sel.innerHTML = '<option value="all">كل الموظفين · All Staff</option>' +
+          d.map(e=>`<option value="${e.id}">${e.name_en||e.name}</option>`).join('');
+        sel.value = cur;
+      }
       renderEmployeeList();
     }
   }catch(e){ console.error(e); }
