@@ -1707,52 +1707,88 @@ function renderAnalytics(){
   `).join('');
 
   // ===== إحصائيات الكيك =====
-  // كلمات مفتاحية — تتطابق مع أي اسم يحتوي عليها
-  const CAKE_KEYWORDS = ['كيك','كوكيز','تيراميسو','تشيز','كريب','سان سباستيان','لندن','cake','cookie','tiramisu','cheesecake','crepe','velvet'];
+  // بناء قائمة أسماء الكيكات من المنيو الفعلي (section = 'الكيك')
+  // ثم نطابق الفواتير بها بدقة — مع احتياط بكلمات مفتاحية إذا لم يُحمَّل المنيو
+  const CAKE_FALLBACK_KW = ['كيك','كوكيز','تيراميسو','تشيز','كريب','سان سباستيان','لندن','بيسكوف','كراميل','ريد','فيلفت','velvet','cake','cookie','tiramisu','cheesecake','crepe','biscoff','caramel'];
+
+  // أسماء الكيكات المعروفة من المنيو (بالعربي والإنجليزي)
+  const cakeMenuNames = new Set();
+  if(allMenuItems && allMenuItems.length > 0){
+    allMenuItems.forEach(mi=>{
+      if((mi.section||'') === 'الكيك'){
+        if(mi.name_ar) cakeMenuNames.add(mi.name_ar.trim().toLowerCase());
+        if(mi.name_en) cakeMenuNames.add(mi.name_en.trim().toLowerCase());
+      }
+    });
+  }
+  const hasCakeMenu = cakeMenuNames.size > 0;
+
+  function isACake(itemName){
+    const n = (itemName||'').trim().toLowerCase();
+    if(!n) return false;
+    // مطابقة دقيقة بأسماء المنيو أولاً
+    if(hasCakeMenu){
+      if(cakeMenuNames.has(n)) return true;
+      // مطابقة جزئية (حالة الاسم في الفاتورة أطول أو أقصر قليلاً)
+      for(const mn of cakeMenuNames){
+        if(n.includes(mn) || mn.includes(n)) return true;
+      }
+    }
+    // احتياط: كلمات مفتاحية
+    return CAKE_FALLBACK_KW.some(k=>n.includes(k.toLowerCase()));
+  }
+
   const cakeSoldMap = {};
   let cakeTotalSold = 0, cakeTotalRev = 0;
   inv.forEach(order=>{
     const items = parseItems(order.items);
     items.forEach(it=>{
-      const itName = (it.name||it.nameEn||'').toLowerCase();
-      const isCake = CAKE_KEYWORDS.some(k=>itName.includes(k.toLowerCase()));
-      if(isCake){
+      const rawName = (it.name||it.nameEn||'');
+      if(isACake(rawName)){
         const qty = +it.qty||1;
-        cakeSoldMap[itName] = (cakeSoldMap[itName]||0) + qty;
+        const displayName = rawName.trim() || 'كيك';
+        cakeSoldMap[displayName] = (cakeSoldMap[displayName]||0) + qty;
         cakeTotalSold += qty;
         cakeTotalRev += (+it.price||0)*qty;
       }
     });
   });
   // المتبقي في المخزون
-  const cakeInvItems = allInventory.filter(i=>CAKE_KEYWORDS.some(k=>(i.product_name||'').toLowerCase().includes(k.toLowerCase())));
+  const cakeInvItems = allInventory.filter(i=>isACake(i.product_name||''));
   const cakeInStock = cakeInvItems.reduce((s,i)=>s+(+i.quantity||0),0);
 
   document.getElementById('anCakeSold').textContent  = cakeTotalSold;
   document.getElementById('anCakeRev').textContent   = cakeTotalRev.toFixed(3);
   document.getElementById('anCakeStock').textContent = cakeInStock;
 
-  const cakeSorted = Object.entries(cakeSoldMap).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  // عرض جميع الكيكات بلا حد — مرتبة تنازلياً
+  const cakeSorted = Object.entries(cakeSoldMap).sort((a,b)=>b[1]-a[1]);
   const cakeMax = cakeSorted[0]?.[1]||1;
-  const cakeMedals = ['🥇','🥈','🥉','4️⃣','5️⃣'];
+  const cakeMedals = ['🥇','🥈','🥉'];
   document.getElementById('anCakeTopList').innerHTML = cakeSorted.length===0
     ? `<div style="text-align:center;color:var(--dim);padding:0.5rem;font-size:0.78rem;">لا توجد مبيعات · No cake sales</div>`
     : cakeSorted.map(([name,qty],i)=>{
         const pct = Math.round(qty/cakeMax*100);
-        const inv_ = allInventory.find(it=>(it.product_name||'').includes(name.slice(0,4)));
+        // مطابقة المخزون بالاسم الكامل أولاً ثم جزئياً
+        const inv_ = allInventory.find(it=>{
+          const pn = (it.product_name||'').toLowerCase();
+          const nm = name.toLowerCase();
+          return pn === nm || pn.includes(nm) || nm.includes(pn);
+        });
         const stk  = inv_ ? +inv_.quantity||0 : null;
         const stkColor = stk===null?'var(--dim)':stk<=0?'var(--red)':stk<=5?'#f5a623':'var(--green)';
         const stkLabel = stk===null?'':` · <span style="color:${stkColor};">📦 ${stk}</span>`;
+        const medal = i < 3 ? cakeMedals[i] : `<span style="font-size:0.72rem;color:var(--dim);">${i+1}</span>`;
         return `
         <div style="display:flex;align-items:center;gap:0.5rem;">
-          <span style="width:1.3rem;font-size:0.85rem;">${cakeMedals[i]}</span>
+          <span style="width:1.3rem;font-size:0.85rem;text-align:center;">${medal}</span>
           <div style="flex:1;">
             <div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:2px;">
               <span style="font-weight:700;">${name}${stkLabel}</span>
               <span style="color:var(--gold);font-weight:900;">${qty}×</span>
             </div>
             <div style="background:var(--border);border-radius:3px;height:4px;">
-              <div style="background:var(--gold);height:100%;width:${pct}%;border-radius:3px;"></div>
+              <div style="background:var(--gold);height:100%;width:${pct}%;border-radius:3px;transition:width 0.3s;"></div>
             </div>
           </div>
         </div>`;
@@ -3963,14 +3999,17 @@ async function loadFixed(){
 
 async function loadAll(){
   try{
-    const [invR,expR]=await Promise.all([
+    const [invR,expR,menuR]=await Promise.all([
       fetch(`${SUPA}/rest/v1/invoices?select=*&order=created_at.desc&limit=1000`,{headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`}}),
-      fetch(`${SUPA}/rest/v1/expenses?select=*&order=created_at.desc&limit=1000`,{headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`}})
+      fetch(`${SUPA}/rest/v1/expenses?select=*&order=created_at.desc&limit=1000`,{headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`}}),
+      fetch(`${SUPA}/rest/v1/menu_items?select=*&order=section,created_at`,{headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`}})
     ]);
     const invD=await invR.json();
     const expD=await expR.json();
+    const menuD=await menuR.json();
     if(Array.isArray(invD)) allInvoices=invD;
     if(Array.isArray(expD)) allExpenses=expD;
+    if(Array.isArray(menuD)) allMenuItems=menuD;
     await loadFixed();
     await loadSuppliers();
     applyOverview();
