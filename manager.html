@@ -2881,7 +2881,7 @@ function renderAttendance(){
   const byEmp = {};
   filtered.forEach(a=>{
     const name = a.employee_name||'Unknown';
-    if(!byEmp[name]) byEmp[name]={records:[],totalHours:0,days:0};
+    if(!byEmp[name]) byEmp[name]={records:[],totalHours:0,days:0,employeeId:a.employee_id};
     byEmp[name].records.push(a);
     if(a.total_hours) byEmp[name].totalHours += +a.total_hours;
     if(a.clock_in && a.clock_out) byEmp[name].days++;
@@ -2890,12 +2890,15 @@ function renderAttendance(){
   container.innerHTML = Object.entries(byEmp).map(([empName, empData])=>{
     const initials = empName.charAt(0).toUpperCase();
     const approvedDays = empData.records.filter(a=>a.approved).length;
+    // البحث عن PIN من قائمة الموظفين
+    const empRecord = allEmployees.find(e=>String(e.id)===String(empData.employeeId)||((e.name_en||e.name||'').toLowerCase()===empName.toLowerCase()));
+    const pinBadge = empRecord ? `<span style="background:var(--gold-dim);border:1px solid var(--gold);color:var(--gold);font-size:0.72rem;font-weight:900;padding:2px 9px;border-radius:999px;letter-spacing:0.05em;font-family:'Cormorant Garamond',serif;">🔑 PIN: ${empRecord.pin}</span>` : '';
     return `
     <div class="att-emp-section">
       <div class="att-emp-header">
         <div class="att-emp-avatar-sm">${initials}</div>
         <div>
-          <div class="att-emp-header-name">${empName}</div>
+          <div class="att-emp-header-name" style="display:flex;align-items:center;gap:0.5rem;">${empName} ${pinBadge}</div>
           <div style="font-size:0.7rem;color:var(--dim);">${empData.days} days · ${empData.totalHours.toFixed(1)} hrs total</div>
         </div>
         <div class="att-emp-header-stats">

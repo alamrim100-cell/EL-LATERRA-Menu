@@ -75,6 +75,11 @@
   .today-lbl{color:var(--dim);}
   .today-val{font-weight:700;color:var(--cream);}
   .today-hours{font-size:1.2rem;font-weight:900;color:var(--gold);margin-top:0.5rem;}
+  .shift-block{background:rgba(0,0,0,0.15);border-radius:8px;padding:0.5rem 0.7rem;margin-bottom:0.5rem;border-right:3px solid var(--gold);}
+  .shift-block:last-child{margin-bottom:0;}
+  .shift-lbl{font-size:0.7rem;color:var(--gold);font-weight:700;margin-bottom:0.3rem;font-family:'Cormorant Garamond',serif;font-style:italic;}
+  .shift-active{border-right-color:var(--green);}
+  .shift-active .shift-lbl{color:var(--green);}
 
   .back-btn{background:none;border:1px solid var(--border);color:var(--dim);border-radius:10px;padding:0.6rem 1.5rem;font-family:'Tajawal',sans-serif;cursor:pointer;font-size:0.85rem;}
   .back-btn:hover{border-color:var(--gold);color:var(--gold);}
@@ -132,9 +137,11 @@
 
     <div class="today-card" id="todayCard" style="display:none;">
       <div class="today-title">Today's Record · سجل اليوم</div>
-      <div class="today-row"><span class="today-lbl">Clock In</span><span class="today-val" id="todayIn">-</span></div>
-      <div class="today-row"><span class="today-lbl">Clock Out</span><span class="today-val" id="todayOut">-</span></div>
-      <div class="today-row"><span class="today-lbl">Hours Worked</span><span class="today-val today-hours" id="todayHours">-</span></div>
+      <div id="todayShifts"></div>
+      <div class="today-row" style="margin-top:0.4rem;">
+        <span class="today-lbl">Total Hours Today</span>
+        <span class="today-val today-hours" id="todayHours">-</span>
+      </div>
     </div>
 
     <div class="action-btns">
@@ -159,7 +166,8 @@ const KEY  = 'sb_publishable_CKq5sKxZvi5k43cmEJ1cjw_Cg7jWk_e';
 
 let pinValue = '';
 let currentEmployee = null;
-let currentAttendance = null;
+let currentAttendance = null;   // the open (active) shift or last shift
+let todayAttendances = [];       // ALL shifts today
 
 /* ===== CLOCK ===== */
 function updateClock(){
@@ -222,13 +230,16 @@ async function loadAttScreen(){
   document.getElementById('empName').textContent = currentEmployee.name_en || currentEmployee.name;
   document.getElementById('empNameAr').textContent = currentEmployee.name;
 
-  // جلب سجل اليوم
+  // جلب كل سجلات اليوم (بدون limit)
   const today = new Date().toISOString().split('T')[0];
-  const r = await fetch(`${SUPA}/rest/v1/attendance?employee_id=eq.${currentEmployee.id}&date=eq.${today}&select=*&order=created_at.desc&limit=1`,{
+  const r = await fetch(`${SUPA}/rest/v1/attendance?employee_id=eq.${currentEmployee.id}&date=eq.${today}&select=*&order=created_at.asc`,{
     headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`}
   });
   const data = await r.json();
-  currentAttendance = Array.isArray(data) && data.length > 0 ? data[0] : null;
+  todayAttendances = Array.isArray(data) ? data : [];
+
+  // الشفت النشط هو الذي له clock_in لكن بدون clock_out
+  currentAttendance = todayAttendances.find(a => a.clock_in && !a.clock_out) || null;
 
   updateAttUI();
 
@@ -243,36 +254,58 @@ function updateAttUI(){
   const status = document.getElementById('empStatus');
   const todayCard = document.getElementById('todayCard');
 
-  if(!currentAttendance || !currentAttendance.clock_in){
+  // حساب إجمالي ساعات اليوم (جميع الشفتات المكتملة + الحالية)
+  const completedHours = todayAttendances
+    .filter(a => a.clock_in && a.clock_out)
+    .reduce((s, a) => s + (+a.total_hours || 0), 0);
+
+  // عرض كل الشفتات
+  if(todayAttendances.length > 0){
+    todayCard.style.display = 'block';
+    const shiftsDiv = document.getElementById('todayShifts');
+    shiftsDiv.innerHTML = todayAttendances.map((a, i) => {
+      const inTime  = a.clock_in  ? new Date(a.clock_in).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) : '-';
+      const outTime = a.clock_out ? new Date(a.clock_out).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) : '—';
+      const hrs     = a.clock_out ? `${(+a.total_hours||0).toFixed(2)} hrs` : '🟢 On shift';
+      const isActive = !a.clock_out;
+      return `<div class="shift-block${isActive?' shift-active':''}">
+        <div class="shift-lbl">Shift ${i+1}${isActive?' · Active':''}${todayAttendances.length===1?'':''}</div>
+        <div class="today-row"><span class="today-lbl">Clock In</span><span class="today-val">${inTime}</span></div>
+        <div class="today-row"><span class="today-lbl">Clock Out</span><span class="today-val">${outTime}</span></div>
+        <div class="today-row" style="border-bottom:none;"><span class="today-lbl">Hours</span><span class="today-val" style="color:var(--gold);">${hrs}</span></div>
+      </div>`;
+    }).join('');
+
+    // إجمالي الساعات
+    const liveExtra = currentAttendance
+      ? (Date.now() - new Date(currentAttendance.clock_in)) / 3600000 : 0;
+    const totalH = completedHours + liveExtra;
+    document.getElementById('todayHours').textContent = `${totalH.toFixed(2)} hrs`;
+  } else {
+    todayCard.style.display = 'none';
+  }
+
+  // الأزرار
+  if(currentAttendance){
+    // هناك شفت مفتوح — يمكن فقط تسجيل الانصراف
+    const inTime = new Date(currentAttendance.clock_in).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+    btnIn.disabled  = true;
+    btnOut.disabled = false;
+    status.textContent = `🟢 Clocked in at ${inTime}`;
+    status.className = 'emp-status clocked-in';
+  } else if(todayAttendances.length === 0){
     // لم يسجل حضور بعد
     btnIn.disabled  = false;
     btnOut.disabled = true;
     status.textContent = '⚪ Not clocked in today · لم يسجل الحضور بعد';
     status.className = 'emp-status';
-    todayCard.style.display = 'none';
-  } else if(currentAttendance.clock_in && !currentAttendance.clock_out){
-    // مسجل حضور لكن لم ينصرف
-    btnIn.disabled  = true;
-    btnOut.disabled = false;
-    const inTime = new Date(currentAttendance.clock_in).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
-    status.textContent = `🟢 Clocked in at ${inTime}`;
-    status.className = 'emp-status clocked-in';
-    todayCard.style.display = 'block';
-    document.getElementById('todayIn').textContent = inTime;
-    document.getElementById('todayOut').textContent = '-';
-    document.getElementById('todayHours').textContent = calcLiveHours();
   } else {
-    // سجل حضور وانصراف
-    btnIn.disabled  = true;
+    // أنهى شفت(ات) ولا يوجد شفت مفتوح — يمكن بدء شفت جديد
+    const count = todayAttendances.length;
+    btnIn.disabled  = false;  // ← السماح بشفت جديد
     btnOut.disabled = true;
-    status.textContent = '✅ Shift complete · انتهى الدوام';
+    status.textContent = `✅ ${count} shift${count>1?'s':''} complete · يمكنك بدء شفت جديد`;
     status.className = 'emp-status';
-    todayCard.style.display = 'block';
-    const inTime  = new Date(currentAttendance.clock_in).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
-    const outTime = new Date(currentAttendance.clock_out).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
-    document.getElementById('todayIn').textContent  = inTime;
-    document.getElementById('todayOut').textContent = outTime;
-    document.getElementById('todayHours').textContent = `${(+currentAttendance.total_hours||0).toFixed(2)} hrs`;
   }
 }
 
@@ -297,8 +330,13 @@ async function clockIn(){
       })
     });
     const data = await r.json();
-    currentAttendance = Array.isArray(data) ? data[0] : data;
-    toast(`🟢 Clocked in! · تم تسجيل الحضور`);
+    const newRec = Array.isArray(data) ? data[0] : data;
+    if(newRec && newRec.id){
+      todayAttendances.push(newRec);
+      currentAttendance = newRec;
+    }
+    const shiftNum = todayAttendances.length;
+    toast(`🟢 Shift ${shiftNum} started! · تم تسجيل الحضور`);
     updateAttUI();
   }catch(e){ toast('❌ Error · خطأ'); }
 }
@@ -316,8 +354,13 @@ async function clockOut(){
         total_hours: +hours.toFixed(4)
       })
     });
-    currentAttendance.clock_out = now.toISOString();
-    currentAttendance.total_hours = hours;
+    // تحديث السجل محلياً
+    const rec = todayAttendances.find(a => a.id === currentAttendance.id);
+    if(rec){
+      rec.clock_out = now.toISOString();
+      rec.total_hours = hours;
+    }
+    currentAttendance = null;
     toast(`🔴 Clocked out! ${hours.toFixed(2)} hrs · تم تسجيل الانصراف`);
     updateAttUI();
   }catch(e){ toast('❌ Error · خطأ'); }
@@ -326,6 +369,7 @@ async function clockOut(){
 function goBack(){
   currentEmployee = null;
   currentAttendance = null;
+  todayAttendances = [];
   pinValue = '';
   updatePinDisplay();
   document.getElementById('attScreen').style.display = 'none';
