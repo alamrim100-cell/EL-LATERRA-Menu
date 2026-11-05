@@ -2928,11 +2928,12 @@ function renderAttendance(){
             <th>الحالة · Status</th>
             <th>اعتماد · Approve</th>
             <th>ملاحظات · Notes</th>
+            <th>تعديل · Edit</th>
           </tr></thead>
           <tbody>
             ${empData.records.sort((a,b)=>new Date(b.date)-new Date(a.date)).map(a=>{
-              const inTime  = a.clock_in  ? new Date(a.clock_in).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) : '-';
-              const outTime = a.clock_out ? new Date(a.clock_out).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) : '-';
+              const inTime  = a.clock_in  ? new Date(a.clock_in).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) : '—';
+              const outTime = a.clock_out ? new Date(a.clock_out).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) : '—';
               const hours   = a.total_hours ? `${(+a.total_hours).toFixed(2)} hrs` : (a.clock_in&&!a.clock_out?'<span style="color:var(--green);">On Shift</span>':'-');
               const statusTxt = !a.clock_in?'<span style="color:var(--dim);">-</span>'
                               : !a.clock_out?'<span style="color:var(--green);font-weight:700;">🟢 Active</span>'
@@ -2940,10 +2941,13 @@ function renderAttendance(){
               const appBtn = a.approved
                 ? `<button class="att-approve-btn approved" disabled>✅ Approved</button>`
                 : `<button class="att-approve-btn" onclick="approveRecord(${a.id})">☑️ Approve</button>`;
+              const missingIn  = !a.clock_in;
+              const missingOut = !a.clock_out;
+              const editHint   = missingIn ? '⚠️ نسي الحضور' : missingOut ? '⚠️ نسي الانصراف' : '';
               return `<tr style="${a.approved?'background:rgba(76,175,80,0.05);':''}">
                 <td style="font-size:0.78rem;font-weight:700;">${a.date||'-'}</td>
-                <td style="color:var(--green);font-weight:700;">${inTime}</td>
-                <td style="color:var(--red);font-weight:700;">${outTime}</td>
+                <td style="${missingIn?'color:var(--red);':'color:var(--green);'}font-weight:700;">${inTime}</td>
+                <td style="${missingOut&&a.clock_in?'color:var(--red);':'color:var(--red);'}font-weight:700;">${outTime}</td>
                 <td style="font-weight:900;color:var(--gold);">${hours}</td>
                 <td>${statusTxt}</td>
                 <td>${appBtn}</td>
@@ -2952,6 +2956,11 @@ function renderAttendance(){
                     <input class="att-note-input" id="note_${a.id}" value="${a.notes||''}" placeholder="ملاحظة...">
                     <button class="att-save-note" onclick="saveNote(${a.id})">💾</button>
                   </div>
+                </td>
+                <td>
+                  <button onclick="openAttEdit(${a.id})" style="background:var(--gold-dim);border:1px solid var(--gold);color:var(--gold);border-radius:6px;padding:3px 9px;cursor:pointer;font-size:0.78rem;font-weight:700;white-space:nowrap;font-family:'Tajawal',sans-serif;" title="تعديل الوقت">
+                    ✏️${editHint ? ' '+editHint : ''}
+                  </button>
                 </td>
               </tr>`;
             }).join('')}
@@ -4060,6 +4069,136 @@ document.addEventListener('click', e=>{
 checkAuth();
 if(sessionStorage.getItem('mgr_auth')==='true') loadAll();
 setInterval(()=>{ if(sessionStorage.getItem('mgr_auth')==='true') loadAll(); },30000);
+</script>
+
+<!-- ===== نافذة تعديل سجل الحضور ===== -->
+<div class="modal-overlay" id="attEditModal" onclick="if(event.target===this)closeAttEdit()">
+  <div class="modal-box" style="max-width:400px;">
+    <div class="modal-head">
+      <span class="modal-title">✏️ تعديل سجل الحضور · Edit Attendance</span>
+      <button class="modal-close" onclick="closeAttEdit()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div>
+        <div class="modal-lbl">التاريخ · Date</div>
+        <input class="modal-input" type="date" id="attEditDate">
+      </div>
+      <div>
+        <div class="modal-lbl">وقت الحضور · Clock In</div>
+        <input class="modal-input" type="time" id="attEditIn">
+      </div>
+      <div>
+        <div class="modal-lbl">وقت الانصراف · Clock Out <span style="font-size:0.72rem;color:var(--dim);">(اتركه فارغاً إن لم ينصرف)</span></div>
+        <input class="modal-input" type="time" id="attEditOut">
+      </div>
+      <div id="attEditHoursPreview" style="font-size:0.82rem;color:var(--gold);text-align:center;min-height:1.2em;"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn modal-btn-save" onclick="saveAttEdit()">💾 حفظ · Save</button>
+      <button class="modal-btn" style="background:var(--border);color:var(--cream);" onclick="closeAttEdit()">إلغاء · Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ===== تعديل سجل الحضور ===== */
+let attEditId = null;
+
+function openAttEdit(id){
+  const rec = allAttendance.find(a=>a.id===id);
+  if(!rec) return;
+  attEditId = id;
+
+  // التاريخ
+  document.getElementById('attEditDate').value = rec.date || '';
+
+  // وقت الحضور: نحوّل من ISO إلى HH:MM
+  if(rec.clock_in){
+    const d = new Date(rec.clock_in);
+    document.getElementById('attEditIn').value =
+      d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',hour12:false});
+  } else {
+    document.getElementById('attEditIn').value = '';
+  }
+
+  // وقت الانصراف
+  if(rec.clock_out){
+    const d = new Date(rec.clock_out);
+    document.getElementById('attEditOut').value =
+      d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',hour12:false});
+  } else {
+    document.getElementById('attEditOut').value = '';
+  }
+
+  updateAttEditPreview();
+  document.getElementById('attEditModal').classList.add('open');
+}
+
+function closeAttEdit(){
+  attEditId = null;
+  document.getElementById('attEditModal').classList.remove('open');
+}
+
+function updateAttEditPreview(){
+  const date = document.getElementById('attEditDate').value;
+  const inT  = document.getElementById('attEditIn').value;
+  const outT = document.getElementById('attEditOut').value;
+  const prev = document.getElementById('attEditHoursPreview');
+  if(date && inT && outT){
+    const inDt  = new Date(`${date}T${inT}:00`);
+    const outDt = new Date(`${date}T${outT}:00`);
+    const hrs = (outDt - inDt) / 3600000;
+    if(hrs > 0){
+      prev.textContent = `⏱ ${hrs.toFixed(2)} hrs · ساعة`;
+    } else {
+      prev.textContent = '⚠️ وقت الانصراف قبل الحضور!';
+    }
+  } else {
+    prev.textContent = '';
+  }
+}
+
+// حساب فوري عند التغيير
+['attEditDate','attEditIn','attEditOut'].forEach(id=>{
+  document.getElementById(id).addEventListener('change', updateAttEditPreview);
+});
+
+async function saveAttEdit(){
+  if(!attEditId) return;
+  const date  = document.getElementById('attEditDate').value;
+  const inT   = document.getElementById('attEditIn').value;
+  const outT  = document.getElementById('attEditOut').value;
+
+  if(!date || !inT){ toast('⚠️ أدخل التاريخ ووقت الحضور على الأقل'); return; }
+
+  const inISO  = new Date(`${date}T${inT}:00`).toISOString();
+  let outISO   = null;
+  let totalHrs = null;
+
+  if(outT){
+    const outDt = new Date(`${date}T${outT}:00`);
+    const inDt  = new Date(`${date}T${inT}:00`);
+    totalHrs = +(( outDt - inDt ) / 3600000).toFixed(4);
+    if(totalHrs <= 0){ toast('⚠️ وقت الانصراف قبل الحضور!'); return; }
+    outISO = outDt.toISOString();
+  }
+
+  const payload = { date, clock_in: inISO, clock_out: outISO, total_hours: totalHrs };
+
+  try{
+    await fetch(`${SUPA}/rest/v1/attendance?id=eq.${attEditId}`,{
+      method:'PATCH',
+      headers:{'apikey':KEY,'Authorization':`Bearer ${KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body: JSON.stringify(payload)
+    });
+    // تحديث محلي
+    const rec = allAttendance.find(a=>a.id===attEditId);
+    if(rec){ Object.assign(rec, payload); }
+    toast('✅ تم التعديل · Updated');
+    closeAttEdit();
+    renderAttendance();
+  }catch(e){ toast('❌ خطأ · Error'); console.error(e); }
+}
 </script>
 </body>
 </html>
