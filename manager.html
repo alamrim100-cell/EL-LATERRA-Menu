@@ -681,6 +681,10 @@
     <button class="filter-btn" onclick="setExpFilter('month')">الشهر</button>
     <button class="filter-btn" onclick="setExpFilter('all')">الكل</button>
   </div>
+
+  <!-- إحصائيات المصاريف الشهرية -->
+  <div id="expStatsBox" style="margin:1rem 0 0.5rem;"></div>
+
   <div class="sec-title">💸 المصروفات اليومية <span class="sec-en">· Daily Expenses</span> <span id="expTotalLbl" style="color:var(--red);font-size:0.85rem;">ر.ع 0.000</span></div>
   <div class="table-wrap">
     <table class="inv-table">
@@ -3399,10 +3403,72 @@ async function deleteExpense(id){
   }catch(e){ toast('❌ خطأ · Error'); }
 }
 
+function renderExpenseStats(expenses){
+  const box = document.getElementById('expStatsBox');
+  if(!box) return;
+
+  // تجميع حسب اسم المصروف
+  const byName = {};
+  expenses.forEach(e=>{
+    const n = (e.name||'غير محدد').trim();
+    if(!byName[n]) byName[n] = {count:0, total:0};
+    byName[n].count++;
+    byName[n].total += +e.amount||0;
+  });
+
+  const items = Object.entries(byName).sort((a,b)=>b[1].count - a[1].count);
+  if(items.length === 0){ box.innerHTML='<div style="color:var(--dim);font-size:0.8rem;padding:0.5rem;">لا توجد بيانات كافية للإحصائيات</div>'; return; }
+
+  const maxCount = items[0][1].count;
+  const topByAmount = [...items].sort((a,b)=>b[1].total - a[1].total).slice(0,1)[0];
+
+  box.innerHTML = `
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1rem;margin-bottom:0.5rem;">
+      <div style="font-size:0.82rem;font-weight:900;color:var(--gold);margin-bottom:0.8rem;font-family:'Cormorant Garamond',serif;font-style:italic;">
+        📊 إحصائيات المصاريف · Expense Statistics
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-bottom:0.9rem;">
+        <div style="background:rgba(0,0,0,0.2);border-radius:10px;padding:0.6rem 0.8rem;border-right:3px solid var(--gold);">
+          <div style="font-size:0.68rem;color:var(--dim);margin-bottom:0.2rem;">الأكثر تكراراً · Most Frequent</div>
+          <div style="font-weight:900;font-size:0.88rem;color:var(--cream);">${items[0][0]}</div>
+          <div style="font-size:0.75rem;color:var(--gold);margin-top:0.2rem;">${items[0][1].count} مرة · times</div>
+        </div>
+        <div style="background:rgba(0,0,0,0.2);border-radius:10px;padding:0.6rem 0.8rem;border-right:3px solid var(--red);">
+          <div style="font-size:0.68rem;color:var(--dim);margin-bottom:0.2rem;">الأعلى مبلغاً · Highest Amount</div>
+          <div style="font-weight:900;font-size:0.88rem;color:var(--cream);">${topByAmount[0]}</div>
+          <div style="font-size:0.75rem;color:var(--red);margin-top:0.2rem;">ر.ع ${topByAmount[1].total.toFixed(3)}</div>
+        </div>
+      </div>
+      <div style="font-size:0.75rem;color:var(--dim);margin-bottom:0.5rem;font-weight:700;">تكرار كل مصروف · Frequency per Item</div>
+      <div style="display:flex;flex-direction:column;gap:0.4rem;">
+        ${items.map(([name, data])=>{
+          const pct = maxCount > 0 ? (data.count / maxCount * 100) : 0;
+          return `
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:0.78rem;margin-bottom:0.2rem;">
+              <span style="font-weight:700;color:var(--cream);">${name}</span>
+              <span style="color:var(--dim);">
+                <span style="color:var(--gold);font-weight:900;">${data.count}×</span>
+                &nbsp;·&nbsp;
+                <span style="color:var(--red);">ر.ع ${data.total.toFixed(3)}</span>
+              </span>
+            </div>
+            <div style="background:rgba(255,255,255,0.06);border-radius:999px;height:6px;overflow:hidden;">
+              <div style="width:${pct}%;background:var(--gold);height:100%;border-radius:999px;transition:width 0.4s;"></div>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+}
+
 function renderExpenses(expenses){
   const tbody=document.getElementById('expTableBody');
   const total=expenses.reduce((s,e)=>s+(+e.amount||0),0);
   document.getElementById('expTotalLbl').textContent=`ر.ع ${total.toFixed(3)}`;
+  // الإحصائيات: إذا كان الفلتر الحالي يعطي بيانات استخدمها، وإلا استخدم كل البيانات
+  const statsData = expenses.length > 0 ? expenses : allExpenses;
+  renderExpenseStats(statsData);
   if(expenses.length===0){tbody.innerHTML=`<tr><td colspan="5" class="empty-row">لا توجد مصروفات · No expenses</td></tr>`;return;}
   tbody.innerHTML=[...expenses].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).map(e=>`
     <tr>
