@@ -123,6 +123,19 @@
   .nav-tabs a:hover,.nav-tabs a:focus-visible{color:var(--cream);border-color:var(--line);}
   .nav-tabs a.active{color:var(--coffee-black);background:var(--caramel-bright);border-color:var(--caramel-bright);}
 
+  /* ===== زر اللغة ===== */
+  .lang-btn{flex:0 0 auto;font-family:var(--ff-display);font-style:italic;font-size:0.82rem;font-weight:600;letter-spacing:0.08em;color:var(--coffee-black);background:var(--caramel);border:none;border-radius:999px;padding:0.5rem 1.1rem;cursor:pointer;white-space:nowrap;transition:background 0.25s,transform 0.2s;line-height:1.3;}
+  .lang-btn:hover{background:var(--caramel-bright);transform:scale(1.04);}
+  .lang-btn.en-active{background:var(--cream);color:var(--espresso);}
+
+  /* عند وضع اللغة الإنجليزية */
+  body.lang-en .item-name .ar{font-size:0.78rem;color:var(--cream-dim);font-family:var(--ff-arabic);font-weight:400;order:2;}
+  body.lang-en .item-name .en{font-size:1.12rem;color:var(--cream);font-family:var(--ff-display);font-weight:600;letter-spacing:0.06em;order:1;}
+  body.lang-en .section-head .ar-title{font-size:clamp(1.1rem,3vw,1.5rem);color:var(--caramel);font-weight:400;order:2;}
+  body.lang-en .section-head .en-title{font-size:clamp(2.1rem,5vw,3.2rem);color:var(--cream);font-family:var(--ff-display);font-weight:600;letter-spacing:0.02em;text-transform:capitalize;order:1;margin-top:0;}
+  body.lang-en .section-head{flex-direction:column-reverse;}
+  body.lang-en .item-name{flex-direction:column-reverse;}
+
   /* ===== SECTIONS ===== */
   section.menu-section{padding:7rem 6vw 3rem;max-width:1080px;margin:0 auto;scroll-margin-top:5.5rem;}
 
@@ -150,7 +163,7 @@
 
   .item-main{display:flex;align-items:center;gap:0.9rem;flex:1;min-width:0;}
 
-  .item-name{display:flex;flex-direction:column;gap:0.25rem;}
+  .item-name{display:flex;flex-direction:column;gap:0.25rem;transition:all 0.2s;}
   .item-name .ar{font-family:var(--ff-arabic);font-weight:700;font-size:1.12rem;color:var(--cream);}
   .item-name .en{font-family:var(--ff-display);font-size:0.78rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--cream-dim);}
   .item-name .note{font-family:var(--ff-arabic);font-weight:400;font-size:0.78rem;color:var(--caramel-bright);margin-top:0.1rem;}
@@ -380,6 +393,34 @@
 
 <script src="cart.js"></script>
 <script>
+  // ===== تبديل اللغة =====
+  let menuLang = 'ar';
+
+  function toggleLang(){
+    menuLang = menuLang === 'ar' ? 'en' : 'ar';
+    const btn = document.getElementById('langToggleBtn');
+    if(menuLang === 'en'){
+      document.body.classList.add('lang-en');
+      btn.textContent = '🌐 العربية';
+      btn.classList.add('en-active');
+    } else {
+      document.body.classList.remove('lang-en');
+      btn.textContent = '🌐 English';
+      btn.classList.remove('en-active');
+    }
+    // إعادة رسم nav بأسماء اللغة المختارة
+    rerenderNavLabels();
+  }
+
+  function rerenderNavLabels(){
+    const nav = document.getElementById('navTabs');
+    // أُبقي على الزر، أُحدّث روابط الأقسام فقط
+    const links = nav.querySelectorAll('a[data-ar]');
+    links.forEach(a=>{
+      a.textContent = menuLang === 'en' ? a.dataset.en : a.dataset.ar;
+    });
+  }
+
   // نوع الطلب
   let orderType = 'dine';
   function selectOrderType(type){
@@ -398,7 +439,7 @@
 
   // مزامنة الإجمالي
   // ===== تحقق من المنتجات غير المتوفرة =====
-  const SUPA_URL = 'https://fyyxuvqwoykavqhoaowu.supabase.co';
+  const SUPA_URL = 'https://fyyxuvqwoykavqwoaowu.supabase.co';
   const SUPA_KEY = 'sb_publishable_CKq5sKxZvi5k43cmEJ1cjw_Cg7jWk_e';
 
   // أيقونات الأقسام
@@ -454,9 +495,12 @@
 
     // بناء الـ nav
     const nav = document.getElementById('navTabs');
-    nav.innerHTML = allSections.map((sec,i)=>`
-      <a href="#${SECTION_ICONS[sec]?.id||'sec'+i}" class="${i===0?'active':''}">${sec}</a>
-    `).join('');
+    const langBtn = `<button class="lang-btn${menuLang==='en'?' en-active':''}" id="langToggleBtn" onclick="toggleLang()">${menuLang==='en'?'🌐 العربية':'🌐 English'}</button>`;
+    nav.innerHTML = langBtn + allSections.map((sec,i)=>{
+      const enLabel = SECTION_ICONS[sec]?.en || sec;
+      const label   = menuLang === 'en' ? enLabel : sec;
+      return `<a href="#${SECTION_ICONS[sec]?.id||'sec'+i}" class="${i===0?'active':''}" data-ar="${sec}" data-en="${enLabel}">${label}</a>`;
+    }).join('');
 
     // بناء الأقسام
     const container = document.getElementById('menuSections');
