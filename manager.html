@@ -1378,7 +1378,17 @@
       <button class="menu-add-btn" onclick="addMenuItem()">✅ Add Item · إضافة المنتج</button>
     </div>
 
-    <!-- قائمة المنتجات حسب القسم -->
+    <!-- زر تبديل اللغة + قائمة المنتجات -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.8rem;">
+      <div style="font-size:0.8rem;color:var(--dim);" id="menuLangHint">عرض الأسماء · Displaying names</div>
+      <button id="menuLangBtn" onclick="toggleMenuLang()" style="
+        background:var(--gold-dim);border:1px solid var(--gold);color:var(--gold);
+        border-radius:999px;padding:0.4rem 1.1rem;font-family:'Tajawal',sans-serif;
+        font-weight:900;font-size:0.82rem;cursor:pointer;transition:all 0.2s;
+        display:flex;align-items:center;gap:0.4rem;">
+        🌐 English
+      </button>
+    </div>
     <div id="menuContent"><div style="text-align:center;padding:2rem;color:var(--dim);">⏳ جاري التحميل...</div></div>
 
   </div>
@@ -3903,7 +3913,26 @@ function previewEditImg(input){
 /* ===== MENU MANAGEMENT ===== */
 let allMenuItems = [];
 let currentEditMenu = null;
+let menuLang = 'ar'; // 'ar' | 'en'
 const SECTIONS_ORDER = ['قهوة الاسبريسو','القهوة المقطرة','مشروبات لاتيرا','ساندويتش','الكيك'];
+
+function toggleMenuLang(){
+  menuLang = menuLang === 'ar' ? 'en' : 'ar';
+  const btn  = document.getElementById('menuLangBtn');
+  const hint = document.getElementById('menuLangHint');
+  if(menuLang === 'en'){
+    btn.textContent  = '🌐 العربية';
+    btn.style.background = 'var(--gold)';
+    btn.style.color  = 'var(--bg)';
+    hint.textContent = 'Displaying: English';
+  } else {
+    btn.textContent  = '🌐 English';
+    btn.style.background = 'var(--gold-dim)';
+    btn.style.color  = 'var(--gold)';
+    hint.textContent = 'عرض: العربية';
+  }
+  renderMenuItems();
+}
 
 async function loadMenuItems(){
   try{
@@ -3923,6 +3952,14 @@ function renderMenuItems(){
   }
 
   // جمع كل الأقسام الموجودة فعلاً في البيانات
+  const sectionLabels = {
+    'قهوة الاسبريسو':'☕ Espresso',
+    'القهوة المقطرة':'🫗 Drip Coffee',
+    'مشروبات لاتيرا':'🥤 Laterra Drinks',
+    'ساندويتش':'🥪 Sandwich',
+    'الكيك':'🍰 Cake',
+    'أخرى':'📦 Other'
+  };
   const grouped = {};
   allMenuItems.forEach(i=>{
     const sec = i.section || 'أخرى';
@@ -3937,25 +3974,29 @@ function renderMenuItems(){
   c.innerHTML = allSections.map(sec=>`
     <div class="menu-section">
       <div class="menu-section-title">
-        ${sec}
+        ${menuLang === 'en' ? (sectionLabels[sec] || sec) : sec}
         <span style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:0.75rem;color:var(--dim);font-weight:400;">${grouped[sec].length} items</span>
       </div>
       <div class="menu-grid">
-        ${grouped[sec].map(item=>`
+        ${grouped[sec].map(item=>{
+          const mainName  = menuLang === 'en' ? (item.name_en || item.name_ar) : item.name_ar;
+          const subName   = menuLang === 'en' ? item.name_ar : (item.name_en || '');
+          const newBadge  = item.is_new ? '<span style="background:var(--gold);color:var(--bg);font-size:0.6rem;font-weight:900;padding:1px 5px;border-radius:999px;">✨ New</span>' : '';
+          return `
           <div class="menu-item-card">
             <div style="display:flex;align-items:center;gap:0.5rem;">
               ${item.img?`<img class="menu-item-img" src="${item.img}" onerror="this.style.display='none'" alt="">`:'<div class="menu-item-img" style="display:flex;align-items:center;justify-content:center;font-size:1.2rem;">☕</div>'}
               <div>
-                <div class="menu-item-en">${item.name_en||item.name_ar} ${item.is_new?'<span style="background:var(--gold);color:var(--bg);font-size:0.6rem;font-weight:900;padding:1px 5px;border-radius:999px;">✨ New</span>':''}</div>
-                <div class="menu-item-ar">${item.name_ar}</div>
+                <div class="${menuLang==='en'?'menu-item-en':'menu-item-ar'}" style="font-size:0.88rem;">${mainName} ${newBadge}</div>
+                ${subName ? `<div class="${menuLang==='en'?'menu-item-ar':'menu-item-en'}" style="font-size:0.7rem;">${subName}</div>` : ''}
                 <div class="menu-item-price">OMR ${(+item.price).toFixed(3)}</div>
               </div>
             </div>
             <div class="menu-item-actions">
               <button class="menu-action-btn menu-btn-edit" onclick='openMenuModal(${JSON.stringify(item).replace(/'/g,"&#39;")})'>✏️ Edit</button>
             </div>
-          </div>
-        `).join('')}
+          </div>`;
+        }).join('')}
       </div>
     </div>
   `).join('');
